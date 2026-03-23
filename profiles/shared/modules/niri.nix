@@ -105,7 +105,7 @@
           Mod+Return { spawn "alacritty"; }
           Mod+A { spawn "fuzzel"; }
           Mod+F { spawn "thunar"; }
-          Mod+Tab { show-hotkey-overlay; }
+          Mod+Tab { toggle-overview; }
 
           Mod+Q { close-window; }
           Mod+Shift+Q { close-window; }
@@ -116,10 +116,10 @@
           Mod+S { focus-column-right; }
           Mod+R { focus-window-down; }
 
-          Mod+Left { focus-column-left; }
-          Mod+Right { focus-column-right; }
-          Mod+Up { focus-window-up; }
-          Mod+Down { focus-window-down; }
+          Mod+N { focus-column-left; }
+          Mod+I { focus-column-right; }
+          Mod+U { focus-window-up; }
+          Mod+E { focus-window-down; }
 
           Mod+Shift+Left { move-column-left; }
           Mod+Shift+Right { move-column-right; }
@@ -149,7 +149,7 @@
           Mod+Shift+0 { move-column-to-workspace 10; } // wanenone
 
           Mod+Escape { focus-workspace-previous; }
-          
+
           // Screenshots with frozen screen using wayfreeze
           Mod+Shift+S { spawn "sh" "-c" "wayfreeze & FREEZE_PID=$!; sleep 0.1; grim -g \"$(slurp -d)\" - | wl-copy; kill $FREEZE_PID 2>/dev/null || true"; }
           Mod+Shift+A { spawn "sh" "-c" "wayfreeze & FREEZE_PID=$!; sleep 0.1; grim -g \"$(slurp -d)\" - | swappy -f -; kill $FREEZE_PID 2>/dev/null || true"; }
@@ -180,8 +180,8 @@
           Mod+Space { toggle-window-floating; }
       }
 
-      spawn-at-startup "sh" "-c" "systemctl --user set-environment XDG_CURRENT_DESKTOP=sway && systemctl --user import-environment WAYLAND_DISPLAY && dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
-      spawn-at-startup "swaybg" "-i" "${config.stylix.image}" "-m" "fill"
+      spawn-at-startup "sh" "-c" "systemctl --user set-environment XDG_CURRENT_DESKTOP=niri && systemctl --user import-environment WAYLAND_DISPLAY && dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
+      spawn-at-startup "swaybg" "-i" "/nix/store/4djy86fqw2i5s2wn12ns8jm0qfaprbl8-nix-d-nord-purple.jpg?raw=true" "-m" "fill"
       spawn-at-startup "xwayland-satellite"
       spawn-at-startup "waybar"
       spawn-at-startup "dunst"
@@ -207,6 +207,7 @@
       hotkey-overlay {
           skip-at-startup
       }
+
 
     '';
   };

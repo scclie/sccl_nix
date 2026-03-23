@@ -174,119 +174,137 @@
   home.file.".xkb/symbols/colemak_caws".text = ''
     default partial alphanumeric_keys
     xkb_symbols "basic" {
-      name[Group1]= "Colemak-CAWS";
-      #include "us(basic)"
+      name[Group1]= "English (Colemak-DH)";
+      
+  
+      key <TLDE> {	[     grave,	asciitilde	]	};
+    key <AE01> {	[	  1,	exclam 		]	};
+    key <AE02> {	[	  2,	at		]	};
+    key <AE03> {	[	  3,	numbersign	]	};
+    key <AE04> {	[	  4,	dollar		]	};
+    key <AE05> {	[	  5,	percent		]	};
+    key <AE06> {	[	  6,	asciicircum	]	};
+    key <AE07> {	[	  7,	ampersand	]	};
+    key <AE08> {	[	  8,	asterisk	]	};
+    key <AE09> {	[	  9,	parenleft	]	};
+    key <AE10> {	[	  0,	parenright	]	};
+    key <AE11> {	[     minus,	underscore	]	};
+    key <AE12> {	[     equal,	plus		]	};
 
-      key <TLDE> { [ grave, asciitilde ] };
-      key <AE01> { [ 1, exclam ] };
-      key <AE02> { [ 2, at ] };
-      key <AE03> { [ 3, numbersign ] };
-      key <AE04> { [ 4, dollar ] };
-      key <AE05> { [ 5, percent ] };
-      key <AE06> { [ 6, asciicircum ] };
-      key <AE07> { [ backslash, bar ] };
-      key <AE08> { [ 7, ampersand ] };
-      key <AE09> { [ 8, asterisk ] };
-      key <AE10> { [ 9, parenleft ] };
-      key <AE11> { [ 0, parenright ] };
-      key <AE12> { [ equal, plus ] };
+    key <AD01> {	[	  q,	Q 		]	};
+    key <AD02> {	[	  w,	W		]	};
+    key <AD03> {	[	  e,	E		]	};
+    key <AD04> {	[	  r,	R		]	};
+    key <AD05> {	[	  t,	T		]	};
+    key <AD06> {	[	  y,	Y		]	};
+    key <AD07> {	[	  u,	U		]	};
+    key <AD08> {	[	  i,	I		]	};
+    key <AD09> {	[	  o,	O		]	};
+    key <AD10> {	[	  p,	P		]	};
+    key <AD11> {	[ bracketleft,	braceleft	]	};
+    key <AD12> {	[ bracketright,	braceright	]	};
 
-      key <AD01> { [ q, Q ] };
-      key <AD02> { [ w, W ] };
-      key <AD03> { [ f, F ] };
-      key <AD04> { [ p, P ] };
-      key <AD05> { [ b, B ] };
-      key <AD06> { [ bracketleft, braceleft ] };
-      key <AD07> { [ j, J ] };
-      key <AD08> { [ l, L ] };
-      key <AD09> { [ u, U ] };
-      key <AD10> { [ y, Y ] };
-      key <AD11> { [ apostrophe, quotedbl ] };
-      key <AD12> { [ minus, underscore ] };
-      key <BKSL> { [ semicolon, colon] };
+    key <AC01> {	[	  a,	A 		]	};
+    key <AC02> {	[	  s,	S		]	};
+    key <AC03> {	[	  d,	D		]	};
+    key <AC04> {	[	  f,	F		]	};
+    key <AC05> {	[	  g,	G		]	};
+    key <AC06> {	[	  h,	H		]	};
+    key <AC07> {	[	  j,	J		]	};
+    key <AC08> {	[	  k,	K		]	};
+    key <AC09> {	[	  l,	L		]	};
+    key <AC10> {	[ semicolon,	colon		]	};
+    key <AC11> {	[ apostrophe,	quotedbl	]	};
 
-      key <AC01> { [ a, A ] };
-      key <AC02> { [ r, R ] };
-      key <AC03> { [ s, S ] };
-      key <AC04> { [ t, T ] };
-      key <AC05> { [ g, G ] };
-      key <AC06> { [ bracketright, braceright ] };
-      key <AC07> { [ m, M ] };
-      key <AC08> { [ n, N ] };
-      key <AC09> { [ e, E ] };
-      key <AC10> { [ i, I ] };
-      key <AC11> { [ o, O ] };
+    key <AB01> {	[	  z,	Z 		]	};
+    key <AB02> {	[	  x,	X		]	};
+    key <AB03> {	[	  c,	C		]	};
+    key <AB04> {	[	  v,	V		]	};
+    key <AB05> {	[	  b,	B		]	};
+    key <AB06> {	[	  n,	N		]	};
+    key <AB07> {	[	  m,	M		]	};
+    key <AB08> {	[     comma,	less		]	};
+    key <AB09> {	[    period,	greater		]	};
+    key <AB10> {	[     slash,	question	]	};
 
-      key <AB01> { [ x, X ] };
-      key <AB02> { [ c, C ] };
-      key <AB03> { [ d, D ] };
-      key <AB04> { [ v, V ] };
-      key <AB05> { [ z, Z ] };
-      key <AB06> { [ slash, question ] };
-      key <AB07> { [ k, K ] };
-      key <AB08> { [ h, H ] };
-      key <AB09> { [ comma, less ] };
-      key <AB10> { [ period, greater ] };
+    key <BKSL> {	[ backslash,         bar	]	};
+      
+      include "level3(ralt_switch)"
     };
   '';
 
   home.file.".xkb/symbols/rulemak_caws".text = ''
     default partial alphanumeric_keys
     xkb_symbols "basic" {
-      name[Group1]= "Rulemak-CAWS";
+      name[Group1]= "Russian (Rulemak, phonetic QWERTY)";
+      
+      key <TLDE> { [     Cyrillic_io,     Cyrillic_IO ] };
+      key <AE01> { [               1,          exclam ] };
+      key <AE02> { [               2,              at ] };
+      key <AE03> { [               3,      numerosign ] };
+      key <AE04> { [               4,          dollar ] };
+      key <AE05> { [               5,         percent ] };
+      key <AE06> { [               6,     asciicircum ] };
+      key <AE07> { [               7,       ampersand ] };
+      key <AE08> { [               8,        asterisk ] };
+      key <AE09> { [               9,       parenleft ] };
+      key <AE10> { [               0,      parenright ] };
+      key <AE11> { [           minus,      underscore ] };
+      key <AE12> { [           equal,            plus ] };
+      
+      // Top row: Q W E R T Y U I O P [ ] \
+      key <AD01> { [     Cyrillic_ya,     Cyrillic_YA ] };  // Q Я
+      key <AD02> { [    Cyrillic_zhe,    Cyrillic_ZHE ] };  // W Ж
+      key <AD03> { [     Cyrillic_ie,     Cyrillic_IE ] };  // E Е
+      key <AD04> { [     Cyrillic_er,     Cyrillic_ER ] };  // R Р
+      key <AD05> { [     Cyrillic_te,     Cyrillic_TE ] };  // T Т
+      key <AD06> { [   Cyrillic_yeru,   Cyrillic_YERU ] };  // Y Ы
+      key <AD07> { [      Cyrillic_u,      Cyrillic_U ] };  // U У
+      key <AD08> { [      Cyrillic_i,      Cyrillic_I ] };  // I И
+      key <AD09> { [      Cyrillic_o,      Cyrillic_O ] };  // O О
+      key <AD10> { [     Cyrillic_pe,     Cyrillic_PE ] };  // P П
+      key <AD11> { [    Cyrillic_sha,    Cyrillic_SHA ] };  // [ Ш
+      key <AD12> { [  Cyrillic_shcha,  Cyrillic_SHCHA ] };  // ] Щ
+      key <BKSL> { [      Cyrillic_e,      Cyrillic_E ] };  // \ Э
+      
+      // Home row: A S D F G H J K L ; '
+      key <AC01> { [      Cyrillic_a,      Cyrillic_A ] };  // A А
+      key <AC02> { [     Cyrillic_es,     Cyrillic_ES ] };  // S С
+      key <AC03> { [     Cyrillic_de,     Cyrillic_DE ] };  // D Д
+      key <AC04> { [     Cyrillic_ef,     Cyrillic_EF ] };  // F Ф
+      key <AC05> { [    Cyrillic_ghe,    Cyrillic_GHE ] };  // G Г
+      key <AC06> { [     Cyrillic_che,     Cyrillic_CHE ] };  // H Ч
+      key <AC07> { [ Cyrillic_shorti, Cyrillic_SHORTI ] };  // J Й
+      key <AC08> { [     Cyrillic_ka,     Cyrillic_KA ] };  // K К
+      key <AC09> { [     Cyrillic_el,     Cyrillic_EL ] };  // L Л
+      key <AC10> { [    Cyrillic_zhe,    Cyrillic_ZHE ] };  // ; Ж (duplicate for convenience)
+      key <AC11> { [ Cyrillic_softsign, Cyrillic_SOFTSIGN ] };  // ' Ь
+      
+             // Bottom row: Z X C V B N M , . /
+      key <AB01> { [     Cyrillic_ze,     Cyrillic_ZE ] };  // Z З
+      key <AB02> { [     Cyrillic_ha,     Cyrillic_HA ] };  // X Х (duplicate)
+      key <AB03> { [     Cyrillic_tse,    Cyrillic_TSE ] };  // C Ц
+      key <AB04> { [     Cyrillic_ve,     Cyrillic_VE ] };  // V В
+      key <AB05> { [     Cyrillic_be,     Cyrillic_BE ] };  // B Б
+      key <AB06> { [     Cyrillic_en,     Cyrillic_EN ] };  // N Н
+      key <AB07> { [     Cyrillic_em,     Cyrillic_EM ] };  // M М
+      key <AB08> {	[     comma,	less		]	};
+      key <AB09> {	[    period,	greater		]	};
+      key <AB10> {	[     slash,	question	]	};
 
-      key <TLDE> { [ Cyrillic_io, Cyrillic_IO ] };
-      key <AE01> { [ 1, exclam ] };
-      key <AE02> { [ 2, quotedbl ] };
-      key <AE03> { [ 3, numerosign ] };
-      key <AE04> { [ 4, U20BD ] };
-      key <AE05> { [ 5, percent ] };
-      key <AE06> { [ 6, asciicircum ] };
-      key <AE07> { [ Cyrillic_e, Cyrillic_E ] };
-      key <AE08> { [ 7, ampersand ] };
-      key <AE09> { [ 8, asterisk ] };
-      key <AE10> { [ 9, parenleft ] };
-      key <AE11> { [ 0, parenright ] };
-      key <AE12> { [ Cyrillic_hardsign, Cyrillic_HARDSIGN ] };
+      key <FK13> { [ Cyrillic_yu, Cyrillic_YU ] };  // Ю
+      key <FK14> { [ Cyrillic_hardsign, Cyrillic_HARDSIGN ] };  // Ъ
 
-      key <AD01> { [ Cyrillic_ya, Cyrillic_YA ] };
-      key <AD02> { [ Cyrillic_zhe, Cyrillic_ZHE ] };
-      key <AD03> { [ Cyrillic_ef, Cyrillic_EF ] };
-      key <AD04> { [ Cyrillic_pe, Cyrillic_PE ] };
-      key <AD05> { [ Cyrillic_be, Cyrillic_BE ] };
-      key <AD06> { [ Cyrillic_sha, Cyrillic_SHA ] };
-      key <AD07> { [ Cyrillic_shorti, Cyrillic_SHORTI ] };
-      key <AD08> { [ Cyrillic_el, Cyrillic_EL ] };
-      key <AD09> { [ Cyrillic_u, Cyrillic_U ] };
-      key <AD10> { [ Cyrillic_yeru, Cyrillic_YERU ] };
-      key <AD11> { [ Cyrillic_softsign, Cyrillic_SOFTSIGN ] };
-      key <AD12> { [ minus, underscore ] };
-      key <BKSL> { [ Cyrillic_yu, Cyrillic_YU ] };
+      
+      include "level3(ralt_switch)"
 
-      key <AC01> { [ Cyrillic_a, Cyrillic_A ] };
-      key <AC02> { [ Cyrillic_er, Cyrillic_ER ] };
-      key <AC03> { [ Cyrillic_es, Cyrillic_ES ] };
-      key <AC04> { [ Cyrillic_te, Cyrillic_TE ] };
-      key <AC05> { [ Cyrillic_ghe, Cyrillic_GHE ] };
-      key <AC06> { [ Cyrillic_shcha, Cyrillic_SHCHA ] };
-      key <AC07> { [ Cyrillic_em, Cyrillic_EM ] };
-      key <AC08> { [ Cyrillic_en, Cyrillic_EN ] };
-      key <AC09> { [ Cyrillic_ie, Cyrillic_IE, Cyrillic_io, Cyrillic_IO ] };
-      key <AC10> { [ Cyrillic_i, Cyrillic_I ] };
-      key <AC11> { [ Cyrillic_o, Cyrillic_O ] };
+      // qwfpb,.jluy'=
+      // arstg[]mneio-
+      // zxcdv\/kh,.;`
 
-      key <AB01> { [ Cyrillic_ha, Cyrillic_HA ] };
-      key <AB02> { [ Cyrillic_tse, Cyrillic_TSE ] };
-      key <AB03> { [ Cyrillic_de, Cyrillic_DE ] };
-      key <AB04> { [ Cyrillic_ve, Cyrillic_VE ] };
-      key <AB05> { [ Cyrillic_ze, Cyrillic_ZE ] };
-      key <AB06> { [ slash, question ] };
-      key <AB07> { [ Cyrillic_ka, Cyrillic_KA ] };
-      key <AB08> { [ Cyrillic_che, Cyrillic_CHE ] };
-      key <AB09> { [ comma, semicolon ] };
-      key <AB10> { [ period, colon ] };
-
-      key <SPCE> { [ space ] };
+      // яжфпбюъйлуыь=
+      // арстгшщмнеио-
+      // зхцдвэ/кцюъжё2
     };
   '';
 }

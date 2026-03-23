@@ -13,7 +13,7 @@
 **Window Managers:**
 - **Niri** (main) - scrollable tiling
 - **Hyprland** - dynamic tiling 
-- Custom layouts: `ColemakCAWS | RulemakCAWS` - works 4 all hosts & profiles *(can disable it in WM settings if u want)*
+- Custom layouts: `Colemak-DH | Rulemak-DH` - works 4 all hosts & profiles *(can disable it in WM settings if u want)*
 
 **Shared packages** -> `profiles/shared/*` (all users):
 - **CLI:** neofetch, ripgrep, fd, fzf, zoxide, bat, eza, btop

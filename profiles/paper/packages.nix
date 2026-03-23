@@ -4,8 +4,9 @@
   home.packages = with pkgs; [
     # Network
     ayugram-desktop
-    librewolf
+    chromium
     qbittorrent
+    vesktop
 
     # Development
     lmstudio
@@ -14,6 +15,10 @@
     cargo
     gcc
     obsidian
+    kiro
+    vial
+    python315
+    nodejs_24
 
     # Gaming
     steam
@@ -21,6 +26,9 @@
     steam-run
     bottles
     modrinth-app
+    faugus-launcher
+    # hmcl
+    lunar-client
 
     # Creative Tools
     kdePackages.kdenlive

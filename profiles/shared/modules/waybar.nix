@@ -39,8 +39,8 @@
 
         "niri/language" = {
           format = " {}";
-          format-colemak_caws = "  Colemak-CAWS";
-          format-rulemak_caws = "  Rulemak-CAWS";
+          format-colemak_caws = "  Colemak";
+          format-rulemak_caws = "  Rulemak";
           min-length = 5;
           tooltip = true;
         };
@@ -185,31 +185,31 @@
 
       #workspaces button:nth-child(1) { color: #bf616a; font-weight: 700; background: rgb(46, 52, 64) }  /* not gay rainbow ;/    */
       #workspaces button:nth-child(1).active { background: #bf616a; color: #2e3440; font-weight: 700; }
-      
+
       #workspaces button:nth-child(2) { color: #d08770; font-weight: 700; background: rgb(46, 52, 64) }
       #workspaces button:nth-child(2).active { background: #d08770; color: #2e3440; font-weight: 700; }
-      
+
       #workspaces button:nth-child(3) { color: #ebcb8b; font-weight: 700; background: rgb(46, 52, 64) }
       #workspaces button:nth-child(3).active { background: #ebcb8b; color: #2e3440; font-weight: 700; }
-      
+
       #workspaces button:nth-child(4) { color: #a3be8c; font-weight: 700; background: rgb(46, 52, 64) }
       #workspaces button:nth-child(4).active { background: #a3be8c; color: #2e3440; font-weight: 700; }
-      
+
       #workspaces button:nth-child(5) { color: #8fbcbb; font-weight: 700; background: rgb(46, 52, 64) }
       #workspaces button:nth-child(5).active { background: #8fbcbb; color: #2e3440; font-weight: 700; }
-      
+
       #workspaces button:nth-child(6) { color: #88c0d0; font-weight: 700; background: rgb(46, 52, 64) }
       #workspaces button:nth-child(6).active { background: #88c0d0; color: #2e3440; font-weight: 700; }
-      
+
       #workspaces button:nth-child(7) { color: #81a1c1; font-weight: 700; background: rgb(46, 52, 64) }
       #workspaces button:nth-child(7).active { background: #81a1c1; color: #2e3440; font-weight: 700; }
-      
+
       #workspaces button:nth-child(8) { color: #5e81ac; font-weight: 700; background: rgb(46, 52, 64) }
       #workspaces button:nth-child(8).active { background: #5e81ac; color: #2e3440; font-weight: 700; }
-      
+
       #workspaces button:nth-child(9) { color: #b48ead; font-weight: 700; background: rgb(46, 52, 64) }
       #workspaces button:nth-child(9).active { background: #b48ead; color: #2e3440; font-weight: 700; }
-      
+
       #workspaces button:nth-child(10) { color: #d8dee9; font-weight: 700;background: rgb(46, 52, 64) }
       #workspaces button:nth-child(10).active { background: #d8dee9; color: #2e3440; font-weight: 700; }
 
