@@ -102,29 +102,29 @@
       prefer-no-csd
 
       binds {                                   // ColemakCAWS keybindings, bad 4 qwerty
+
+      ///////////////////////////////
+      ///   WINDOW MANIPULATIONS  ///
+      ///////////////////////////////
+
           Mod+Return { spawn "alacritty"; }
           Mod+A { spawn "fuzzel"; }
-          Mod+F { spawn "thunar"; }
+          Mod+D { spawn "thunar"; }
           Mod+Tab { toggle-overview; }
 
           Mod+Q { close-window; }
           Mod+Shift+Q { close-window; }
-          Mod+T { set-window-height "-10%"; }
-          Mod+Shift+T { fullscreen-window; }
+          Mod+Shift+G { fullscreen-window; }
 
-          Mod+W { focus-column-left; }
-          Mod+S { focus-column-right; }
-          Mod+R { focus-window-down; }
+          Mod+R { focus-column-left; }
+          Mod+T { focus-column-right; }
+          Mod+F { focus-workspace-up; }
+          Mod+S { focus-workspace-down; }
 
-          Mod+N { focus-column-left; }
-          Mod+I { focus-column-right; }
-          Mod+U { focus-window-up; }
-          Mod+E { focus-window-down; }
-
-          Mod+Shift+Left { move-column-left; }
-          Mod+Shift+Right { move-column-right; }
-          Mod+Shift+Up { move-window-up; }
-          Mod+Shift+Down { move-window-down; }
+          Mod+Shift+R { move-column-left; }
+          Mod+Shift+T { move-column-right; }
+          Mod+Shift+F { move-window-up; }
+          Mod+Shift+S { move-window-down; }
 
           Mod+1 { focus-workspace 1; }
           Mod+2 { focus-workspace 2; }
@@ -151,7 +151,7 @@
           Mod+Escape { focus-workspace-previous; }
 
           // Screenshots with frozen screen using wayfreeze
-          Mod+Shift+S { spawn "sh" "-c" "wayfreeze & FREEZE_PID=$!; sleep 0.1; grim -g \"$(slurp -d)\" - | wl-copy; kill $FREEZE_PID 2>/dev/null || true"; }
+          Mod+Shift+Z { spawn "sh" "-c" "wayfreeze & FREEZE_PID=$!; sleep 0.1; grim -g \"$(slurp -d)\" - | wl-copy; kill $FREEZE_PID 2>/dev/null || true"; }
           Mod+Shift+A { spawn "sh" "-c" "wayfreeze & FREEZE_PID=$!; sleep 0.1; grim -g \"$(slurp -d)\" - | swappy -f -; kill $FREEZE_PID 2>/dev/null || true"; }
 
           XF86AudioRaiseVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"; } // inf roll 4 burn out ur headphones
@@ -159,25 +159,45 @@
           XF86AudioMute { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }      // fr i dont have kb with this bttn, but mb ive build it in the future
 
           // windowo management keybindings
-          Mod+Comma { move-column-left; }
-          Mod+Period { move-column-right; }
-
-          Mod+Shift+R { move-window-up; }
-          Mod+Ctrl+R { move-window-down; }
-
-          Mod+BracketRight { focus-workspace-down; }
-          Mod+BracketLeft { focus-workspace-up; }
-          Mod+Shift+BracketLeft { move-column-to-workspace-down; }
-          Mod+Shift+BracketRight { move-column-to-workspace-up; }
+          Mod+W { move-column-left; }
+          Mod+P { move-column-right; }
 
           Mod+M { switch-preset-column-width; }
-          Mod+Shift+M { maximize-column; }
+          Mod+Shift+V { maximize-column; }
 
           Mod+V { spawn "sh" "-c" "cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"; }
           Mod+B { consume-window-into-column; }
           Mod+Shift+B { expel-window-from-column; }
 
           Mod+Space { toggle-window-floating; }
+
+
+
+          //////////////////////////
+          ///   VIDEO RECORDING  ///
+          //////////////////////////
+
+          // Run video rec buffer
+          Mod+Alt+Semicolon hotkey-overlay-title="Start 3min Replay Buffer" {
+              spawn "sh" "-c" "wf-recorder --buffering 180 -r 60 -c h264_vaapi -d /dev/dri/renderD128 -f ~/Videos/replay-$(date +%s).mp4"
+          }
+
+          // save video buffer
+          Mod+Shift+Semicolon hotkey-overlay-title="Save Replay" {
+              spawn "sh" "-c" r#"
+                    pkill -INT wf-recorder
+                    file=$(ls -t ~/Videos/replay-*.mp4 | head -n 1)
+                    wl-copy "file://$file" -t text/uri-list
+                    notify-send -t 2000 "Replay" "Saved & Restarting buffer..."
+
+                    wf-recorder --buffering 180 -r 60 -c h264_vaapi -d /dev/dri/renderD128 -f ~/Videos/replay-$(date +%s).mp4
+                "#;
+          }
+
+          // stop video buffer
+          Mod+Alt+Shift+Semicolon hotkey-overlay-title="Stop & Clear Replay" {
+              spawn "pkill" "-9" "wf-recorder"
+          }
       }
 
       spawn-at-startup "sh" "-c" "systemctl --user set-environment XDG_CURRENT_DESKTOP=niri && systemctl --user import-environment WAYLAND_DISPLAY && dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
@@ -186,6 +206,7 @@
       spawn-at-startup "waybar"
       spawn-at-startup "dunst"
       spawn-at-startup "swayidle" "-w" "timeout" "300" "niri msg action power-off-monitors"
+
 
       animations {
           window-open {
