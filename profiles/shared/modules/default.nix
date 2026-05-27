@@ -21,5 +21,6 @@
     ./btop.nix
     ./fetch.nix
     ./obs.nix
+    ./kdenlive.nix
   ];
 }

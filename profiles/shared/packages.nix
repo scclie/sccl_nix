@@ -9,6 +9,7 @@
     fd
     fzf
     zoxide
+    killall
 
     # GUI Applications
     xfce.thunar

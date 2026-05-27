@@ -19,23 +19,28 @@
     vial
     python315
     nodejs_24
+    kicad
 
     # Gaming
     steam
     protonplus
     steam-run
+    gamemode
     bottles
     modrinth-app
     faugus-launcher
     # hmcl
     lunar-client
+    gdlauncher-carbon
 
     # Creative Tools
-    kdePackages.kdenlive
+    # kdePackages.kdenlive
     krita
     aseprite
     blender
     audacity
+    wf-recorder
+    orca-slicer
 
     # Audio
     easyeffects

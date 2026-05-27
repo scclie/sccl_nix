@@ -41,8 +41,8 @@ let
 
     modules = [
       ./hosts/${hostName}/configuration.nix
-      (if builtins.pathExists ./hosts/${hostName}/disko.nix 
-       then ./hosts/${hostName}/disko.nix 
+      (if builtins.pathExists ./hosts/${hostName}/disko.nix
+       then ./hosts/${hostName}/disko.nix
        else {})
       ./nixos/modules/zapret.nix
       stylix.nixosModules.stylix
@@ -54,20 +54,20 @@ let
 
   # validate
   isValidHost = name: type:
-    type == "directory" && 
+    type == "directory" &&
     builtins.pathExists (./hosts + "/${name}/configuration.nix");
 
   # auto-discover hosts from the hosts/ directory
   hostEntries = builtins.readDir ./hosts;
-  validHosts = builtins.filter 
+  validHosts = builtins.filter
     (name: isValidHost name hostEntries.${name})
     (builtins.attrNames hostEntries);
 
   # convert list of host names to attribute set
   hostsAttrSet = builtins.listToAttrs (
-    map (name: { 
-      name = name; 
-      value = mkHost name; 
+    map (name: {
+      name = name;
+      value = mkHost name;
     }) validHosts
   );
 in {
