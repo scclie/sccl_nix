@@ -21,8 +21,5 @@
 
     # Network manager
     networkmanagerapplet
-    
-    # Communication
-    webcord
   ];
 }
