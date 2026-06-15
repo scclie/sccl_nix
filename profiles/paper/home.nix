@@ -23,4 +23,16 @@
     gtk.enable = true;
     rofi.enable = false;
   };
+
+  xdg.desktopEntries = {
+      vesktop = {
+        name = "Vesktop (Secured)";
+        genericName = "Discord Client";
+        exec = "vesktop %U";
+        icon = "vesktop";
+        categories = [ "Network" "Chat" "InstantMessaging" ];
+        terminal = false;
+        mimeType = [ "x-scheme-handler/discord" ];
+      };
+    };
 }
