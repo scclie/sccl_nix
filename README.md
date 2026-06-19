@@ -16,7 +16,7 @@
 - Custom layouts: `Colemak-DH | Rulemak-DH` - works 4 all hosts & profiles *(can disable it in WM settings if u want)*
 
 **Shared packages** -> `profiles/shared/*` (all users):
-- **CLI:** neofetch, ripgrep, fd, fzf, zoxide, bat, eza, btop
+- **CLI:** fastfetch, ripgrep, fd, fzf, zoxide, bat, eza, btop
 - **GUI:** thunar, vlc, mpv, evince, zathura
 - **Utils:** grim, slurp, wl-clipboard, pavucontrol, appimage-run, gparted
 - **Network:** firefox
@@ -201,7 +201,7 @@ Or create manually (if ur feeling adventurous~):
   home = {
     username = "<username>";
     homeDirectory = "/home/<username>";
-    stateVersion = "25.11";
+    stateVersion = "26.05";
   };
 
   stylix.targets = {
@@ -279,7 +279,7 @@ Edit [`hosts/<hostname>/configuration.nix`](hosts/sacculos/configuration.nix):
     };
   };
 
-  system.stateVersion = "25.11";
+  system.stateVersion = "26.05";
 }
 
 ```

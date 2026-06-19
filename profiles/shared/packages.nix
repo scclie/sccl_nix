@@ -4,7 +4,7 @@
   home.packages = with pkgs; [
     # CLI Tools
     # Note: btop, bat, eza are configured via modules
-    neofetch
+    fastfetch
     ripgrep
     fd
     fzf

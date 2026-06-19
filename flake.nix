@@ -2,7 +2,7 @@
   description = "sacculos NixOS configuration";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11"; # stable packages frfr
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05"; # stable packages frfr
 
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable"; # fresh packages, might break tho
 
@@ -10,11 +10,11 @@
     disko.inputs.nixpkgs.follows = "nixpkgs";
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.11";
+      url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    stylix.url = "github:danth/stylix/release-25.11";
+    stylix.url = "github:danth/stylix/release-26.05";
     zapret-discord-youtube.url = "github:kartavkun/zapret-discord-youtube";
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
   };

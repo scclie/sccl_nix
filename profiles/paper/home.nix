@@ -11,7 +11,7 @@
   home = {
     username = "paper";
     homeDirectory = "/home/paper";
-    stateVersion = "25.11";
+    stateVersion = "26.05";
   };
 
   programs.home-manager.enable = true;
@@ -25,14 +25,14 @@
   };
 
   xdg.desktopEntries = {
-      vesktop = {
-        name = "Vesktop (Secured)";
-        genericName = "Discord Client";
-        exec = "vesktop %U";
-        icon = "vesktop";
-        categories = [ "Network" "Chat" "InstantMessaging" ];
-        terminal = false;
-        mimeType = [ "x-scheme-handler/discord" ];
-      };
+    vesktop = {
+      name = "Vesktop (Secured)";
+      genericName = "Discord Client";
+      exec = "vesktop %U";
+      icon = "vesktop";
+      categories = [ "Network" "Chat" "InstantMessaging" ];
+      terminal = false;
+      mimeType = [ "x-scheme-handler/discord" ];
     };
+  };
 }
