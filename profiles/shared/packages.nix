@@ -27,6 +27,10 @@
     # System Utilities
     grim
     slurp
+
+    # Portal backends (for xdg-desktop-portal)
+    xdg-desktop-portal-gnome
+    xdg-desktop-portal-gtk
     wl-clipboard
     pavucontrol
     appimage-run

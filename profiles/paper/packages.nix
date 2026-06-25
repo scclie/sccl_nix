@@ -43,6 +43,7 @@ in
     python315
     nodejs_24
     kicad
+    opencode
 
     # Gaming
     steam

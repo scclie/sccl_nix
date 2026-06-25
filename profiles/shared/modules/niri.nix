@@ -40,15 +40,6 @@
     Install.WantedBy = [ "graphical-session.target" ];
   };
 
-  xdg.configFile."xdg-desktop-portal/portals.conf" = {
-    enable = true;
-    text = ''
-      [preferred]
-      default=gtk
-      org.freedesktop.impl.portal.ScreenCast=wlr
-      org.freedesktop.impl.portal.Screenshot=wlr
-    '';
-  };
 
   xdg.configFile."niri/config.kdl" = {
     enable = true;
@@ -200,7 +191,7 @@
           }
       }
 
-      spawn-at-startup "sh" "-c" "systemctl --user set-environment XDG_CURRENT_DESKTOP=niri && systemctl --user import-environment WAYLAND_DISPLAY && dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
+      spawn-at-startup "sh" "-c" "systemctl --user set-environment XDG_CURRENT_DESKTOP=niri:gnome && systemctl --user import-environment WAYLAND_DISPLAY && dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP && systemctl --user restart xdg-desktop-portal"
       spawn-at-startup "swaybg" "-i" "/nix/store/4djy86fqw2i5s2wn12ns8jm0qfaprbl8-nix-d-nord-purple.jpg?raw=true" "-m" "fill"
       spawn-at-startup "xwayland-satellite"
       spawn-at-startup "waybar"
