@@ -8,6 +8,9 @@
             listGeneral = [
             # discord
             "discord.com" "discord.gg" "discordapp.com" "discordapp.net" "media.discordapp.net" "discord.media" "discordvoice.com"
+            # container registries
+            "docker.io" "registry-1.docker.io" "registry-2.docker.io" "production.cloudflare.docker.com"
+            "gcr.io" "k8s.gcr.io" "registry.k8s.io" "quay.io" "ghcr.io"
             ];
 
             listExclude = [

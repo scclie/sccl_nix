@@ -17,7 +17,7 @@
 
     firewall = {
       enable = true;
-      allowedTCPPorts = [ ];
+      allowedTCPPorts = [ 7890 ];  # FlClashX proxy Docker
       allowedUDPPorts = [ ];
     };
 

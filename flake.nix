@@ -72,5 +72,30 @@ let
   );
 in {
   nixosConfigurations = hostsAttrSet;
+
+  devShells.${system} = {
+    playground = pkgs.mkShell {
+      packages = with pkgs; [
+        # Kubernetes
+        kubectl krew minikube kubernetes-helm k9s stern popeye
+
+        # Docker
+        dive lazydocker docker-compose
+
+        # Monitoring
+        prometheus grafana
+
+        # Databases
+        postgresql
+
+        # Other
+        kind yq-go jq
+      ];
+
+      shellHook = ''
+        echo "🎮 Playground shell — type 'exit' to return to paper"
+      '';
+    };
+  };
 };
 }

@@ -5,7 +5,7 @@
   users.users.paper = {
     isNormalUser = true;
     description = "Paper"; # tipo bumaga?
-    extraGroups = [ "networkmanager" "wheel" "video" "audio" ];
+    extraGroups = [ "networkmanager" "wheel" "video" "audio" "docker" ];
     shell = pkgs.fish;
     initialPassword = "change"; # initial psswd, dont forget to change
   };

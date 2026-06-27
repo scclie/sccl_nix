@@ -15,5 +15,6 @@
     ./xdg-portal.nix
     ./display-manager.nix
     ./flclashx.nix
+    ./playground.nix
   ];
 }
