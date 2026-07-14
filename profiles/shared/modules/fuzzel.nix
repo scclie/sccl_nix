@@ -6,10 +6,10 @@
     
     settings = {
       main = {
-        font = lib.mkForce "JetBrainsMono Nerd Font:size=13";
+        font = lib.mkForce "CaskaydiaCove Nerd Font:size=13";
         terminal = lib.mkForce "alacritty";
         prompt = lib.mkForce "❯ ";
-        icon-theme = lib.mkForce "Papirus";
+        icon-theme = lib.mkForce "Nordzy-dark";
         fields = lib.mkForce "name,generic,comment,categories,filename";
         width = lib.mkForce 40;
         horizontal-pad = lib.mkForce 20;

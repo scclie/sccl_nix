@@ -45,11 +45,10 @@
 
     # Themes & Icons
     nordic
-    papirus-icon-theme
+    nordzy-icon-theme
     rose-pine-hyprcursor
 
     # Fonts
-    jetbrains-mono
     noto-fonts
     noto-fonts-color-emoji
     twemoji-color-font

@@ -137,7 +137,7 @@
 
     style = ''
       * {
-        font-family: "JetBrainsMono Nerd Font", sans-serif;
+        font-family: "CaskaydiaCove Nerd Font", sans-serif;
         font-size: 13px;
         border: none;
         border-radius: 0;

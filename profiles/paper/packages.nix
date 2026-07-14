@@ -37,6 +37,10 @@ in
     qbittorrent
     secure-vesktop
 
+    # Crypto
+    electrum
+    electrum-ltc
+
     # Development
     lmstudio
     lazygit

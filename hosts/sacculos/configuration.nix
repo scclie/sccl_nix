@@ -31,6 +31,19 @@
       url = "https://github.com/OulipianSummer/nixos-pattern-nord-wallpapers/blob/master/jpgs/nix-d-nord-purple.jpg?raw=true";
       sha256 = "sha256-cqL194wcTxCKmSFf+z0BfyZlLAlFs8pnzAManlQbkjQ=";
     };
+
+    fonts = {
+      monospace = {
+        package = pkgs.nerd-fonts.caskaydia-cove;
+        name = "CaskaydiaCove Nerd Font Mono";
+      };
+      sizes = {
+        applications = 10;
+        terminal = 11;
+        desktop = 10;
+        popups = 10;
+      };
+    };
   };
 
     programs.flclashx.enable = true;
@@ -63,6 +76,10 @@
         libpng
         expat
     ];
+
+  nixpkgs.config.permittedInsecurePackages = [
+    "python3.13-ecdsa-0.19.2"
+  ];
 
   system.stateVersion = "26.05";
 }

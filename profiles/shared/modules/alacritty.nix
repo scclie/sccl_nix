@@ -1,6 +1,8 @@
 { config, pkgs, lib, ... }:
 
 {
+  stylix.targets.alacritty.enable = false;
+
   programs.alacritty = {
     enable = true;
     
@@ -16,7 +18,7 @@
       font = {
         size = lib.mkForce 11.0;
         normal = {
-          family = lib.mkForce "FiraCode Nerd Font";
+          family = lib.mkForce "CaskaydiaCove Nerd Font";
           style = lib.mkForce "Regular";
         };
       };
@@ -31,6 +33,6 @@
   };
   
   home.packages = with pkgs; [
-    nerd-fonts.fira-code
+    nerd-fonts.caskaydia-cove
   ];
 }

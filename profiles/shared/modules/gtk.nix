@@ -13,8 +13,8 @@
     };
 
     iconTheme = {
-          name = "Papirus-Dark";
-          package = pkgs.papirus-icon-theme;
+          name = "Nordzy-dark";
+          package = pkgs.nordzy-icon-theme;
     };
   };
 
