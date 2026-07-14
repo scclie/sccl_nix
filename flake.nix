@@ -44,7 +44,7 @@ let
       (if builtins.pathExists ./hosts/${hostName}/disko.nix
        then ./hosts/${hostName}/disko.nix
        else {})
-      ./nixos/modules/zapret.nix
+      (if hostName != "aero15laptop" then ./nixos/modules/zapret.nix else {})
       stylix.nixosModules.stylix
       disko.nixosModules.disko
       home-manager.nixosModules.home-manager
