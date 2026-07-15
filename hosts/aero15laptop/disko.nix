@@ -1,4 +1,3 @@
-# Aero 15 laptop — adjust disk device path after checking `lsblk`
 {
   disko.devices = {
     disk.nvme0n1 = {

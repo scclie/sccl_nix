@@ -12,9 +12,7 @@
 
       cat = "bat";
 
-      rebuild = "sudo nixos-rebuild switch --flake ~/sccl_nix/#sacculos";
-      rebuildproxy = "sudo env http_proxy=http://127.0.0.1:7890 https_proxy=http://127.0.0.1:7890 nixos-rebuild switch --flake ~/sccl_nix/#sacculos";
-      update = "cd ~/sccl_nix/ && sudo nix flake update && rebuild";
+      update = "cd ~/sccl_nix/ && sudo nix flake update";
       clean = "sudo nix-collect-garbage -d";
 
       ".." = "cd ..";
@@ -23,6 +21,14 @@
 
     functions = {
       fish_greeting = "";
+      rebuild = {
+        argumentNames = "host";
+        body = "sudo nixos-rebuild switch --flake ~/sccl_nix/#$host";
+      };
+      rebuildproxy = {
+        argumentNames = "host";
+        body = "sudo env http_proxy=http://127.0.0.1:7890 https_proxy=http://127.0.0.1:7890 nixos-rebuild switch --flake ~/sccl_nix/#$host";
+      };
     };
 
     interactiveShellInit = ''

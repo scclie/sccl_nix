@@ -20,13 +20,11 @@
       enable = true;
       enableOffloadCmd = true;
     };
-    # intelBusId and nvidiaBusId — fill in after running `lspci | grep -E 'VGA|3D'`
-    # intelBusId = "PCI:0:2:0";
-    # nvidiaBusId = "PCI:1:0:0";
+    intelBusId = "PCI:0:2:0";
+    nvidiaBusId = "PCI:1:0:0";
   };
 
   environment.systemPackages = with pkgs; [
-    nvtop
     nvidia-vaapi-driver
   ];
 

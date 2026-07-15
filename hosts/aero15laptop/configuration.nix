@@ -26,6 +26,8 @@
   ];
 
   networking.hostName = "aero15laptop";
+  services.openssh.enable = true;
+  users.users.root.initialPassword = "root";
 
   # Home-manager configuration
   home-manager = {
@@ -36,6 +38,16 @@
     extraSpecialArgs = {
       inherit inputs;
       pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system};
+      niriKbLayout = "colemak_dh,rulemak";
+      niriKbOptions = "caps:backspace,grp:win_space_toggle,lv3:ralt_alt";
+      niriOutput = ''
+        output "eDP-1" {
+            mode "1920x1080@144"
+            scale 1.0
+        }
+      '';
+      niriExtraBinds = "";
+      niriExtraSpawn = "";
     };
   };
 

@@ -1,4 +1,13 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib
+, niriKbLayout ? "colemak_caws,rulemak_caws"
+, niriKbOptions ? "caps:backspace,grp:rwin_toggle,lv3:ralt_switch"
+, niriOutput ? ''output "DP-2" {
+          mode "2560x1440@500"
+          scale 1.0
+      }''
+, niriExtraBinds ? ""
+, niriExtraSpawn ? ""
+, ... }:
 
 {
   home.packages = with pkgs; [
@@ -50,8 +59,8 @@
       input {
           keyboard {
               xkb {
-                  layout "colemak_caws,rulemak_caws"                         // change it to ur own, like "en, de, fr"
-                  options "caps:backspace,grp:rwin_toggle,lv3:ralt_switch"       // capslock == backspace, rSuper for layout toggle, rAlt == AltGr
+                  layout "${niriKbLayout}"
+                  options "${niriKbOptions}"
               }
           }
 
@@ -63,10 +72,7 @@
       }
 
 
-      output "DP-2" {
-          mode "2560x1440@500"
-          scale 1.0
-      }
+      ${niriOutput}
 
       layout {
           gaps 10
@@ -162,6 +168,8 @@
 
           Mod+Space { toggle-window-floating; }
 
+          ${niriExtraBinds}
+
 
 
           //////////////////////////
@@ -197,6 +205,8 @@
       spawn-at-startup "waybar"
       spawn-at-startup "dunst"
       spawn-at-startup "swayidle" "-w" "timeout" "300" "niri msg action power-off-monitors"
+
+      ${niriExtraSpawn}
 
 
       animations {
