@@ -14,9 +14,14 @@
   users.users.paper-dis = {
       isSystemUser = true;
       group = "paper-dis";
-      extraGroups = [ "audio" "video" ];
+      extraGroups = [ "audio" "video" "users" ];
     };
     users.groups.paper-dis = {};
+
+  system.activationScripts.paper-dis-acl = ''
+    ${pkgs.acl}/bin/setfacl -m u:paper-dis:r-x /home/paper
+    chmod g+rx /home/paper
+  '';
 
   programs.fish.enable = true;
   security.sudo.wheelNeedsPassword = false;

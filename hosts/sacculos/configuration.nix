@@ -6,6 +6,7 @@
     ./local-packages.nix
     ./disko.nix
     ../../nixos/modules
+    ../../nixos/modules/amd-gpu.nix
     ../../profiles/paper/user.nix
   ];
 
@@ -20,6 +21,16 @@
     extraSpecialArgs = {
       inherit inputs;
       pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system};
+      niriKbLayout = "colemak_caws,rulemak_caws";
+      niriKbOptions = "caps:backspace,grp:rwin_toggle,lv3:ralt_switch";
+      niriOutput = ''
+        output "DP-2" {
+            mode "2560x1440@500"
+            scale 1.0
+        }
+      '';
+      niriExtraBinds = "";
+      niriExtraSpawn = "";
     };
   };
 

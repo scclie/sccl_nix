@@ -6,9 +6,14 @@
 
     settings = {
       user = {
-        name = "papersaccul";
-        email = "papersacculos@outlook.com";
+        name = "scclie";
+        email = "contact@sccl.cc";
+        signingKey = "~/.ssh/id_ed25519_git.pub";
       };
+
+      gpg.format = "ssh";
+      commit.gpgsign = true;
+      gpg.ssh.allowedSignersFile = "~/.ssh/allowed_signers";
 
       init.defaultBranch = "main";
       pull.rebase = false;
