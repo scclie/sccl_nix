@@ -1,4 +1,4 @@
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, lib, inputs, ... }:
 
 {
   imports = [
@@ -23,6 +23,8 @@
     gtk.enable = true;
     rofi.enable = false;
   };
+
+  gtk.theme.name = lib.mkForce "adw-gtk3-dark";
 
   xdg.desktopEntries = {
     vesktop = {

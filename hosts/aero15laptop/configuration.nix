@@ -1,26 +1,16 @@
 { config, lib, pkgs, inputs, ... }:
 
 {
+  disabledModules = [ ../../nixos/modules/keyboard.nix ];
+
   imports = [
     ./hardware-configuration.nix
     ./local-packages.nix
     ./disko.nix
 
-    # nixos modules (laptop: nvidia instead of amd-gpu)
-    ../../nixos/modules/boot.nix
-    ../../nixos/modules/nix.nix
-    ../../nixos/modules/net.nix
-    ../../nixos/modules/timezone.nix
-    ../../nixos/modules/env.nix
-    ../../nixos/modules/audio.nix
-    ../../nixos/modules/bluetooth.nix
-    ../../nixos/modules/kernel.nix
+    ../../nixos/modules
     ../../nixos/modules/keyboard-colemak.nix
     ../../nixos/modules/nvidia-gpu.nix
-    ../../nixos/modules/xdg-portal.nix
-    ../../nixos/modules/display-manager.nix
-    ../../nixos/modules/flclashx.nix
-    ../../nixos/modules/playground.nix
 
     ../../profiles/paper/user.nix
   ];
