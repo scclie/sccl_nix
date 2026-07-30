@@ -6,6 +6,143 @@
     options = "caps:backspace,grp:win_space_toggle,lv3:ralt_alt";
     
     extraLayouts = {
+      colemak_dh_wide = {
+        description = "Colemak-DH Wide";
+        languages = [ "eng" ];
+        symbolsFile = pkgs.writeText "colemak_dh_wide" ''
+          default partial alphanumeric_keys
+          xkb_symbols "basic" {
+            name[Group1]= "English (Colemak-DH Wide)";
+
+            key <TLDE> { [     grave,    asciitilde  ] };
+            key <AE01> { [         1,      exclam     ] };
+            key <AE02> { [         2,          at     ] };
+            key <AE03> { [         3,  numbersign    ] };
+            key <AE04> { [         4,      dollar     ] };
+            key <AE05> { [         5,     percent     ] };
+            key <AE06> { [         6, asciicircum     ] };
+            key <AE07> { [         7,     ampersand   ] };
+            key <AE08> { [         8,      asterisk   ] };
+            key <AE09> { [         9,     parenleft   ] };
+            key <AE10> { [         0,    parenright   ] };
+            key <AE11> { [     minus,     underscore  ] };
+            key <AE12> { [     equal,         plus    ] };
+
+            // Top row
+            key <AD01> { [         q,          Q     ] };
+            key <AD02> { [         w,          W     ] };
+            key <AD03> { [         f,          F     ] };
+            key <AD04> { [         p,          P     ] };
+            key <AD05> { [         b,          B     ] };
+            key <AD06> { [     comma,         less    ] };
+            key <AD07> { [ bracketright,   braceright ] };
+            key <AD08> { [         j,          J     ] };
+            key <AD09> { [         l,          L     ] };
+            key <AD10> { [         u,          U     ] };
+            key <AD11> { [         y,          Y     ] };
+            key <AD12> { [ apostrophe,     quotedbl  ] };
+            key <BKSL> { [     equal,         plus    ] };
+
+            // Home row
+            key <AC01> { [         a,          A     ] };
+            key <AC02> { [         r,          R     ] };
+            key <AC03> { [         s,          S     ] };
+            key <AC04> { [         t,          T     ] };
+            key <AC05> { [         g,          G     ] };
+            key <AC06> { [    bracketleft,   braceleft  ] };
+            key <AC07> { [         m,          M     ] };
+            key <AC08> { [         n,          N     ] };
+            key <AC09> { [         e,          E     ] };
+            key <AC10> { [         i,          I     ] };
+            key <AC11> { [         o,          O     ] };
+            key <AE12> { [     minus,     underscore  ] };
+
+            // Bottom row
+            key <AB01> { [         z,          Z     ] };
+            key <AB02> { [         x,          X     ] };
+            key <AB03> { [         c,          C     ] };
+            key <AB04> { [         v,          V     ] };
+            key <AB05> { [     slash,      question   ] };
+            key <AB06> { [         k,          K     ] };
+            key <AB07> { [         h,          H     ] };
+            key <AB08> { [ semicolon,       colon     ] };
+            key <AB09> { [     grave,    asciitilde  ] };
+            key <BKSL> { [ backslash,          bar    ] };
+
+            include "level3(ralt_switch)"
+          };
+        '';
+      };
+
+      rulemak_wide = {
+        description = "Russian (Rulemak Wide)";
+        languages = [ "rus" ];
+        symbolsFile = pkgs.writeText "rulemak_wide" ''
+          default partial alphanumeric_keys
+          xkb_symbols "basic" {
+            name[Group1]= "Russian (Rulemak Wide)";
+
+            key <TLDE> { [     Cyrillic_io,     Cyrillic_IO ] };
+            key <AE01> { [               1,          exclam ] };
+            key <AE02> { [               2,              at ] };
+            key <AE03> { [               3,      numerosign ] };
+            key <AE04> { [               4,          dollar ] };
+            key <AE05> { [               5,         percent ] };
+            key <AE06> { [               6,     asciicircum ] };
+            key <AE07> { [               7,       ampersand ] };
+            key <AE08> { [               8,        asterisk ] };
+            key <AE09> { [               9,       parenleft ] };
+            key <AE10> { [               0,      parenright ] };
+            key <AE11> { [           minus,      underscore ] };
+            key <AE12> { [           equal,            plus ] };
+
+            // Top row
+            key <AD01> { [     Cyrillic_ya,     Cyrillic_YA ] };
+            key <AD02> { [    Cyrillic_zhe,    Cyrillic_ZHE ] };
+            key <AD03> { [     Cyrillic_ef,     Cyrillic_EF ] };
+            key <AD04> { [     Cyrillic_pe,     Cyrillic_PE ] };
+            key <AD05> { [     Cyrillic_be,     Cyrillic_BE ] };
+            key <AD06> { [     Cyrillic_em,     Cyrillic_EM ] };
+            key <AD07> { [    Cyrillic_sha,    Cyrillic_SHA ] };
+            key <AD08> { [    Cyrillic_short,    Cyrillic_SHORT ] };
+            key <AD09> { [      Cyrillic_u,      Cyrillic_U ] };
+            key <AD10> { [      Cyrillic_l,      Cyrillic_L ] };
+            key <AD11> { [   Cyrillic_yeru,   Cyrillic_YERU ] };
+            key <AD12> { [ Cyrillic_softsign, Cyrillic_SOFTSIGN ] };
+            key <BKSL> { [           equal,            plus ] };
+
+            // Home row
+            key <AC01> { [      Cyrillic_a,      Cyrillic_A ] };
+            key <AC02> { [     Cyrillic_er,     Cyrillic_ER ] };
+            key <AC03> { [     Cyrillic_es,     Cyrillic_ES ] };
+            key <AC04> { [     Cyrillic_te,     Cyrillic_TE ] };
+            key <AC05> { [    Cyrillic_ghe,    Cyrillic_GHE ] };
+            key <AC06> { [    Cyrillic_sha,    Cyrillic_SHA ] };
+            key <AC07> { [  Cyrillic_shcha,  Cyrillic_SHCHA ] };
+            key <AC08> { [     Cyrillic_en,     Cyrillic_EN ] };
+            key <AC09> { [     Cyrillic_ie,     Cyrillic_IE ] };
+            key <AC10> { [      Cyrillic_i,      Cyrillic_I ] };
+            key <AC11> { [      Cyrillic_o,      Cyrillic_O ] };
+            key <AE12> { [           minus,      underscore ] };
+
+            // Bottom row
+            key <AB01> { [     Cyrillic_ze,     Cyrillic_ZE ] };
+            key <AB02> { [     Cyrillic_ha,     Cyrillic_HA ] };
+            key <AB03> { [    Cyrillic_tse,    Cyrillic_TSE ] };
+            key <AB04> { [     Cyrillic_ve,     Cyrillic_VE ] };
+            key <AB05> { [      Cyrillic_e,      Cyrillic_E ] };
+            key <AB06> { [     Cyrillic_ka,     Cyrillic_KA ] };
+            key <AB07> { [     Cyrillic_che,     Cyrillic_CHE ] };
+            key <AB08> { [     Cyrillic_yu,     Cyrillic_YU ] };
+            key <AB09> { [ Cyrillic_hardsign, Cyrillic_HARDSIGN ] };
+            key <AB10> { [    Cyrillic_zhe,    Cyrillic_ZHE ] };
+            key <BKSL> { [       Cyrillic_io,       Cyrillic_IO ] };
+
+            include "level3(ralt_switch)"
+          };
+        '';
+      };
+
       rulemak_vial = {
         description = "Rulemak for Vial Colemak-DH";
         languages = [ "rus" ];

@@ -15,7 +15,7 @@
     ../../nixos/modules/audio.nix
     ../../nixos/modules/bluetooth.nix
     ../../nixos/modules/kernel.nix
-    ../../nixos/modules/keyboard-colemak.nix
+    ../../nixos/modules/keyboard.nix
     ../../nixos/modules/nvidia-gpu.nix
     ../../nixos/modules/xdg-portal.nix
     ../../nixos/modules/display-manager.nix
@@ -38,8 +38,8 @@
     extraSpecialArgs = {
       inherit inputs;
       pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system};
-      niriKbLayout = "colemak_dh,rulemak";
-      niriKbOptions = "caps:backspace,grp:win_space_toggle,lv3:ralt_alt";
+      niriKbLayout = "colemak_caws,rulemak_caws";
+      niriKbOptions = "caps:backspace,grp:rwin_toggle,lv3:ralt_switch";
       niriOutput = ''
         output "eDP-1" {
             mode "1920x1080@144"
