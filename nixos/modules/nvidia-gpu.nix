@@ -28,7 +28,9 @@
     nvidia-vaapi-driver
   ];
 
-  # Fix screen tearing
+  # Blacklist nouveau — causes kernel lockups on this hardware
+  boot.blacklistedKernelModules = [ "nouveau" ];
+
   environment.variables = {
     LIBVA_DRIVER_NAME = "nvidia";
     GBM_BACKEND = "nvidia-drm";

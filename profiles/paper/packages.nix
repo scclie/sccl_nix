@@ -5,9 +5,10 @@
 
 let
   secure-vesktop = pkgs.writeShellScriptBin "vesktop" ''
+    chmod 666 /run/user/1000/''${WAYLAND_DISPLAY:-wayland-0}
     exec sudo ${pkgs.systemd}/bin/systemd-run \
       --description="Secure Vesktop (User: paper-dis)" \
-      --property=BindPaths="/var/lib/paper-dis-vesktop:/var/lib/paper-dis-vesktop /run/user/1000/''${WAYLAND_DISPLAY}:/run/user/1000/''${WAYLAND_DISPLAY} /run/user/1000/pulse:/run/user/1000/pulse /run/user/1000/bus:/var/lib/paper-dis-vesktop/bus" \
+      --property=BindPaths="/var/lib/paper-dis-vesktop:/var/lib/paper-dis-vesktop /run/user/1000/''${WAYLAND_DISPLAY}:/var/lib/paper-dis-vesktop/''${WAYLAND_DISPLAY} /run/user/1000/pulse:/run/user/1000/pulse /run/user/1000/bus:/var/lib/paper-dis-vesktop/bus" \
       --property=BindReadOnlyPaths=/home/paper:/home/paper \
       --uid=paper-dis \
       --gid=paper-dis \
@@ -26,7 +27,7 @@ let
       --setenv=ALL_PROXY=http://127.0.0.1:7890 \
       --setenv=NO_PROXY=127.0.0.1,localhost,internal.domain,127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16 \
       --wait \
-      ${pkgs.vesktop}/bin/vesktop --no-sandbox "$@"
+      ${pkgs.vesktop}/bin/vesktop --no-sandbox --ozone-platform=wayland "$@"
   '';
 in
 {
