@@ -1,9 +1,10 @@
-{ config, pkgs, inputs, ... }: {
+{ config, lib, pkgs, inputs, ... }: {
     imports = [ inputs.zapret-discord-youtube.nixosModules.default ];
 
     services.zapret-discord-youtube = {
             enable = true;
-            config = "general(ALT)";
+            configName = "general (FAKE_TLS_AUTO)";
+            gameFilter = "all";
 
             listGeneral = [
             # discord
@@ -37,4 +38,12 @@
             ipsetAll = [ "192.168.1.0/24" "10.0.0.1" ];
             ipsetExclude = [ "203.0.113.0/24" "172.66.165.132" "104.20.29.242"];
     };
+
+    # Rust game server uses Raknet on UDP 1337 — not covered by zapret's
+    # NFQWS_PORTS_UDP (443,50000-65535). Route it through nfqws manually.
+    systemd.services.zapret-discord-youtube.postStart = lib.mkAfter ''
+      sleep 1
+      iptables -t mangle -C POSTROUTING -p udp --dport 1337 -m connbytes --connbytes-dir=original --connbytes-mode=packets --connbytes 1:9 -m mark ! --mark 0x40000000/0x40000000 -m set ! --match-set nozapret dst -j NFQUEUE --queue-num 200 --queue-bypass 2>/dev/null || \
+      iptables -t mangle -A POSTROUTING -p udp --dport 1337 -m connbytes --connbytes-dir=original --connbytes-mode=packets --connbytes 1:9 -m mark ! --mark 0x40000000/0x40000000 -m set ! --match-set nozapret dst -j NFQUEUE --queue-num 200 --queue-bypass
+    '';
 }

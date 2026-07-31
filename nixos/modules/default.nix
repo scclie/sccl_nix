@@ -11,7 +11,6 @@
     ./bluetooth.nix
     ./kernel.nix
     ./keyboard.nix
-    ./amd-gpu.nix
     ./xdg-portal.nix
     ./display-manager.nix
     ./flclashx.nix
