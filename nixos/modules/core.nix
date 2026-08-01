@@ -1,7 +1,5 @@
-{ config, lib, inputs, ... }:
-let
-  cfg = config.sccl;
-in {
+{ lib, inputs, ... }:
+{
   options = {
     sccl.ui.enable = lib.mkEnableOption "Stylix + greetd display manager";
     sccl.audio.enable = lib.mkEnableOption "PipeWire audio";
@@ -21,42 +19,25 @@ in {
     };
   };
 
-  imports =
-    [
-      ./boot.nix
-      ./nix.nix
-      ./env.nix
-      ./keyboard.nix
-      ./timezone.nix
-      ./system-packages.nix
-    ]
-    ++ lib.optionals cfg.ui.enable [
-      ./display-manager.nix
-      ./stylix.nix
-      inputs.stylix.nixosModules.stylix
-    ]
-    ++ lib.optionals cfg.audio.enable [
-      ./audio.nix
-      ./xdg-portal.nix
-    ]
-    ++ lib.optionals cfg.bluetooth.enable [ ./bluetooth.nix ]
-    ++ lib.optionals cfg.net.enable [ ./net.nix ]
-    ++ lib.optionals cfg.automount.enable [ ./automount.nix ]
-    ++ lib.optionals cfg.secrets.enable [ ./secrets.nix ]
-    ++ lib.optionals cfg.zapret.enable [ ./zapret.nix ]
-    ++ lib.optionals cfg.flclashx.enable [ ./flclashx.nix ]
-    ++ lib.optionals cfg.playground.enable [ ./playground.nix ]
-    ++ lib.optionals cfg.nix-ld.enable [ ./nix-ld.nix ];
-
-  config = lib.mkMerge [
-    {
-      imports = [
-        inputs.disko.nixosModules.disko
-        inputs.home-manager.nixosModules.home-manager
-      ];
-    }
-    (lib.mkIf cfg.chaotic.enable {
-      imports = [ inputs.chaotic.nixosModules.default ];
-    })
+  imports = [
+    ./boot.nix
+    ./nix.nix
+    ./env.nix
+    ./keyboard.nix
+    ./timezone.nix
+    ./system-packages.nix
+    ./display-manager.nix
+    ./stylix.nix
+    ./audio.nix
+    ./xdg-portal.nix
+    ./bluetooth.nix
+    ./net.nix
+    ./automount.nix
+    ./secrets.nix
+    ./zapret.nix
+    ./flclashx.nix
+    ./playground.nix
+    ./nix-ld.nix
   ];
+
 }

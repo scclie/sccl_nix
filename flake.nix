@@ -40,7 +40,7 @@ let
     };
 
     modules = [
-      ./nixos/modules/core         # NEW — options system
+      ./nixos/modules/core.nix      # NEW — options system
       ./nixos/modules              # OLD default.nix chain (will coexist)
       ./hosts/${hostName}/configuration.nix
       (if builtins.pathExists ./hosts/${hostName}/disko.nix
