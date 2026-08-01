@@ -1,23 +1,30 @@
 { config, lib, pkgs, inputs, ... }:
-
 {
   imports = [
     ./hardware-configuration.nix
-    ./local-packages.nix
+    ./gpu.nix
     ./disko.nix
-    ../../nixos/modules
-    ../../nixos/modules/amd-gpu.nix
     ../../profiles/paper/user.nix
   ];
 
   networking.hostName = "sacculos";
 
-  # Home-manager configuration
+  sccl = {
+    ui.enable = true;
+    audio.enable = true;
+    bluetooth.enable = true;
+    net.enable = true;
+    zapret.enable = true;
+    flclashx.enable = true;
+    playground.enable = true;
+    nix-ld.enable = true;
+    ui.wallpaperSha256 = "sha256-cqL194wcTxCKmSFf+z0BfyZlLAlFs8pnzAManlQbkjQ=";
+  };
+
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
     users.paper = import ../../profiles/paper/home.nix;
-
     extraSpecialArgs = {
       inherit inputs;
       pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system};
@@ -33,60 +40,6 @@
       niriExtraSpawn = "";
     };
   };
-
-  # Stylix global theme (Nord)
-  stylix = {
-    enable = true;
-    base16Scheme = "${pkgs.base16-schemes}/share/themes/nord.yaml";
-    image = pkgs.fetchurl {
-      url = "https://github.com/OulipianSummer/nixos-pattern-nord-wallpapers/blob/master/jpgs/nix-d-nord-purple.jpg?raw=true";
-      sha256 = "sha256-cqL194wcTxCKmSFf+z0BfyZlLAlFs8pnzAManlQbkjQ=";
-    };
-
-    fonts = {
-      monospace = {
-        package = pkgs.nerd-fonts.caskaydia-cove;
-        name = "CaskaydiaCove Nerd Font Mono";
-      };
-      sizes = {
-        applications = 10;
-        terminal = 11;
-        desktop = 10;
-        popups = 10;
-      };
-    };
-  };
-
-    programs.flclashx.enable = true;
-
-    programs.nix-ld.enable = true; # runs proprietary garbage
-    programs.nix-ld.libraries = with pkgs; [
-        gcc.cc.lib
-        glibc
-        openssl
-        zlib
-        qt6.qtbase
-        qt6.qtwebengine
-        qt6.qtdeclarative
-        gtk3
-        gdk-pixbuf
-        webkitgtk_4_1
-        glib
-        libGL
-        libglvnd
-        alsa-lib
-        libpulseaudio
-        dbus
-        fontconfig
-        freetype
-        pango
-        cairo
-        libtiff
-        libjpeg
-        giflib
-        libpng
-        expat
-    ];
 
   nixpkgs.config.permittedInsecurePackages = [
     "python3.13-ecdsa-0.19.2"
