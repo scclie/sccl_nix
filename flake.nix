@@ -40,6 +40,14 @@ let
 
     specialArgs = {
       inherit inputs pkgs-unstable;
+      scclKbLayout = if hostName == "aero15laptop"
+        then "colemak_dh,rulemak"
+        else "us,rulemak_vial";
+      scclKbOptions = if hostName == "aero15laptop"
+        then "caps:backspace,grp:win_space_toggle,lv3:ralt_alt"
+        else "caps:backspace,grp:win_space_toggle,lv3:ralt_alt";
+      scclKbVariant = if hostName == "aero15laptop" then "colemak" else "vial";
+      scclKbExtraRules = "";
     };
 
     modules = [
