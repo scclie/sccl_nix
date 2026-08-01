@@ -28,7 +28,6 @@
     ./env.nix
     ./keyboard.nix
     ./timezone.nix
-    ./system-packages.nix
     ./display-manager.nix
     ./stylix.nix
     ./audio.nix

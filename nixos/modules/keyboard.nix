@@ -242,7 +242,7 @@ let
             key <AD05> { [     Cyrillic_be,     Cyrillic_BE ] };
             key <AD06> { [     Cyrillic_em,     Cyrillic_EM ] };
             key <AD07> { [    Cyrillic_sha,    Cyrillic_SHA ] };
-            key <AD08> { [    Cyrillic_short,    Cyrillic_SHORT ] };
+            key <AD08> { [    Cyrillic_shorti,    Cyrillic_SHORTI ] };
             key <AD09> { [      Cyrillic_u,      Cyrillic_U ] };
             key <AD10> { [      Cyrillic_l,      Cyrillic_L ] };
             key <AD11> { [   Cyrillic_yeru,   Cyrillic_YERU ] };
@@ -347,8 +347,6 @@ let
       key <FK14> { [ Cyrillic_hardsign, Cyrillic_HARDSIGN ] };  // Ъ
 
       include "level3(ralt_switch)"
-
-            include "level3(ralt_switch)"
           };
         '';
       };
