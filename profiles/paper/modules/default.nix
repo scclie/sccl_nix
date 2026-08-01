@@ -2,7 +2,7 @@
 
 {
   imports = [
-    ./opencode.nix
+    ./opencode
     ./playground.nix
   ];
 }
