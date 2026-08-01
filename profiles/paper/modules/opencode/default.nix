@@ -21,7 +21,7 @@ in {
       mkdir -p $out/skills
       cp -r ${devops-skills}/skills/* $out/skills/
       cp -r ${superpowers}/skills/* $out/skills/
-      cp ${./opencode-config.json} $out/opencode.json
+      cp ${./opencode.json} $out/opencode.json
     '';
     recursive = true;
   };
