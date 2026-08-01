@@ -1,0 +1,36 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "skill": {
+      "aws-cli": "allow",
+      "brainstorming": "allow",
+      "code-review": "allow",
+      "commit-code": "allow",
+      "create-dockerfile": "allow",
+      "create-skill": "allow",
+      "create-terraform-helm-upgrade-plan": "allow",
+      "dispatching-parallel-agents": "allow",
+      "executing-plans": "allow",
+      "finishing-a-development-branch": "allow",
+      "github-cli": "allow",
+      "gitlab-cli": "allow",
+      "grafana-cli": "allow",
+      "jenkins-cli": "allow",
+      "jira-and-confluence-cli": "allow",
+      "maintenance-check-aws-eks": "allow",
+      "maintenance-create-ticket-on-jira": "allow",
+      "prometheus-cli": "allow",
+      "receiving-code-review": "allow",
+      "requesting-code-review": "allow",
+      "slack-cli": "allow",
+      "subagent-driven-development": "allow",
+      "systematic-debugging": "allow",
+      "test-driven-development": "allow",
+      "using-git-worktrees": "allow",
+      "using-superpowers": "allow",
+      "verification-before-completion": "allow",
+      "writing-plans": "allow",
+      "writing-skills": "allow"
+    }
+  }
+}
