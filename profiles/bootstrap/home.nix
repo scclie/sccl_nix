@@ -1,8 +1,8 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 {
   home = {
     username = "bootstrap";
-    homeDirectory = "/home/bootstrap";
+    homeDirectory = lib.mkForce "/home/bootstrap";
     stateVersion = "26.05";
   };
 

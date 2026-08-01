@@ -1,4 +1,4 @@
-{ config, pkgs, lib, inputs, ... }:
+{ config, pkgs, lib, inputs, hasSecrets ? false, ... }:
 
 {
   imports = [
@@ -6,7 +6,7 @@
     ../shared/modules         # Base configurations for all users
     ./packages.nix            # Additional user-specific packages
     ./modules                 # User-specific configuration overrides
-  ];
+  ] ++ lib.optional hasSecrets inputs.sops-nix.homeManagerModules.sops;
 
   home = {
     username = "paper";
@@ -37,4 +37,29 @@
       mimeType = [ "x-scheme-handler/discord" ];
     };
   };
-}
+
+} // (lib.optionalAttrs hasSecrets {
+  sops = {
+    defaultSopsFile = ../../secrets/common.yaml;
+    secrets = {
+      "ssh/id_ed25519" = {
+        path = "${config.home.homeDirectory}/.ssh/id_ed25519";
+      };
+      "ssh/id_ed25519_git" = {
+        path = "${config.home.homeDirectory}/.ssh/id_ed25519_git";
+      };
+      "ssh/id_ed25519_scclie" = {
+        path = "${config.home.homeDirectory}/.ssh/id_ed25519_scclie";
+      };
+      "gpg/signing_key" = {
+        path = "${config.home.homeDirectory}/.ssh/gpg_signing_key.asc";
+      };
+    };
+  };
+
+  home.activation = {
+    importGpgKey = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      $DRY_RUN_CMD ${pkgs.gnupg}/bin/gpg --import ${config.sops.secrets."gpg/signing_key".path}
+    '';
+  };
+})
