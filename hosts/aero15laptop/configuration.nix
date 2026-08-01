@@ -6,6 +6,7 @@
     ./hardware-configuration.nix
     ./gpu.nix
     ../../profiles/paper/user.nix
+    ../../profiles/bootstrap/user.nix
   ];
 
   networking.hostName = "aero15laptop";
@@ -25,7 +26,6 @@
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
-    users.paper = import ../../profiles/paper/home.nix;
     extraSpecialArgs = {
       inherit inputs;
       pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system};
@@ -40,7 +40,9 @@
       niriExtraBinds = "";
       niriExtraSpawn = "";
     };
-  };
+  } // (if config.sccl.bootstrap
+    then { users.bootstrap = import ../../profiles/bootstrap/home.nix; }
+    else { users.paper = import ../../profiles/paper/home.nix; });
 
   nixpkgs.config.permittedInsecurePackages = [
     "python3.13-ecdsa-0.19.2"

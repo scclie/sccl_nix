@@ -1,7 +1,6 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
-{
-  # Main user
+lib.mkIf (!config.sccl.bootstrap) {
   users.users.paper = {
     isNormalUser = true;
     description = "Paper"; # tipo bumaga?
@@ -23,6 +22,6 @@
     chmod g+rx /home/paper
   '';
 
-  programs.fish.enable = true;
-  security.sudo.wheelNeedsPassword = false;
-}
+    programs.fish.enable = true;
+    security.sudo.wheelNeedsPassword = false;
+  }
