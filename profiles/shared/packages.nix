@@ -10,6 +10,8 @@
     fzf
     zoxide
     killall
+    age
+    sops
 
     # GUI Applications
     xfce.thunar

@@ -1,129 +1,354 @@
 # sccl_nix
 > [!NOTE]  
-> /// NixOS config: `flakes` + `home-manager` + `disko`   
-> /// Modular host-profile architecture -> scale across machines & users
+> /// NixOS config: `flakes` + `home-manager` + `disko` + `sops-nix`  
+> /// Modular host-profile architecture w/ sccl.* options — scale across machines & users
 
-![desktop_img](img/Niri.png)
+![desktop_img](img/niri.webp)
 
 ## What's Inside¿
 > [!NOTE] 
 > /// Personal setup: `host::sacculos` + `profile::paper`  
 > /// U can use as reference or starting point!! feel free 2 yoink anything~
 
-**Window Managers:**
-- **Niri** (main) - scrollable tiling
-- **Hyprland** - dynamic tiling 
-- Custom layouts: `Colemak-DH | Rulemak-DH` - works 4 all hosts & profiles *(can disable it in WM settings if u want)*
+**Window Manager:**
+- **Niri** — scrollable tiling wayland compositord
+- Custom layouts: `Colemak-DH | Rulemak-DH` — works 4 all hosts & profiles *(parametrized via flake specialArgs, per host kbd variant)*
 
-**Shared packages** -> `profiles/shared/*` (all users):
-- **CLI:** fastfetch, ripgrep, fd, fzf, zoxide, bat, eza, btop
-- **GUI:** thunar, vlc, mpv, evince, zathura
-- **Utils:** grim, slurp, wl-clipboard, pavucontrol, appimage-run, gparted
-- **Network:** firefox
-- **Dev:** nixd, gh, zed-editor
-- **Terminal:** alacritty w/ fish & starship
-- **Launcher:** fuzzel (niri), rofi (hyprland)
-- **Bar:** waybar
-- **Themes:** Nordic, Papirus icons, Bibata cursor
-- **Fonts:** JetBrains Mono, Noto, Font Awesome, Nerd Fonts
+**System features (nixos/modules/):**
+- `core.nix` — sccl.* option definitions (all default `false`), hosts enable what they need
+- `boot.nix`, `nix.nix`, `net.nix`, `audio.nix`, `bluetooth.nix` — system services
+- `automount.nix` — udisks2 + polkit USB automag
+- `secrets.nix` — sops-nix integration for SSH/GPG keys
+- `zapret.nix` — DPI bypass 4 blocked sites
+- `playground.nix` — Docker + dev tools (system-level)
 
-**System packages** -> `hosts/sacculos/*` (all users on this host):
-- **Utils:** vim, wget, curl, git, htop, tree, nano, fastfetch, hyfetch (iykyk :D)
-- **Archive:** p7zip, unzip, zip
-- **Network:** networkmanagerapplet, webcord
-- **Services:** zapret-discord-youtube (DPI bypass)
+**Host layer (hosts/):**
+- Auto-discovered by flake (drop dir → `nixosConfigurations.<name>`)
+- `gpu.nix` — hardware-specific (amd or nvidia)
+- `local-packages.nix` — system-wide packages 4 this machine only
 
-**My profile** -> `profiles/paper/*` (user-specific):
-- **Network:** ayugram
-- **Dev:** rustc, cargo, gcc, lmstudio, lazygit
-- **Gaming:** steam, bottles, obs-studio, protonplus, steam-run
-- **Creative:** kdenlive, krita, aseprite, blender, audacity
-- **Audio:** easyeffects
-- **Office:** libreoffice
+**Profiles (profiles/):**
+- `bootstrap/` — minimal (~1-2 GB) 4 fresh installs from USB (nmtui + vim + ssh)
+- `shared/` — base configs & packages 4 all users (fish, alacritty, niri, waybar...)
+- `paper/` — my chunky profile (steam, blender, krita, opencode...)
+
+**Secrets (sops-nix):** `secrets/common.yaml` — encrypted w/ age key, safe 4 public repo
+
+**DevShells (shells/):** auto-discovered by flake, `nix develop .#playground`
 
 ## Table of Contents
 
-- [Host-Profile System](#host-profile-system)
-- [Config Structure](#config-structure)
-- [Adding New Profiles](#adding-new-profiles)
-- [Adding New Hosts](#adding-new-hosts)
-- [Adding packages](#adding-packages)
+- [Architecture](#architecture)
+- [Options System](#options-system)
+- [Secrets (sops-nix)](#secrets-sops-nix)
 - [Installation](#installation)
+- [Adding New Hosts](#adding-new-hosts)
+- [Adding New Profiles](#adding-new-profiles)
+- [Config Structure](#config-structure)
 
 ---
 
-## Host-Profile System
-
-This config uses a modular host-profile architecture that separates machine-specific settings from user configurations!
-
-### How it works
+## Architecture
 
 ```mermaid
 flowchart TD
-    F[❄️ flake.nix<br/>Auto-discovery]
+    F[❄️ flake.nix<br/>auto-discovery: hosts + shells]
 
-    P1[👤 profiles/paper]
-    P2[👤 profiles/guest]
+    NM[⚙️ nixos/modules/core.nix<br/>sccl.* options → conditional config]
 
-    H1[🖥️  hosts/sacculos]
-    H2[💻 hosts/laptop]
+    H1[🖥️  hosts/sacculos<br/>desktop + amd gpu]
+    H2[💻 hosts/laptop<br/>portable + nvidia gpu]
 
-   NM[⚙️ nixos/modules<br/>System services]
-   PS[📦 profiles/shared<br/>Base configs&packages]
+    P1[👤 profiles/paper<br/>main user: steam, blender...]
+    P2[👤 profiles/guest<br/>second user: firefox, vlc...]
+    PS[📦 profiles/shared<br/>base: fish, niri, waybar...]
+
+    PB[🪶 profiles/bootstrap<br/>minimal: nmtui, vim, ssh]
+
+    S[🔐 secrets/<br/>sops-nix encrypted]
+    SH[🐚 shells/<br/>auto-discovered devShells]
 
     F --> H1
     F --> H2
-    
+    F --> SH
+
+    H1 --> NM
+    H2 --> NM
+
     H1 --> P1
     H1 --> P2
     H2 --> P2
-    
+
+    H1 --> PB
+    H2 --> PB
+
     P1 --> PS
     P2 --> PS
-    
-    H1 --> NM
-    H2 --> NM
-    
-    classDef flakeStyle fill:#517599,stroke:#5e81ac,stroke-width:2px,color:#000000
-    classDef hostStyle fill:#88c0d0,stroke:#5e81ac,stroke-width:2px,color:#000000
-    classDef profileStyle fill:#a3be8c,stroke:#8fbcbb,stroke-width:2px,color:#000000
-    classDef sharedStyle fill:#ebcb8b,stroke:#d08770,stroke-width:2px,color:#000000
-    classDef moduleStyle fill:#b48ead,stroke:#bf616a,stroke-width:2px,color:#000000
-    
+
+    classDef flakeStyle fill:#517599,stroke:#5e81ac,stroke-width:2px,color:#000
+    classDef hostStyle fill:#88c0d0,stroke:#5e81ac,stroke-width:2px,color:#000
+    classDef profileStyle fill:#a3be8c,stroke:#8fbcbb,stroke-width:2px,color:#000
+    classDef sharedStyle fill:#ebcb8b,stroke:#d08770,stroke-width:2px,color:#000
+    classDef moduleStyle fill:#b48ead,stroke:#bf616a,stroke-width:2px,color:#000
+    classDef secretStyle fill:#bf616a,stroke:#d08770,stroke-width:2px,color:#000
+    classDef shellStyle fill:#d08770,stroke:#ebcb8b,stroke-width:2px,color:#000
+
     class F flakeStyle
     class H1,H2 hostStyle
-    class P1,P2 profileStyle
+    class P1,P2,PB profileStyle
     class PS sharedStyle
     class NM moduleStyle
+    class S secretStyle
+    class SH shellStyle
 ```
 
-### Why it's cool
+### How it works
 
-**Separation:**
-- `Hosts` -> hardware-specific: disk layout, drivers, system packages
-- `Profiles` -> user-specific: packages, dotfiles, preferences
-- `Shared` -> common base: WM configs, themes, base tools
+**Separation of concerns:**
+- `flake.nix` → minimum logic: auto-discovers hosts + shells, passes `specialArgs`
+- `nixos/modules/core.nix` → defines ALL `sccl.*` options (default: `false`), imports modules
+- `nixos/modules/<feature>.nix` → each module self-gates via `lib.mkIf config.sccl.<feature>.enable`
+- `hosts/` → declares `sccl.{ui,audio,net,...}.enable = true`, imports profiles + hardware files
+- `profiles/` → user configs (home-manager): packages, dotfiles, WM binds
 
-**Ez scaling:**
-- New machine? -> Drop dir in `hosts/` (auto-discovered by flake)
-- New profile(user)? -> Copy profile, tweak packages
-- Multiple profiles(users)? -> Import multiple profiles in host config
+**No more `if hostName !=` hacks** — zapret excluded on laptop simply by NOT setting `sccl.zapret.enable`.
 
-**DRY:**
-- Shared configs -> `profiles/shared/`
-- User profiles -> override only wha u need
-- Zero copy-paste between machines
-
+**Bootstrap mode** — set `sccl.bootstrap = true` → minimal user (nmtui+vim+ssh), ~1-2 GB closure. After install: `sccl.bootstrap = false` + `nixos-rebuild switch` → full system.
 
 **Example:**
 ```
-hosts/sacculos (desktop)  ->  profiles/paper (main user)    ->  profiles/shared (base)
-                          ->  profiles/guest (second user)  ->  profiles/shared (base)
+hosts/sacculos (desktop) → profiles/paper (main)   → profiles/shared (base)
+                         → profiles/guest (second)  → profiles/shared (base)
+                         → profiles/bootstrap (install)
 
-hosts/laptop (portable)   ->  profiles/paper (same user)    ->  profiles/shared (base)
+hosts/laptop   (portable) → profiles/paper (same)   → profiles/shared (base)
+                           → profiles/guest (same)   → profiles/shared (base)
+                           → profiles/bootstrap (install)
 ```
 
-Same usr profile works on different machines, same shared base for all users!
+Same user profile works on different machines, same shared base for all users, bootstrap available anywhere!
+
+---
+
+## Options System
+
+Every system feature has an option under `sccl.*`. All default to `false`:
+
+```nix
+sccl.ui.enable           # stylix + greetd display manager
+sccl.audio.enable        # pipewire
+sccl.bluetooth.enable    # bluetooth + blueman
+sccl.net.enable          # networkmanager + proxy + firewall
+sccl.automount.enable    # udisks2 USB automount
+sccl.secrets.enable      # sops-nix
+sccl.zapret.enable       # DPI bypass
+sccl.flclashx.enable     # FlClashX proxy GUI
+sccl.playground.enable   # Docker + dev tools (system-level)
+sccl.chaotic.enable      # chaotic-nyx repo
+sccl.nix-ld.enable       # nix-ld for proprietary binaries
+sccl.bootstrap           # bool: minimal install profile
+```
+
+Host enables what it needs in `configuration.nix`:
+
+```nix
+sccl = {
+  ui.enable = true;
+  audio.enable = true;
+  bluetooth.enable = true;
+  net.enable = true;
+  automount.enable = true;    # desktop only
+  zapret.enable = true;       # desktop only (repo banned on laptop)
+  flclashx.enable = true;
+  playground.enable = true;   # desktop only
+  nix-ld.enable = true;
+};
+```
+
+---
+
+## Secrets (sops-nix)
+
+Encrypted w/ age key → safe 4 public repo. SSH/GPG keys live in `secrets/common.yaml`.
+
+### Setup
+
+```bash
+# 1. Generate age key (age + sops are in shared packages)
+mkdir -p ~/.config/sops/age
+age-keygen -o ~/.config/sops/age/keys.txt
+
+# 2. Save private key to Bitwarden (or any pw manager)
+#    Keep ~/.config/sops/age/keys.txt on disk for daily use
+
+# 3. Copy PUBLIC key (age1...) into secrets/.sops.yaml:
+#    age: age1abcdef...   ← replace the placeholder
+
+# 4. Encrypt secrets (run from repo root)
+sops --config secrets/.sops.yaml secrets/common.yaml
+# → editor opens, paste your actual SSH/GPG keys:
+#
+#   ssh:
+#     id_ed25519: |
+#       -----BEGIN OPENSSH PRIVATE KEY-----
+#       ...
+#     id_ed25519_git: |
+#       ...
+#   gpg:
+#     signing_key: |
+#       -----BEGIN PGP PRIVATE KEY BLOCK-----
+#       ...
+#
+# → save & exit → file is now encrypted, safe to commit
+```
+
+Enable: `sccl.secrets.enable = true` in host config. On rebuild with `sops-nix`, SSH keys decrypt to `~/.ssh/`, GPG imports automatically.
+
+---
+
+## Installation
+
+### Option 1: Bootstrap (one machine + USB stick)
+
+```bash
+# 1. Boot nixos-minimal livecd
+# 2. Clone repo & setup host
+git clone https://github.com/papersaccul/sccl_nix.git /mnt/etc/nixos
+cd /mnt/etc/nixos
+
+# 3. Copy host template
+cp -r hosts/sacculos hosts/<hostname>
+# Edit hostname + disko paths in hosts/<hostname>/
+
+# 4. Generate hardware config
+nixos-generate-config --root /mnt --show-hardware-config --no-filesystems \
+  > hosts/<hostname>/hardware-configuration.nix
+
+# 5. Set bootstrap mode in configuration.nix:
+#    sccl.bootstrap = true;
+
+# 6. Install (~1-2 GB closure)
+nixos-install --flake .#<hostname>
+
+# 7. Reboot → minimal system (nmtui for wifi, vim, ssh)
+# 8. Switch to full profile:
+#    sccl.bootstrap = false;
+sudo nixos-rebuild switch --flake .#<hostname>
+```
+
+### Option 2: nixos-anywhere (two machines, faster)
+
+```bash
+# 1. Boot target with nixos-minimal livecd (or any ISO w/ SSH)
+# 2. On your dev machine: clone repo, configure host
+git clone https://github.com/papersaccul/sccl_nix.git
+cd sccl_nix
+cp -r hosts/sacculos hosts/<hostname>
+# Edit hostname + disko paths
+
+# 3. Push & install (closure built locally → no USB space issues)
+nix run github:nix-community/nixos-anywhere -- \
+  --generate-hardware-config nixos-generate-config \
+    hosts/<hostname>/hardware-configuration.nix \
+  --flake .#<hostname> \
+  root@<target-ip>
+
+# 4. Reboot → full system ready
+```
+
+### Option 3: Migrate existing NixOS
+
+```bash
+# 1. Backup
+sudo cp -r /etc/nixos /etc/nixos.backup
+
+# 2. Clone & setup
+git clone https://github.com/papersaccul/sccl_nix ~/sccl_nix
+cd ~/sccl_nix
+# Setup host (see "Adding New Hosts")
+
+# 3. Test then switch
+sudo nixos-rebuild test --flake .#<hostname>
+sudo nixos-rebuild switch --flake .#<hostname>
+```
+
+---
+
+## Adding New Hosts
+
+```bash
+# 1. Create host dir
+mkdir -p hosts/<hostname>
+
+# 2. Copy from existing host
+cp -r hosts/sacculos/* hosts/<hostname>/
+
+# 3. Edit configuration.nix:
+#    - networking.hostName = "<hostname>";
+#    - sccl = { ... };  # enable features u need
+#    - gpu.nix → amd or nvidia config
+#    - local-packages.nix → machine-specific system packages
+
+# 4. Edit disko.nix — change disk paths
+# 5. Generate hardware-configuration.nix (see Installation)
+
+# Build & test
+nixos-rebuild build --flake .#<hostname>
+```
+
+Flake auto-discovers the new host — no edits needed 💅
+
+---
+
+## Adding New Profiles
+
+```bash
+mkdir -p profiles/<username>/modules
+```
+
+**`profiles/<username>/user.nix`** — system user + groups + shell:
+```nix
+{ config, pkgs, ... }:
+{
+  users.users.<username> = {
+    isNormalUser = true;
+    extraGroups = [ "networkmanager" "wheel" "video" "audio" ];
+    shell = pkgs.fish;
+    initialPassword = "changeme";
+  };
+  security.sudo.wheelNeedsPassword = false;
+}
+```
+
+**`profiles/<username>/home.nix`** — home-manager entry point:
+```nix
+{ config, pkgs, inputs, ... }:
+{
+  imports = [
+    ../shared/packages.nix
+    ../shared/modules
+    ./packages.nix
+    ./modules
+  ];
+  home = {
+    username = "<username>";
+    homeDirectory = "/home/<username>";
+    stateVersion = "26.05";
+  };
+  programs.home-manager.enable = true;
+}
+```
+
+**Import in host config:**
+```nix
+# hosts/<hostname>/configuration.nix
+imports = [
+  ...
+  ../../profiles/<username>/user.nix
+];
+
+home-manager.users.<username> = import ../../profiles/<username>/home.nix;
+```
 
 ---
 
@@ -131,343 +356,62 @@ Same usr profile works on different machines, same shared base for all users!
 
 ```tree
 sccl_nix
- ├── flake.nix                          # Main flake conf (auto-discovers hosts)
- ├── flake.lock                         # Dependencies
- ├── profiles/
- │   ├── shared/                        # Shared conf for all users
- │   │   ├── packages.nix               # Base packages w/ categories
- │   │   └── modules/                   # Base program configs
- │   └── paper/                         # User-specific conf
- │       ├── user.nix                   # System user settings
- │       ├── home.nix                   # Home Manager conf
- │       ├── packages.nix               # Extra user packages
- │       └── modules/                   # Config overrides
+ ├── flake.nix                 # inputs + mkHost + auto-discovery (hosts & shells)
+ ├── flake.lock
+ │
+ ├── shells/
+ │   └── playground.nix        # auto-discovered devShells (nix develop .#playground)
+ │
+ ├── secrets/                  # sops-nix encrypted secrets
+ │   ├── .sops.yaml            # age public key config
+ │   └── common.yaml           # SSH/GPG keys (encrypted, safe 4 public repo)
+ │
+ ├── nixos/
+ │   └── modules/              # system services (host-independent)
+ │       ├── core.nix          # ALL sccl.* options + module imports
+ │       ├── automount.nix     # udisks2 + polkit (sccl.automount.enable)
+ │       ├── audio.nix         # pipewire (sccl.audio.enable)
+ │       ├── bluetooth.nix     # (sccl.bluetooth.enable)
+ │       ├── boot.nix          # systemd-boot + plymouth
+ │       ├── display-manager.nix # greetd + tuigreet
+ │       ├── env.nix           # EDITOR, session variables
+ │       ├── flclashx.nix      # FlClashX proxy (sccl.flclashx.enable)
+ │       ├── keyboard.nix      # parametrized (vial/colemak) via specialArgs
+ │       ├── net.nix           # networkmanager + proxy (sccl.net.enable)
+ │       ├── nix.nix           # nix settings + GC
+ │       ├── nix-ld.nix        # proprietary binary support (sccl.nix-ld.enable)
+ │       ├── playground.nix    # Docker + tools (sccl.playground.enable)
+ │       ├── secrets.nix       # sops-nix (sccl.secrets.enable)
+ │       ├── stylix.nix        # nord theme + fonts (sccl.ui.enable)
+ │       ├── timezone.nix      # Europe/Moscow
+ │       ├── xdg-portal.nix    # WM-agnostic portal config
+ │       └── zapret.nix        # DPI bypass (sccl.zapret.enable)
+ │
  ├── hosts/
- │   └── sacculos/                      # Host-specific conf
- │       ├── configuration.nix          # Main host config
- │       ├── disko.nix                  # Disk partitioning
- │       ├── hardware-configuration.nix # Generated file
- │       └── local-packages.nix         # System-wide packages (for all profiles)
- └── nixos/
-     └── modules/                       # Reusable NixOS modules
+ │   └── <hostname>/
+ │       ├── configuration.nix  # sccl.* options + profile imports
+ │       ├── disko.nix          # disk partitioning
+ │       ├── hardware-configuration.nix
+ │       ├── gpu.nix            # amd or nvidia (host-specific)
+ │       └── local-packages.nix # system-wide packages (host-specific)
+ │
+ └── profiles/
+     ├── bootstrap/            # minimal install profile (~1-2 GB)
+     │   ├── user.nix          # bootstrap user + nmtui + vim + ssh
+     │   └── home.nix          # minimal home-manager
+     ├── shared/               # base configs 4 all users
+     │   ├── packages.nix      # CLI tools, firefox, themes, fonts
+     │   └── modules/          # fish, niri, alacritty, waybar...
+     └── paper/                # full user profile
+         ├── user.nix          # paper + paper-dis users
+         ├── home.nix          # imports shared + paper modules
+         ├── packages.nix      # steam, blender, krita...
+         └── modules/          # opencode/ (config + module), playground
 ```
 
----
-
-## Adding New Profiles
-
-### 1. Create profile dir
-
-```bash
-mkdir -p profiles/<username>/modules
-```
-
-### 2. Create files
-
-U can copy from existing profile and edit (literally the easiest way):
-```bash
-cp -r profiles/paper profiles/<username>
-```
-
-Or create manually (if ur feeling adventurous~):
-
-**[`profiles/<username>/user.nix`](profiles/paper/user.nix)** - system user settings:
-```nix
-{ config, pkgs, ... }:
-
-{
-  users.users.<username> = {
-    isNormalUser = true;
-    description = "Your Name";
-    extraGroups = [ "networkmanager" "wheel" "video" "audio" ];
-    shell = pkgs.fish;
-    initialPassword = "changeme";
-  };
-}
-```
-
-**[`profiles/<username>/home.nix`](profiles/paper/home.nix)** - home manager conf:
-```nix
-{ config, pkgs, inputs, ... }:
-
-{
-  imports = [
-    ../shared/packages.nix    # Base packages
-    ../shared/modules         # Base configs
-    ./packages.nix            # Extra packages
-    ./modules                 # Config overrides
-  ];
-
-  home = {
-    username = "<username>";
-    homeDirectory = "/home/<username>";
-    stateVersion = "26.05";
-  };
-
-  stylix.targets = {
-    waybar.enable = false;
-    rofi.enable = false;
-    hyprland.enable = false;
-  };
-
-  programs.home-manager.enable = true;
-}
-```
-
-**[`profiles/<username>/packages.nix`](profiles/paper/packages.nix)** - extra pkgs:
-```nix
-{ config, pkgs, ... }:
-
-{
-  home.packages = with pkgs; [
-    # Development Tools
-    zed-editor
-
-    # another stuff...
-  ];
-}
-```
-
-**[`profiles/<username>/modules/default.nix`](profiles/paper/modules/default.nix)** - config overrides:
-```nix
-{ config, pkgs, ... }:
-
-{
-  imports = [
-    # Add overrides if needed
-    # ./git.nix  # Override git config
-  ];
-}
-```
-
-### 3. Add profile to host
-
-Edit [`hosts/<hostname>/configuration.nix`](hosts/sacculos/configuration.nix):
-```nix
-{
-  imports = [
-    ./hardware-configuration.nix
-    ./local-packages.nix
-    ./disko.nix
-    ../../nixos/modules
--    ../../profiles/paper/user.nix
-+    ../../profiles/<username>/user.nix
-  ];
--    networking.hostName = "sacculos";
-+    networking.hostName = "<username>";
-
-  # Home-manager configuration
-  home-manager = {
-    useGlobalPkgs = true;
-    useUserPackages = true;
--    users.paper = import ../../profiles/paper/home.nix;
-+    users.<username> = import ../../profiles/<username>/home.nix;
-
-    extraSpecialArgs = {
-      inherit inputs;
-      pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system};
-    };
-  };
-
-  # Stylix global theme (Nord)
-  stylix = {
-    enable = true;
-    base16Scheme = "${pkgs.base16-schemes}/share/themes/nord.yaml";
-    image = pkgs.fetchurl {
-      url = "https://github.com/OulipianSummer/nixos-pattern-nord-wallpapers/blob/master/jpgs/nix-d-nord-purple.jpg?raw=true";
-      sha256 = "sha256-cqL194wcTxCKmSFf+z0BfyZlLAlFs8pnzAManlQbkjQ=";
-    };
-  };
-
-  system.stateVersion = "26.05";
-}
-
-```
-
-### 4. Rebuild
-
-```bash
-sudo nixos-rebuild switch --flake .#<hostname>
-```
-
-### Overriding shared configs
-
-If u wanna change smth from shared conf (like git email), create override:
-
-**`profiles/<username>/modules/git.nix`:**
-```nix
-{ config, pkgs, ... }:
-
-{
-  programs.git = {
-    userEmail = "your@email.com";  # Override
-  };
-}
-```
-
-Import it in `profiles/<username>/modules/default.nix`:
-```nix
-{
-  imports = [
-    ./git.nix
-  ];
-}
-```
-
----
-
-## Adding New Hosts
-
-### 1. Create host dir
-
-```bash
-mkdir -p hosts/<hostname>
-```
-
-### 2. Copy from existing host
-
-```bash
-cp -r hosts/sacculos hosts/<hostname>
-```
-
-See [`hosts/sacculos/`](hosts/sacculos/) for reference.
-
-### 3. Edit hostname
-
-In [`hosts/<hostname>/configuration.nix`](hosts/sacculos/configuration.nix):
-```diff
-- networking.hostName = "sacculos";
-+ networking.hostName = "<hostname>";
-```
-
-### 4. Edit disk conf
-
-In [`hosts/<hostname>/disko.nix`](hosts/sacculos/disko.nix), change disk path:
-```diff
-{
-  disko.devices = {
-    disk.nvme0n1 = {
--       device = "/dev/nvme0n1";
-+       device = "/dev/sda";  # ur disk, check w/ `lsblk`
-```
-
-### 5. Generate hardware conf
-
-```bash
-nixos-generate-config --root /mnt --show-hardware-config --no-filesystems > hosts/<hostname>/hardware-configuration.nix
-```
-
-### 6. Build & test
-
-```bash
-nixos-rebuild build --flake .#<hostname>
-```
-
-That's it!! Flake auto-discovers the new host
-
----
-
-## Adding packages
-
-**For all users (Home Manager):**
-- Edit [`profiles/shared/packages.nix`](profiles/shared/packages.nix) (everyone gets it!!)
-
-**For specific user (Home Manager):**
-- Edit [`profiles/<username>/packages.nix`](profiles/paper/packages.nix) (just 4 u~)
-- **Or with custom config** (if u need fancy settings)
-  - Create [`profiles/shared/modules/<program>.nix`](profiles/shared/modules/)
-  - Import in [`profiles/shared/modules/default.nix`](profiles/shared/modules/default.nix)
-
-**System-wide (for all users under profile):**
-- Edit [`hosts/<hostname>/local-packages.nix`](hosts/sacculos/local-packages.nix)
-- Use for system utils that need to be available globally (like the important stuff!!)
-
----
-
-## Installation
-
-### Option 1: nixos-anywhere new config
-
-```bash
-# 1. Fork/clone repo & create basic host conf
-git clone https://github.com/papersaccul/sccl_nix.git
-cd sccl_nix
-
-# 2. Create min host (just copy & edit hostname + disko)
-cp -r hosts/sacculos hosts/<hostname>
-# Edit hostname in configuration.nix
-# Edit disk paths in disko.nix
-# learn more in "Adding New Hosts" and "Adding New Profile" section in this guide
-
-# 3. Install w/ auto hardware config generation
-nix run github:nix-community/nixos-anywhere -- \
-  --generate-hardware-config nixos-generate-config hosts/<hostname>/hardware-configuration.nix \
-  --flake .#<hostname> \
-  root@<target-ip>
-```
-
-
-### Option 2: nixos-anywhere prepared config
-
-If u already have conf
-
-```bash
-# Using local flake
-nix run github:nix-community/nixos-anywhere -- \
-  --flake .#<hostname> \
-  root@<target-ip>
-
-# Using GitHub (if u fork & push updated repo)
-nix run github:nix-community/nixos-anywhere -- \
-  --flake github:yourusername/sccl_nix#<hostname> \
-  root@<target-ip>
-```
-
-### Option 3: Manual
-
-#### Fresh install (the classic way~):
-
-```bash
-# 1. Boot NixOS installer
-# 2. Clone repo
-git clone https://github.com/papersaccul/sccl_nix.git /mnt/etc/nixos
-cd /mnt/etc/nixos
-
-# 3. Setup host (see "Adding New Hosts" section)
-cp -r hosts/sacculos hosts/<hostname>
-# Edit hostname & disk paths
-
-# 4. Generate hardware conf
-nixos-generate-config --root /mnt --show-hardware-config --no-filesystems > hosts/<hostname>/hardware-configuration.nix
-
-# 5. Install
-nixos-install --flake .#<hostname>
-
-# 6. Reboot
-reboot
-```
-
-#### Migrate (switching 2 this config):
-
-```bash
-# 1. Backup
-sudo cp -r /etc/nixos /etc/nixos.backup
-
-# 2. Clone
-git clone https://github.com/papersaccul/sccl_nix ~/sccl_nix
-cd ~/sccl_nix
-
-# 3. Setup host (see "Adding New Hosts" section)
-
-# 4. Test
-sudo nixos-rebuild test --flake .#<hostname>
-
-# 5. Switch
-sudo nixos-rebuild switch --flake .#<hostname>
-```
-# License
+## License
 
 > [!IMPORTANT]
-> This configuration is provided as-is for personal use!! Modify as needed for ur own systems~ Use at ur own risk (but it should work fine lol)> 
+> This configuration is provided as-is for personal use!! Modify as needed for ur own systems~ Use at ur own risk (but it should work fine lol)
 >
 > feel free 2 fork, star, or yoink whatever u need!!

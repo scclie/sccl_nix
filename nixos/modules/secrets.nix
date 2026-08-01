@@ -1,13 +1,10 @@
 { config, lib, pkgs, inputs, ... }:
 let cfg = config.sccl.secrets;
 in {
-  options.sccl.secrets = {
-    enable = lib.mkEnableOption "sops-nix secrets";
-    ageKeyFile = lib.mkOption {
-      type = lib.types.path;
-      default = "/var/lib/sops-nix/key.txt";
-      description = "Path to age private key";
-    };
+  options.sccl.secrets.ageKeyFile = lib.mkOption {
+    type = lib.types.path;
+    default = "/var/lib/sops-nix/key.txt";
+    description = "Path to age private key";
   };
 
   imports = [ inputs.sops-nix.nixosModules.sops ];

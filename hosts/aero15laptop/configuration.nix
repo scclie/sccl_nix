@@ -27,6 +27,7 @@
     useUserPackages = true;
     extraSpecialArgs = {
       inherit inputs;
+      hasSecrets = config.sccl.secrets.enable;
       pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system};
       niriKbLayout = "colemak_caws,rulemak_caws";
       niriKbOptions = "caps:backspace,grp:rwin_toggle,lv3:ralt_switch";
@@ -39,9 +40,8 @@
       niriExtraBinds = "";
       niriExtraSpawn = "";
     };
-  } // (if config.sccl.bootstrap
-    then { users.bootstrap = import ../../profiles/bootstrap/home.nix; }
-    else { users.paper = import ../../profiles/paper/home.nix; });
+    users.paper = import ../../profiles/paper/home.nix;
+  };
 
   nixpkgs.config.permittedInsecurePackages = [
     "python3.13-ecdsa-0.19.2"
