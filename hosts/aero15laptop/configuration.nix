@@ -5,7 +5,6 @@
   imports = [
     ./hardware-configuration.nix
     ./gpu.nix
-    ./disko.nix
     ../../profiles/paper/user.nix
   ];
 
