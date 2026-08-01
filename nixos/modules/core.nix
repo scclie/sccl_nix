@@ -28,6 +28,7 @@ in {
       ./env.nix
       ./keyboard.nix
       ./timezone.nix
+      ./system-packages.nix
     ]
     ++ lib.optionals cfg.ui.enable [
       ./display-manager.nix
