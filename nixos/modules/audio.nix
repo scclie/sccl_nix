@@ -1,17 +1,17 @@
 { config, lib, pkgs, ... }:
+let cfg = config.sccl.audio;
+in {
+  config = lib.mkIf cfg.enable {
+    security.rtkit.enable = true;
+    services.pulseaudio.enable = false;
 
-{
-  # pipewire 4 audio n video
-  security.rtkit.enable = true; # realtime audio frfr
-
-  services.pipewire = {
-    enable = true; # pipewire + alsa + pulse + jack
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-    jack.enable = true;
+    services.pipewire = {
+      enable = true;
+      alsa.enable = true;
+      alsa.support32Bit = true;
+      pulse.enable = true;
+      jack.enable = true;
+      wireplumber.enable = true;
+    };
   };
-
-  # pulseaudio is dead
-  services.pulseaudio.enable = false;
 }
