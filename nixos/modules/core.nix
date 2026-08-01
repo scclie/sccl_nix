@@ -20,6 +20,9 @@
   };
 
   imports = [
+    inputs.stylix.nixosModules.stylix
+    inputs.home-manager.nixosModules.home-manager
+    inputs.chaotic.nixosModules.default
     ./boot.nix
     ./nix.nix
     ./env.nix
