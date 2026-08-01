@@ -1,7 +1,5 @@
 { config, lib, pkgs, inputs, ... }:
 {
-  disabledModules = [ ../../nixos/modules/keyboard.nix ];
-
   imports = [
     ./hardware-configuration.nix
     ./gpu.nix
