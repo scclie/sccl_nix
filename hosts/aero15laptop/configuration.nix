@@ -3,6 +3,7 @@
   imports = [
     ./hardware-configuration.nix
     ./gpu.nix
+    ./local-packages.nix
     ../../profiles/paper/user.nix
     ../../profiles/bootstrap/user.nix
   ];

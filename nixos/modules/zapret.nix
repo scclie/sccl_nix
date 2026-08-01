@@ -1,6 +1,11 @@
-{ config, lib, pkgs, inputs, ... }: {
-    imports = [ inputs.zapret-discord-youtube.nixosModules.default ];
+{ config, lib, pkgs, inputs, ... }:
+let cfg = config.sccl.zapret;
+in {
+  imports = [
+    inputs.zapret-discord-youtube.nixosModules.default
+  ];
 
+  config = lib.mkIf cfg.enable {
     services.zapret-discord-youtube = {
             enable = true;
             configName = "general (FAKE_TLS_AUTO)";
@@ -46,4 +51,5 @@
       iptables -t mangle -C POSTROUTING -p udp --dport 1337 -m connbytes --connbytes-dir=original --connbytes-mode=packets --connbytes 1:9 -m mark ! --mark 0x40000000/0x40000000 -m set ! --match-set nozapret dst -j NFQUEUE --queue-num 200 --queue-bypass 2>/dev/null || \
       iptables -t mangle -A POSTROUTING -p udp --dport 1337 -m connbytes --connbytes-dir=original --connbytes-mode=packets --connbytes 1:9 -m mark ! --mark 0x40000000/0x40000000 -m set ! --match-set nozapret dst -j NFQUEUE --queue-num 200 --queue-bypass
     '';
+  };
 }

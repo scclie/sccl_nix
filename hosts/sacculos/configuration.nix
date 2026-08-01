@@ -3,6 +3,7 @@
   imports = [
     ./hardware-configuration.nix
     ./gpu.nix
+    ./local-packages.nix
     ../../profiles/paper/user.nix
     ../../profiles/bootstrap/user.nix
   ];
@@ -18,6 +19,7 @@
     flclashx.enable = true;
     playground.enable = true;
     nix-ld.enable = true;
+    automount.enable = true;
     ui.wallpaperSha256 = "sha256-cqL194wcTxCKmSFf+z0BfyZlLAlFs8pnzAManlQbkjQ=";
   };
 
