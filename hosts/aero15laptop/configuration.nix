@@ -30,8 +30,8 @@
       inherit inputs;
       hasSecrets = config.sccl.secrets.enable;
       pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system};
-      niriKbLayout = "colemak_caws,rulemak_caws";
-      niriKbOptions = "caps:backspace,grp:rwin_toggle,lv3:ralt_switch";
+      niriKbLayout = "colemak_dh_wide_en,colemak_dh_wide_ru";
+      niriKbOptions = "caps:backspace,grp:rctrl_toggle";
       niriOutput = ''
         output "eDP-1" {
             mode "1920x1080@144"
