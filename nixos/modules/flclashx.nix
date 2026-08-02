@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 
 let
-  cfg = config.programs.flclashx;
+  cfg = config.sccl.flclashx;
 
   flclashxDefault = pkgs.appimageTools.wrapType2 rec {
     pname = "flclashx";
@@ -37,18 +37,7 @@ let
   };
 in
 {
-  options.programs.flclashx = {
-    enable = lib.mkEnableOption "FlClashX GUI proxy client";
-
-    package = lib.mkOption {
-      type = lib.types.package;
-      default = flclashxDefault;
-      defaultText = "FlClashX AppImage v0.3.2";
-      description = "Package to install for FlClashX.";
-    };
-  };
-
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = [ cfg.package ];
+    environment.systemPackages = [ flclashxDefault ];
   };
 }
