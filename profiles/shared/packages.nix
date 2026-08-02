@@ -12,6 +12,7 @@
     killall
     age
     sops
+    gnupg
 
     # GUI Applications
     xfce.thunar
