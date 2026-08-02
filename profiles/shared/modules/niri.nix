@@ -49,6 +49,137 @@
     Install.WantedBy = [ "graphical-session.target" ];
   };
 
+  xdg.configFile."xkb/symbols/colemak_dh_wide_en" = {
+    enable = true;
+    text = ''
+      default partial alphanumeric_keys
+      xkb_symbols "basic" {
+        name[Group1]= "English (Colemak-DH Wide)";
+
+        // Number row: ` 1-6 / 7-0 - =
+        key <TLDE> { [     grave,    asciitilde  ] };
+        key <AE01> { [         1,      exclam     ] };
+        key <AE02> { [         2,          at     ] };
+        key <AE03> { [         3,  numbersign     ] };
+        key <AE04> { [         4,      dollar     ] };
+        key <AE05> { [         5,     percent     ] };
+        key <AE06> { [         6, asciicircum     ] };
+        key <AE07> { [ backslash,           bar   ] };
+        key <AE08> { [         7,     ampersand   ] };
+        key <AE09> { [         8,      asterisk   ] };
+        key <AE10> { [         9,     parenleft   ] };
+        key <AE11> { [         0,    parenright   ] };
+        key <AE12> { [     minus,     underscore  ] };
+        key <BKSL> { [     equal,         plus    ] };
+
+        // Top row: QWFPB ] JLUY' ;
+        key <AD01> { [         q,          Q      ] };
+        key <AD02> { [         w,          W      ] };
+        key <AD03> { [         f,          F      ] };
+        key <AD04> { [         p,          P      ] };
+        key <AD05> { [         b,          B      ] };
+        key <AD06> { [ bracketright,   braceright  ] };
+        key <AD07> { [         j,          J      ] };
+        key <AD08> { [         l,          L      ] };
+        key <AD09> { [         u,          U      ] };
+        key <AD10> { [         y,          Y      ] };
+        key <AD11> { [ apostrophe,     quotedbl   ] };
+        key <AD12> { [ semicolon,       colon     ] };
+
+        // Home row: ARSTG [ MNEIO
+        key <AC01> { [         a,          A      ] };
+        key <AC02> { [         r,          R      ] };
+        key <AC03> { [         s,          S      ] };
+        key <AC04> { [         t,          T      ] };
+        key <AC05> { [         g,          G      ] };
+        key <AC06> { [ bracketleft,    braceleft   ] };
+        key <AC07> { [         m,          M      ] };
+        key <AC08> { [         n,          N      ] };
+        key <AC09> { [         e,          E      ] };
+        key <AC10> { [         i,          I      ] };
+        key <AC11> { [         o,          O      ] };
+
+        // Bottom row: XCDVZ / KH , . (Angle)
+        key <AB01> { [         x,          X      ] };
+        key <AB02> { [         c,          C      ] };
+        key <AB03> { [         d,          D      ] };
+        key <AB04> { [         v,          V      ] };
+        key <AB05> { [         z,          Z      ] };
+        key <AB06> { [     slash,      question   ] };
+        key <AB07> { [         k,          K      ] };
+        key <AB08> { [         h,          H      ] };
+        key <AB09> { [     comma,         less    ] };
+        key <AB10> { [    period,       greater   ] };
+
+      };
+    '';
+  };
+
+  xdg.configFile."xkb/symbols/colemak_dh_wide_ru" = {
+    enable = true;
+    text = ''
+      default partial alphanumeric_keys
+      xkb_symbols "basic" {
+        name[Group1]= "Russian (Rulemak-CAWS DH Wide)";
+
+        // Number row: ё 1-6 э 7-0 - ъ
+        key <TLDE> { [     Cyrillic_io,     Cyrillic_IO ] };
+        key <AE01> { [               1,          exclam ] };
+        key <AE02> { [               2,              at ] };
+        key <AE03> { [               3,      numerosign ] };
+        key <AE04> { [               4,          dollar ] };
+        key <AE05> { [               5,         percent ] };
+        key <AE06> { [               6,     asciicircum ] };
+        key <AE07> { [      Cyrillic_e,      Cyrillic_E ] };
+        key <AE08> { [               7,       ampersand ] };
+        key <AE09> { [               8,        asterisk ] };
+        key <AE10> { [               9,       parenleft ] };
+        key <AE11> { [               0,      parenright ] };
+        key <AE12> { [           minus,      underscore ] };
+        key <BKSL> { [ Cyrillic_hardsign, Cyrillic_HARDSIGN ] };
+
+        // Top row: Я Ж Ф П Б   Ш Й Л У Ы Ь Ю
+        key <AD01> { [     Cyrillic_ya,     Cyrillic_YA ] };
+        key <AD02> { [    Cyrillic_zhe,    Cyrillic_ZHE ] };
+        key <AD03> { [     Cyrillic_ef,     Cyrillic_EF ] };
+        key <AD04> { [     Cyrillic_pe,     Cyrillic_PE ] };
+        key <AD05> { [     Cyrillic_be,     Cyrillic_BE ] };
+        key <AD06> { [    Cyrillic_sha,    Cyrillic_SHA ] };
+        key <AD07> { [ Cyrillic_shorti, Cyrillic_SHORTI ] };
+        key <AD08> { [     Cyrillic_el,     Cyrillic_EL ] };
+        key <AD09> { [      Cyrillic_u,      Cyrillic_U ] };
+        key <AD10> { [   Cyrillic_yeru,   Cyrillic_YERU ] };
+        key <AD11> { [ Cyrillic_softsign, Cyrillic_SOFTSIGN ] };
+        key <AD12> { [     Cyrillic_yu,     Cyrillic_YU ] };
+
+        // Home row: А Р С Т Г   Щ М Н Е И О
+        key <AC01> { [      Cyrillic_a,      Cyrillic_A ] };
+        key <AC02> { [     Cyrillic_er,     Cyrillic_ER ] };
+        key <AC03> { [     Cyrillic_es,     Cyrillic_ES ] };
+        key <AC04> { [     Cyrillic_te,     Cyrillic_TE ] };
+        key <AC05> { [    Cyrillic_ghe,    Cyrillic_GHE ] };
+        key <AC06> { [  Cyrillic_shcha,  Cyrillic_SHCHA ] };
+        key <AC07> { [     Cyrillic_em,     Cyrillic_EM ] };
+        key <AC08> { [     Cyrillic_en,     Cyrillic_EN ] };
+        key <AC09> { [     Cyrillic_ie,     Cyrillic_IE ] };
+        key <AC10> { [      Cyrillic_i,      Cyrillic_I ] };
+        key <AC11> { [      Cyrillic_o,      Cyrillic_O ] };
+
+        // Bottom row: Х Ц Д В З   / К Ч , . (Angle)
+        key <AB01> { [     Cyrillic_ha,     Cyrillic_HA ] };
+        key <AB02> { [    Cyrillic_tse,    Cyrillic_TSE ] };
+        key <AB03> { [     Cyrillic_de,     Cyrillic_DE ] };
+        key <AB04> { [     Cyrillic_ve,     Cyrillic_VE ] };
+        key <AB05> { [     Cyrillic_ze,     Cyrillic_ZE ] };
+        key <AB06> { [           slash,       question ] };
+        key <AB07> { [     Cyrillic_ka,     Cyrillic_KA ] };
+        key <AB08> { [     Cyrillic_che,     Cyrillic_CHE ] };
+        key <AB09> { [           comma,           less ] };
+        key <AB10> { [          period,        greater ] };
+
+      };
+    '';
+  };
 
   xdg.configFile."niri/config.kdl" = {
     enable = true;
