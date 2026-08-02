@@ -19,6 +19,7 @@
     bluetooth.enable = true;
     net.enable = true;
     flclashx.enable = true;
+    secrets.enable = true;
     nix-ld.enable = true;
   };
 
