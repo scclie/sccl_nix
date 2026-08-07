@@ -20,5 +20,6 @@
 
     # Network manager
     networkmanagerapplet
+    keyd
   ];
 }

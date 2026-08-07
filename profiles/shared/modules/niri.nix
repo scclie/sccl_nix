@@ -7,8 +7,14 @@
       }''
 , niriExtraBinds ? ""
 , niriExtraSpawn ? ""
+, niriBuiltinKbIdentifier ? null
 , ... }:
 
+let
+  toggleKeybind = if niriBuiltinKbIdentifier != null then ''
+    Mod+Shift+Backspace { spawn "sudo" "${config.home.homeDirectory}/.local/bin/toggle-builtin-kb"; }
+  '' else "";
+in
 {
   home.packages = with pkgs; [
     niri
@@ -181,6 +187,136 @@
     '';
   };
 
+  xdg.configFile."xkb/symbols/colemak_caws" = {
+    enable = true;
+    text = ''
+      default partial alphanumeric_keys
+      xkb_symbols "basic" {
+        name[Group1]= "English (Colemak-CAWS)";
+
+        key <TLDE> { [     grave,    asciitilde   ] };
+        key <AE01> { [         1,      exclam     ] };
+        key <AE02> { [         2,          at     ] };
+        key <AE03> { [         3,  numbersign     ] };
+        key <AE04> { [         4,      dollar     ] };
+        key <AE05> { [         5,     percent     ] };
+        key <AE06> { [         6, asciicircum     ] };
+        key <AE07> { [         7,    ampersand    ] };
+        key <AE08> { [         8,     asterisk    ] };
+        key <AE09> { [         9,    parenleft    ] };
+        key <AE10> { [         0,   parenright    ] };
+        key <AE11> { [     minus,   underscore    ] };
+        key <AE12> { [     equal,         plus    ] };
+
+        key <AD01> { [         q,          Q      ] };
+        key <AD02> { [         w,          W      ] };
+        key <AD03> { [         e,          E      ] };
+        key <AD04> { [         r,          R      ] };
+        key <AD05> { [         t,          T      ] };
+        key <AD06> { [         y,          Y      ] };
+        key <AD07> { [         u,          U      ] };
+        key <AD08> { [         i,          I      ] };
+        key <AD09> { [         o,          O      ] };
+        key <AD10> { [         p,          P      ] };
+        key <AD11> { [ bracketleft,  braceleft   ] };
+        key <AD12> { [ bracketright, braceright  ] };
+
+        key <AC01> { [         a,          A      ] };
+        key <AC02> { [         s,          S      ] };
+        key <AC03> { [         d,          D      ] };
+        key <AC04> { [         f,          F      ] };
+        key <AC05> { [         g,          G      ] };
+        key <AC06> { [         h,          H      ] };
+        key <AC07> { [         j,          J      ] };
+        key <AC08> { [         k,          K      ] };
+        key <AC09> { [         l,          L      ] };
+        key <AC10> { [ semicolon,       colon     ] };
+        key <AC11> { [ apostrophe,     quotedbl   ] };
+
+        key <AB01> { [         z,          Z      ] };
+        key <AB02> { [         x,          X      ] };
+        key <AB03> { [         c,          C      ] };
+        key <AB04> { [         v,          V      ] };
+        key <AB05> { [         b,          B      ] };
+        key <AB06> { [         n,          N      ] };
+        key <AB07> { [         m,          M      ] };
+        key <AB08> { [     comma,        less    ] };
+        key <AB09> { [    period,      greater   ] };
+        key <AB10> { [     slash,     question   ] };
+
+        key <BKSL> { [ backslash,          bar   ] };
+
+        include "level3(ralt_switch)"
+      };
+    '';
+  };
+
+  xdg.configFile."xkb/symbols/rulemak_caws" = {
+    enable = true;
+    text = ''
+      default partial alphanumeric_keys
+      xkb_symbols "basic" {
+        name[Group1]= "Russian (Rulemak, phonetic QWERTY)";
+
+        key <TLDE> { [     Cyrillic_io,     Cyrillic_IO ] };
+        key <AE01> { [               1,          exclam ] };
+        key <AE02> { [               2,              at ] };
+        key <AE03> { [               3,      numerosign ] };
+        key <AE04> { [               4,          dollar ] };
+        key <AE05> { [               5,         percent ] };
+        key <AE06> { [               6,     asciicircum ] };
+        key <AE07> { [               7,       ampersand ] };
+        key <AE08> { [               8,        asterisk ] };
+        key <AE09> { [               9,       parenleft ] };
+        key <AE10> { [               0,      parenright ] };
+        key <AE11> { [           minus,      underscore ] };
+        key <AE12> { [           equal,            plus ] };
+
+        key <AD01> { [     Cyrillic_ya,     Cyrillic_YA ] };
+        key <AD02> { [    Cyrillic_zhe,    Cyrillic_ZHE ] };
+        key <AD03> { [     Cyrillic_ie,     Cyrillic_IE ] };
+        key <AD04> { [     Cyrillic_er,     Cyrillic_ER ] };
+        key <AD05> { [     Cyrillic_te,     Cyrillic_TE ] };
+        key <AD06> { [   Cyrillic_yeru,   Cyrillic_YERU ] };
+        key <AD07> { [      Cyrillic_u,      Cyrillic_U ] };
+        key <AD08> { [      Cyrillic_i,      Cyrillic_I ] };
+        key <AD09> { [      Cyrillic_o,      Cyrillic_O ] };
+        key <AD10> { [     Cyrillic_pe,     Cyrillic_PE ] };
+        key <AD11> { [    Cyrillic_sha,    Cyrillic_SHA ] };
+        key <AD12> { [  Cyrillic_shcha,  Cyrillic_SHCHA ] };
+        key <BKSL> { [      Cyrillic_e,      Cyrillic_E ] };
+
+        key <AC01> { [      Cyrillic_a,      Cyrillic_A ] };
+        key <AC02> { [     Cyrillic_es,     Cyrillic_ES ] };
+        key <AC03> { [     Cyrillic_de,     Cyrillic_DE ] };
+        key <AC04> { [     Cyrillic_ef,     Cyrillic_EF ] };
+        key <AC05> { [    Cyrillic_ghe,    Cyrillic_GHE ] };
+        key <AC06> { [     Cyrillic_che,     Cyrillic_CHE ] };
+        key <AC07> { [ Cyrillic_shorti, Cyrillic_SHORTI ] };
+        key <AC08> { [     Cyrillic_ka,     Cyrillic_KA ] };
+        key <AC09> { [     Cyrillic_el,     Cyrillic_EL ] };
+        key <AC10> { [     Cyrillic_zhe,    Cyrillic_ZHE ] };
+        key <AC11> { [ Cyrillic_softsign, Cyrillic_SOFTSIGN ] };
+
+        key <AB01> { [     Cyrillic_ze,     Cyrillic_ZE ] };
+        key <AB02> { [     Cyrillic_ha,     Cyrillic_HA ] };
+        key <AB03> { [    Cyrillic_tse,    Cyrillic_TSE ] };
+        key <AB04> { [     Cyrillic_ve,     Cyrillic_VE ] };
+        key <AB05> { [     Cyrillic_be,     Cyrillic_BE ] };
+        key <AB06> { [     Cyrillic_en,     Cyrillic_EN ] };
+        key <AB07> { [     Cyrillic_em,     Cyrillic_EM ] };
+        key <AB08> { [           comma,           less ] };
+        key <AB09> { [          period,        greater ] };
+        key <AB10> { [           slash,       question ] };
+
+        key <FK13> { [ Cyrillic_yu, Cyrillic_YU ] };
+        key <FK14> { [ Cyrillic_hardsign, Cyrillic_HARDSIGN ] };
+
+        include "level3(ralt_switch)"
+      };
+    '';
+  };
+
   xdg.configFile."niri/config.kdl" = {
     enable = true;
     text = ''
@@ -299,6 +435,7 @@
 
           Mod+Space { toggle-window-floating; }
 
+          ${toggleKeybind}
           ${niriExtraBinds}
 
 
@@ -363,5 +500,12 @@
 
 
     '';
+  };
+
+  home.file = lib.mkIf (niriBuiltinKbIdentifier != null) {
+    ".local/bin/toggle-builtin-kb" = {
+      source = ../scripts/toggle-builtin-kb.sh;
+      executable = true;
+    };
   };
 }
