@@ -16,7 +16,8 @@
     bluetooth.enable = true;
     net.enable = true;
     zapret.enable = true;
-    flclashx.enable = true;
+    secrets.enable = true;
+    mihomo.enable = true;
     playground.enable = true;
     nix-ld.enable = true;
     automount.enable = true;

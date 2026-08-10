@@ -8,7 +8,7 @@
     sccl.automount.enable = lib.mkEnableOption "udisks2 USB automount";
     sccl.secrets.enable = lib.mkEnableOption "sops-nix secrets";
     sccl.zapret.enable = lib.mkEnableOption "zapret DPI bypass";
-    sccl.flclashx.enable = lib.mkEnableOption "FlClashX proxy GUI";
+    # sccl.flclashx.enable = lib.mkEnableOption "FlClashX proxy GUI"; # replaced by mihomo module
     sccl.playground.enable = lib.mkEnableOption "Docker + dev tools";
     sccl.chaotic.enable = lib.mkEnableOption "chaotic-nyx repo";
     sccl.nix-ld.enable = lib.mkEnableOption "nix-ld for binaries";
@@ -37,7 +37,7 @@
     ./automount.nix
     ./secrets.nix
     ./zapret.nix
-    ./flclashx.nix
+    ./mihomo.nix
     ./playground.nix
     ./nix-ld.nix
   ];
