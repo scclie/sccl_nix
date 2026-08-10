@@ -15,7 +15,6 @@
     };
 
     stylix.url = "github:danth/stylix/release-26.05";
-    zapret-discord-youtube.url = "github:kartavkun/zapret-discord-youtube";
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
 
     sops-nix.url = "github:Mic92/sops-nix";

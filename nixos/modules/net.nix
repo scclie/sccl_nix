@@ -4,20 +4,20 @@
   boot.kernel.sysctl."net.ipv4.ip_default_ttl" = 65;
 
   networking = {
-    # proxy all fkn rkn fuck putin
-    proxy = {
-      default = "http://127.0.0.1:7890";
-      noProxy = "127.0.0.1,localhost,internal.domain,127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"; # ignore proxy for RFC 1918
-    };
+    # Proxy is now handled by mihomo TUN at network level.
+    # No HTTP proxy env vars needed.
 
     networkmanager = {
       enable = true;
       wifi.powersave = false; # stable connection > battery
+      dns = "none";           # mihomo serves DNS on 127.0.0.1:53
     };
+
+    nameservers = [ "127.0.0.1" ];
 
     firewall = {
       enable = true;
-      allowedTCPPorts = [ 7890 ];  # FlClashX proxy Docker
+      allowedTCPPorts = [ 7890 ];  # mihomo mixed-port for local proxy access
       allowedUDPPorts = [ ];
     };
 

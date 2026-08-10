@@ -18,7 +18,7 @@
     audio.enable = true;
     bluetooth.enable = true;
     net.enable = true;
-    flclashx.enable = true;
+    # flclashx.enable = true; # replaced by mihomo module (not enabled on laptop)
     secrets.enable = true;
     nix-ld.enable = true;
   };

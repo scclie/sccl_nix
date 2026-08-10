@@ -18,14 +18,6 @@ let
       --setenv=DISPLAY=$DISPLAY \
       --setenv=PULSE_SERVER=unix:/run/user/1000/pulse/native \
       --setenv=DBUS_SESSION_BUS_ADDRESS=unix:path=/var/lib/paper-dis-vesktop/bus \
-      --setenv=http_proxy=http://127.0.0.1:7890 \
-      --setenv=https_proxy=http://127.0.0.1:7890 \
-      --setenv=all_proxy=http://127.0.0.1:7890 \
-      --setenv=no_proxy=127.0.0.1,localhost,internal.domain,127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16 \
-      --setenv=HTTP_PROXY=http://127.0.0.1:7890 \
-      --setenv=HTTPS_PROXY=http://127.0.0.1:7890 \
-      --setenv=ALL_PROXY=http://127.0.0.1:7890 \
-      --setenv=NO_PROXY=127.0.0.1,localhost,internal.domain,127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16 \
       --wait \
       ${pkgs.vesktop}/bin/vesktop --no-sandbox --ozone-platform=wayland "$@"
   '';
@@ -65,20 +57,21 @@ in
     modrinth-app
     faugus-launcher
     # hmcl
-    lunar-client
-    gdlauncher-carbon
+    prismlauncher
 
     # Creative Tools
     # kdePackages.kdenlive
     krita
     aseprite
     blender
-    audacity
     wf-recorder
     orca-slicer
 
     # Audio
     easyeffects
+    audacity
+    sonic-visualiser
+    x42-plugins
 
     # Office
     libreoffice-fresh
