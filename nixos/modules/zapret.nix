@@ -96,7 +96,7 @@ in {
         ${pkgs.iptables}/bin/iptables -t mangle -A ZAPRET -p tcp --dport 443 -j NFQUEUE --queue-num 200 --queue-bypass
         ${pkgs.iptables}/bin/iptables -t mangle -A ZAPRET -p udp --dport 443 -j NFQUEUE --queue-num 200 --queue-bypass
         ${pkgs.iptables}/bin/iptables -t mangle -I PREROUTING -j ZAPRET
-        ${pkgs.iptables}/bin/iptables -I OUTPUT -j ZAPRET
+        ${pkgs.iptables}/bin/iptables -t mangle -I OUTPUT -j ZAPRET
       '';
 
       script = ''

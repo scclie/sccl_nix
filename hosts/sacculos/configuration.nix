@@ -17,7 +17,19 @@
     net.enable = true;
     zapret.enable = true;
     secrets.enable = true;
-    mihomo.enable = true;
+    mihomo = {
+      enable = true;
+      bypassProcesses = [
+        "steam"
+        "steamwebhelper"
+        "gameoverlayui"
+        "reaper"
+        "cs2"
+        "wine64-preloader"
+        "wine-preloader"
+        "wineserver"
+      ];
+    };
     playground.enable = true;
     nix-ld.enable = true;
     automount.enable = true;

@@ -1,5 +1,11 @@
 { config, lib, pkgs, ... }:
 
+# fck putin fck putin fck putin fck putin fck putin fck putin fck putin fck putin
+# putin fck putin fck putin fck putin fck putin fck putin fck putin fck putin fck
+# ...and rkn,
+# i fckng need to keep two fckn services on in the system,
+# just so that the fucking internet works for me.
+
 {
   boot.kernel.sysctl."net.ipv4.ip_default_ttl" = 65;
 
