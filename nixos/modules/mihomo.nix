@@ -3,11 +3,14 @@
 let
   cfg = config.sccl.mihomo;
 
+  processRules = lib.concatMapStringsSep "\n" (p: "      - PROCESS-NAME,${p},DIRECT") cfg.bypassProcesses;
+
   localOverride = pkgs.writeText "mihomo-local-override.yaml" ''
     mixed-port: ${toString cfg.mixedPort}
     socks-port: ${toString cfg.socksPort}
     external-controller: 127.0.0.1:${toString cfg.apiPort}
     mode: rule
+    find-process-mode: strict
     dns:
       enable: true
       listen: 127.0.0.1:53
@@ -25,6 +28,7 @@ let
       auto-detect-interface: true
     external-ui: ui
     rules:
+${processRules}
       - DOMAIN-SUFFIX,github.com,DIRECT
       - DOMAIN-SUFFIX,githubusercontent.com,DIRECT
       - DOMAIN-SUFFIX,live.com,DIRECT
@@ -90,7 +94,8 @@ let
         print(f"Subscription fetch failed: {e}", file=sys.stderr)
         if os.path.exists(output_path):
             print("Using cached config", file=sys.stderr)
-            sys.exit(0)
+            with open(output_path) as f:
+                sub_config = yaml.safe_load(f)
         else:
             print("No cached config — initial deploy needs manual fetch", file=sys.stderr)
             sub_config = {"proxies": [], "proxy-groups": [], "rules": []}
@@ -101,7 +106,8 @@ let
     for key in override:
         if key == 'rules':
             sub_rules = sub_config.get('rules', [])
-            sub_config['rules'] = override['rules'] + sub_rules
+            old_override = [r for r in sub_rules if r not in override['rules']]
+            sub_config['rules'] = override['rules'] + old_override
         else:
             sub_config[key] = override[key]
 
@@ -143,6 +149,16 @@ in
       default = 9090;
     };
 
+    bypassProcesses = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      description = ''
+        Process names whose traffic goes DIRECT (bypasses the proxy).
+        Matched via PROCESS-NAME rules; useful for games that need
+        low-latency direct routing (CS2, Deadlock, etc).
+      '';
+    };
+
     configDir = lib.mkOption {
       type = lib.types.str;
       default = "/var/lib/mihomo";
@@ -169,8 +185,8 @@ in
         Type = "simple";
         User = "root";
         Group = "root";
-        AmbientCapabilities = [ "CAP_NET_ADMIN" "CAP_NET_RAW" "CAP_NET_BIND_SERVICE" ];
-        CapabilityBoundingSet = [ "CAP_NET_ADMIN" "CAP_NET_RAW" "CAP_NET_BIND_SERVICE" ];
+        AmbientCapabilities = [ "CAP_NET_ADMIN" "CAP_NET_RAW" "CAP_NET_BIND_SERVICE" "CAP_DAC_READ_SEARCH" "CAP_SYS_PTRACE" ];
+        CapabilityBoundingSet = [ "CAP_NET_ADMIN" "CAP_NET_RAW" "CAP_NET_BIND_SERVICE" "CAP_DAC_READ_SEARCH" "CAP_SYS_PTRACE" ];
         Restart = "always";
         RestartSec = 5;
         LimitNOFILE = 1048576;
@@ -187,8 +203,6 @@ in
         ];
 
         ExecStart = "${pkgs.mihomo}/bin/mihomo -d ${cfg.configDir} -f ${cfg.configDir}/config.yaml";
-
-        ExecStopPost = "${pkgs.mihomo}/bin/mihomo -d ${cfg.configDir} cleanup";
       };
     };
 
