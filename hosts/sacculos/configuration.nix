@@ -19,6 +19,7 @@
     secrets.enable = true;
     mihomo = {
       enable = true;
+      fakeHwid = "B8A7E6D5C4B3";
       bypassProcesses = [
         "steam"
         "steamwebhelper"
