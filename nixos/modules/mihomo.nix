@@ -27,6 +27,11 @@ let
       auto-route: true
       auto-detect-interface: true
     external-ui: ui
+    proxy-groups:
+      - name: proxy
+        type: select
+        use:
+          - proxy
     rules:
 ${processRules}
       - DOMAIN-SUFFIX,github.com,DIRECT
@@ -39,85 +44,72 @@ ${processRules}
       - DOMAIN-SUFFIX,xboxlive.com,DIRECT
       - DOMAIN-SUFFIX,prismlauncher.org,DIRECT
       - DOMAIN-SUFFIX,upsilon.theaq.one,DIRECT
+      - DOMAIN-SUFFIX,aliexpress.ru,DIRECT
       - GEOIP,RU,DIRECT
-      - MATCH,RayTun
+      - MATCH,proxy
   '';
 
   mergeConfig = pkgs.writeScriptBin "mihomo-merge-config" ''
     #!${pkgs.python3.withPackages (ps: [ ps.pyyaml ])}/bin/python3
     import os
-    import re
-    import subprocess
     import sys
     import urllib.request
     import yaml
 
-    def get_hwid():
-        try:
-            r = subprocess.run(
-                ["${pkgs.iproute2}/bin/ip", "route", "show", "default"],
-                capture_output=True, text=True)
-        except OSError:
-            return None
-        for m in re.finditer(r"dev\s+(\S+)", r.stdout):
-            dev = m.group(1)
-            try:
-                with open(f"/sys/class/net/{dev}/type") as f:
-                    if f.read().strip() != "1":
-                        continue
-                with open(f"/sys/class/net/{dev}/address") as f:
-                    mac = f.read().strip()
-            except OSError:
-                continue
-            if mac and mac != "00:00:00:00:00:00":
-                return mac.replace(":", "").upper()
-        return None
-
     secret_path = sys.argv[1]
     override_path = sys.argv[2]
     output_path = sys.argv[3]
+    fake_hwid = sys.argv[4]
 
     with open(secret_path) as f:
         sub_url = f.read().strip()
 
-    sub_config = None
+    # Fetch subscription and extract proxies for initial cache
+    proxies = []
     try:
-        headers = {"User-Agent": "clash.meta/1.19.24"}
-        hwid = get_hwid()
-        if hwid:
-            headers["x-hwid"] = hwid
+        headers = {
+            "User-Agent": "clash.meta/1.19.24",
+            "x-hwid": fake_hwid,
+        }
         req = urllib.request.Request(sub_url, headers=headers)
         with urllib.request.urlopen(req, timeout=30) as resp:
             sub_config = yaml.safe_load(resp.read())
-        print("Fetched subscription successfully")
+        proxies = sub_config.get('proxies', [])
+        print(f"Fetched subscription successfully ({len(proxies)} proxies)")
     except Exception as e:
         print(f"Subscription fetch failed: {e}", file=sys.stderr)
-        if os.path.exists(output_path):
-            print("Using cached config", file=sys.stderr)
-            with open(output_path) as f:
-                sub_config = yaml.safe_load(f)
-        else:
-            print("No cached config — initial deploy needs manual fetch", file=sys.stderr)
-            sub_config = {"proxies": [], "proxy-groups": [], "rules": []}
+
+    # Write provider cache so mihomo has proxies even if runtime refresh fails
+    provider_dir = os.path.join(os.path.dirname(output_path), 'providers')
+    os.makedirs(provider_dir, exist_ok=True)
+    cache_path = os.path.join(provider_dir, 'proxy.yaml')
+    with open(cache_path, 'w') as f:
+        yaml.dump({'proxies': proxies}, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+
+    base_config = {
+        'proxy-providers': {
+            'proxy': {
+                'type': 'http',
+                'url': sub_url,
+                'interval': 86400,
+                'path': './providers/proxy.yaml',
+                'header': {
+                    'x-hwid': [fake_hwid],
+                    'User-Agent': ['clash.meta/1.19.24'],
+                },
+            }
+        }
+    }
 
     with open(override_path) as f:
         override = yaml.safe_load(f)
 
     for key in override:
-        if key == 'rules':
-            sub_rules = sub_config.get('rules', [])
-            old_override = [r for r in sub_rules if r not in override['rules']]
-            sub_config['rules'] = override['rules'] + old_override
-        else:
-            sub_config[key] = override[key]
-
-    if 'proxies' not in sub_config:
-        print("Error: subscription has no proxies", file=sys.stderr)
-        sys.exit(1)
+        base_config[key] = override[key]
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, 'w') as f:
-        yaml.dump(sub_config, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+        yaml.dump(base_config, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
 
     print(f"Merged config written to {output_path}")
   '';
@@ -159,6 +151,12 @@ in
       '';
     };
 
+    fakeHwid = lib.mkOption {
+      type = lib.types.str;
+      default = lib.substring 0 12 (builtins.hashString "sha256" "mihomo-hwid-${config.networking.hostName}");
+      description = "Fake HWID sent with subscription requests (x-hwid header)";
+    };
+
     configDir = lib.mkOption {
       type = lib.types.str;
       default = "/var/lib/mihomo";
@@ -190,6 +188,9 @@ in
         Restart = "always";
         RestartSec = 5;
         LimitNOFILE = 1048576;
+        TimeoutStopSec = 10;
+        KillMode = "mixed";
+        KillSignal = "SIGKILL";
 
         StateDirectory = "mihomo";
         WorkingDirectory = cfg.configDir;
@@ -198,7 +199,7 @@ in
           ''${pkgs.coreutils}/bin/rm -rf ${dashboardDir}''
           ''${pkgs.coreutils}/bin/cp -r --no-preserve=mode ${pkgs.metacubexd} ${dashboardDir}''
           ''${pkgs.coreutils}/bin/mkdir -p ${cfg.configDir}''
-          ''${mergeConfig}/bin/mihomo-merge-config ${config.sops.secrets.${cfg.subscriptionSecretName}.path} ${localOverride} ${cfg.configDir}/config.yaml''
+          ''${mergeConfig}/bin/mihomo-merge-config ${config.sops.secrets.${cfg.subscriptionSecretName}.path} ${localOverride} ${cfg.configDir}/config.yaml "${cfg.fakeHwid}"''
           ''${pkgs.coreutils}/bin/chown -R root:root ${cfg.configDir}''
         ];
 
@@ -215,7 +216,6 @@ in
         echo "VPN off"
         exec sudo ${pkgs.systemd}/bin/systemctl stop mihomo
       '')
-      # pkgs.clash-verge-rev  # optional GUI control
     ];
   };
 }
