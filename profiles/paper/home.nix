@@ -24,15 +24,4 @@
   };
 
   gtk.theme.name = lib.mkForce "adw-gtk3-dark";
-
-  xdg.desktopEntries.vesktop = {
-    name = "Vesktop (Secured)";
-    genericName = "Discord Client";
-    exec = "vesktop %U";
-    icon = "vesktop";
-    type = "Application";
-    categories = [ "Network" "Chat" "InstantMessaging" ];
-    terminal = false;
-    mimeType = [ "x-scheme-handler/discord" ];
-  };
 }
