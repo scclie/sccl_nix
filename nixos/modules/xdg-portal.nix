@@ -1,5 +1,5 @@
 { config, pkgs, lib, ... }:
-let cfg = config.sccl.audio;
+let cfg = config.sccl.ui;
 in {
   config = lib.mkIf cfg.enable {
     xdg.portal = {
@@ -8,7 +8,15 @@ in {
         pkgs.xdg-desktop-portal-gnome
         pkgs.xdg-desktop-portal-gtk
       ];
+      configPackages = [ pkgs.niri ];
       config = {
+        niri = {
+          default = [ "gnome" "gtk" ];
+          "org.freedesktop.impl.portal.ScreenCast" = [ "gnome" ];
+          "org.freedesktop.impl.portal.Screenshot" = [ "gnome" ];
+          "org.freedesktop.impl.portal.OpenURI" = [ "gtk" ];
+          "org.freedesktop.impl.portal.FileChooser" = [ "gtk" ];
+        };
         common = {
           default = [ "gtk" ];
         };
