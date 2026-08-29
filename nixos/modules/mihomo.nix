@@ -45,7 +45,6 @@ ${processRules}
       - DOMAIN-SUFFIX,prismlauncher.org,DIRECT
       - DOMAIN-SUFFIX,upsilon.theaq.one,DIRECT
       - DOMAIN-SUFFIX,aliexpress.ru,DIRECT
-      - GEOIP,RU,DIRECT
       - MATCH,proxy
   '';
 
