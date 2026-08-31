@@ -52,6 +52,7 @@
             scale 1.0
         }
       '';
+      niriBuiltinKbIdentifier = null;
       niriExtraBinds = "";
       niriExtraSpawn = "";
     };
