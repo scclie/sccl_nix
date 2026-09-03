@@ -8,12 +8,13 @@
       timeout = 3;
     };
 
-    # pretty boot screen
-    plymouth.enable = true;
+    kernelPackages = if config.sccl.boot.cachyos
+      then lib.mkForce pkgs.linuxPackages_cachyos
+      else pkgs.linuxPackages;
 
-    kernelParams = [ "quiet" "splash" ]; # hide boot messages, show splash
-
-    # CachyOS kernel
-    kernelPackages = lib.mkForce pkgs.linuxPackages_cachyos;
+    plymouth.enable = config.sccl.boot.cachyos;
+    kernelParams = lib.optionals config.sccl.boot.cachyos [ "quiet" "splash" ];
   };
+
+  boot.supportedFilesystems = lib.optionals (!config.sccl.boot.cachyos) [ "zfs" ];
 }

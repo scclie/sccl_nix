@@ -1,19 +1,9 @@
 { config, pkgs, ... }:
 
 {
-  home.packages = with pkgs; [
-    # CLI Tools
-    # Note: btop, bat, eza are configured via modules
-    fastfetch
-    ripgrep
-    fd
-    fzf
-    zoxide
-    killall
-    age
-    sops
-    gnupg
+  imports = [ ./packages-cli.nix ];
 
+  home.packages = with pkgs; [
     # GUI Applications
     xfce.thunar
     xfce.thunar-archive-plugin
@@ -25,7 +15,6 @@
     vlc
     mpv
     evince
-    # Note: zathura is configured via module
 
     # System Utilities
     grim
@@ -41,10 +30,6 @@
 
     # Network
     firefox
-
-    # Development
-    nixd
-    gh
 
     # Themes & Icons
     nordic

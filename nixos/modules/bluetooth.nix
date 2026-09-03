@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }:
 
-{
+lib.mkIf config.sccl.bluetooth.enable {
   hardware.bluetooth = {
     enable = true;
     powerOnBoot = true;

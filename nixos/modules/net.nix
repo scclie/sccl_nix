@@ -6,7 +6,7 @@
 # i fckng need to keep two fckn services on in the system,
 # just so that the fucking internet works for me.
 
-{
+lib.mkIf config.sccl.net.enable {
   boot.kernel.sysctl."net.ipv4.ip_default_ttl" = 65;
 
   networking = {

@@ -2,13 +2,9 @@
 
 {
   imports = [
-    ./fish.nix
-    ./starship.nix
-    ./git.nix
-    ./gh.nix
+    ./cli.nix
+    # GUI modules
     ./alacritty.nix
-    ./bat.nix
-    ./eza.nix
     ./zathura.nix
     ./gtk.nix
     ./hyprland.nix
@@ -18,8 +14,6 @@
     ./rofi.nix
     ./cursor.nix
     ./zed-editor.nix
-    ./btop.nix
-    ./fetch.nix
     ./obs.nix
     ./kdenlive.nix
   ];

@@ -1,6 +1,6 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
-{
+lib.mkIf config.sccl.ui.enable {
   services.greetd = {
     enable = true;
     settings = {
