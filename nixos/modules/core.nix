@@ -12,6 +12,11 @@
     sccl.playground.enable = lib.mkEnableOption "Docker + dev tools";
     sccl.chaotic.enable = lib.mkEnableOption "chaotic-nyx repo";
     sccl.nix-ld.enable = lib.mkEnableOption "nix-ld for binaries";
+    sccl.boot.cachyos = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Use CachyOS kernel (disable for ZFS compatibility on server)";
+    };
     sccl.bootstrap = lib.mkOption {
       type = lib.types.bool;
       default = false;
@@ -40,6 +45,7 @@
     ./mihomo.nix
     ./playground.nix
     ./nix-ld.nix
+    ./server
   ];
 
 }
