@@ -1,0 +1,17 @@
+keys:
+  - &infra age1w7arfrmavxzqg70x0wsme3dcm88a0se8qh9tu3sq0t725ssgmffqd6g7jh
+  - &personal age1v925pdj23e5lhz38r6yyd35uzvfdjapznld0szv3e2y3gxvt2c8qf9nv57
+
+creation_rules:
+  - path_regex: common\.yaml$
+    key_groups:
+      - age: [*personal]
+  - path_regex: secrets/infra\.yaml$
+    key_groups:
+      - age: [*infra]
+  - path_regex: secrets/db\.yaml$
+    key_groups:
+      - age: [*infra]
+  - path_regex: secrets/apps\.yaml$
+    key_groups:
+      - age: [*infra]

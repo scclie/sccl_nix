@@ -1,2 +1,5 @@
 docs/
 .worktrees/
+.superpowers/
+result
+result-*
