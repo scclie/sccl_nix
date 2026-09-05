@@ -25,6 +25,9 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    # nginx must read ACME certs (dir is rwxr-x--- acme:acme)
+    users.users.nginx.extraGroups = [ "acme" ];
+
     services.nginx = {
       enable = true;
       recommendedProxySettings = true;
@@ -37,14 +40,6 @@ in {
         limit_req_zone $binary_remote_addr zone=general:10m rate=10r/s;
         limit_req_zone $binary_remote_addr zone=api:10m rate=30r/s;
         server_names_hash_bucket_size 128;
-
-        ssl_protocols TLSv1.2 TLSv1.3;
-        ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
-        ssl_prefer_server_ciphers off;
-        ssl_session_timeout 1d;
-        ssl_session_cache shared:SSL:10m;
-        ssl_stapling on;
-        ssl_stapling_verify on;
       '';
     };
 

@@ -15,8 +15,13 @@ in {
     # PostgreSQL
     services.postgresql = {
       enable = true;
+      enableTCPIP = true; # listen on all interfaces so containers reach it via br-svc (10.69.0.1)
       package = pkgs.postgresql_16;
       dataDir = "${cfg.dataDir}/postgresql";
+      authentication = lib.mkAfter ''
+        # Allow app containers on the service bridge to log in with passwords (scram)
+        host all all 10.69.0.0/24 scram-sha-256
+      '';
       settings = {
         max_connections = 100;
         shared_buffers = "512MB";
@@ -55,5 +60,8 @@ in {
       "d ${cfg.dataDir} 0755 postgres postgres -"
       "d ${cfg.dataDir}/postgresql 0700 postgres postgres -"
     ];
+
+    # Containers reach the host DB via the br-svc bridge gateway (10.69.0.1)
+    networking.firewall.interfaces.br-svc.allowedTCPPorts = [ 5432 ];
   };
 }

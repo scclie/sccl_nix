@@ -48,17 +48,26 @@ in {
       config = { config, lib, pkgs, ... }: {
         system.stateVersion = "26.05";
 
-        environment.systemPackages = [ pkgs.vaultwarden ];
+        environment.systemPackages = [
+          # Postgres backend requires the 'postgresql' feature build
+          (pkgs.vaultwarden.override { dbBackend = "postgresql"; })
+        ];
 
         systemd.services.vaultwarden = {
           description = "Vaultwarden server";
           after = [ "network.target" ];
           wantedBy = [ "multi-user.target" ];
           serviceConfig = {
+            # LoadCredential copies the (0400 root) secrets into /run/credentials/<unit>/,
+            # which is owned by the service user — direct cat of /run/secrets would fail.
+            LoadCredential = [
+              "admin-token:/run/secrets/vaultwarden/admin-token"
+              "db-password:/run/secrets/vaultwarden/db-password"
+            ];
             ExecStart = lib.mkForce (pkgs.writeShellScript "vaultwarden-wrapped" ''
-              export ADMIN_TOKEN="$(cat /run/secrets/vaultwarden/admin-token)"
-              export DATABASE_URL="postgresql://vaultwarden:$(cat /run/secrets/vaultwarden/db-password)@10.69.0.1:5432/vaultwarden"
-              exec ${pkgs.vaultwarden}/bin/vaultwarden
+              export ADMIN_TOKEN="$(cat $CREDENTIALS_DIRECTORY/admin-token)"
+              export DATABASE_URL="postgresql://vaultwarden:$(cat $CREDENTIALS_DIRECTORY/db-password)@10.69.0.1:5432/vaultwarden"
+              exec ${pkgs.vaultwarden.override { dbBackend = "postgresql"; }}/bin/vaultwarden
             '');
             User = "vaultwarden";
             Group = "vaultwarden";
@@ -69,6 +78,10 @@ in {
             DATA_FOLDER = "/var/lib/vaultwarden";
             DOMAIN = cfg.domain;
             WEBSOCKET_ENABLED = "true";
+            # Listen on all interfaces so nginx on the host/bridge can reach it
+            ROCKET_ADDRESS = "0.0.0.0";
+            # Serve the bundled web vault UI from the package
+            WEB_VAULT_FOLDER = "${pkgs.vaultwarden.webvault}/share/vaultwarden/vault";
           };
         };
 
@@ -77,6 +90,8 @@ in {
           group = "vaultwarden";
         };
         users.groups.vaultwarden = {};
+
+        networking.firewall.allowedTCPPorts = [ cfg.port ];
       };
     };
 

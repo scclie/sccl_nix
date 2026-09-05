@@ -64,10 +64,8 @@
     proxy = {
       enable = true;
       sites = {
-        # Sites will be added as services come online
-        # Example:
-        # git = { upstream = "http://10.69.0.4:3000"; };
-        # pass = { upstream = "http://10.69.0.7:8080"; };
+        git = { upstream = "http://10.69.0.10:3000"; };
+        # pass / pass-api are registered by the vaultwarden module itself
       };
     };
   };

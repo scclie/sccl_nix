@@ -4,28 +4,27 @@ let
   domain = cfg.zone;
   records = import ./dns-records.nix { inherit domain; serverIp = cfg.hostIp; };
 
-  pdnsutil = "${pkgs.pdns}/bin/pdnsutil";
+  pdns = pkgs.pdns;
+  pdnsutil = "${pdns}/bin/pdnsutil";
+  pdnsSchema = "${pdns}/share/doc/pdns/schema.sqlite3.sql";
+  sqlite3 = "${pkgs.sqlite}/bin/sqlite3";
 
   recordCmd = r:
-    if r.type == "SOA" then ""
-    else if r.type == "NS" then "${pdnsutil} replace-rrset ${domain} '${r.name}' NS '${r.content}'"
-    else if r.type == "MX" then "${pdnsutil} replace-rrset ${domain} '${r.name}' MX '${r.content}'"
-    else "${pdnsutil} replace-rrset ${domain} '${r.name}' ${r.type} '${r.content}'";
+    let
+      name = if r.name == "@" then domain else "${r.name}.${domain}";
+      content = if r.type == "TXT" then "\"${r.content}\"" else r.content;
+    in
+    if r.type == "NS" then "${pdnsutil} rrset replace ${domain} '${name}' NS '${r.content}'"
+    else if r.type == "MX" then "${pdnsutil} rrset replace ${domain} '${name}' MX '${r.content}'"
+    else if r.type == "SOA" then "${pdnsutil} rrset replace ${domain} '${name}' SOA '${r.content}'"
+    else "${pdnsutil} rrset replace ${domain} '${name}' ${r.type} '${content}'";
 
   applyScript = pkgs.writeShellScript "dns-apply" ''
     set -euo pipefail
 
-    if [ ! -f /var/lib/pdns/pdns.sqlite ]; then
-      echo "Creating pdns database..."
-      mkdir -p /var/lib/pdns
-      ${pdnsutil} create-zone ${domain}
-    fi
-
-    ${pdnsutil} set-soa ${domain} ns1.${domain} hostmaster.${domain} 2026090301 3600 900 604800 300 || true
+    ${pdnsutil} create-zone ${domain} || true
 
     ${lib.concatStringsSep "\n" (map recordCmd records.records)}
-
-    ${pdnsutil} set-meta ${domain} PRESIGNED 1 || true
 
     echo "DNS records applied for ${domain} at $(date)"
   '';
@@ -52,12 +51,7 @@ in {
         gsqlite3-database=/var/lib/pdns/pdns.sqlite
         gsqlite3-pragma-foreign-keys=true
         gsqlite3-dnssec=yes
-        local-address=127.0.0.1:5300
-        local-ipv6=
-        master=yes
-        allow-axfr-ips=127.0.0.0/8
-        default-soa-name=ns1.${domain}
-        default-soa-mail=hostmaster.${domain}
+local-address=127.0.0.1:5300
         default-ttl=3600
         loglevel=4
         security-poll-suffix=
@@ -87,6 +81,26 @@ in {
           forward-addr = [ "1.1.1.1" "8.8.8.8" ];
         }];
       };
+    };
+
+    # Initialize pdns sqlite DB before pdns starts (pdns 5.x refuses to start
+    # against a missing database)
+    systemd.services.pdns-init = {
+      description = "Initialize PowerDNS gsqlite3 database";
+      before = [ "pdns.service" ];
+      wantedBy = [ "multi-user.target" ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+      };
+      script = ''
+        if [ ! -f /var/lib/pdns/pdns.sqlite ]; then
+          echo "Creating pdns database..."
+          mkdir -p /var/lib/pdns
+          ${sqlite3} /var/lib/pdns/pdns.sqlite < ${pdnsSchema}
+          chown pdns:pdns /var/lib/pdns/pdns.sqlite
+        fi
+      '';
     };
 
     systemd.services.dns-apply = {
