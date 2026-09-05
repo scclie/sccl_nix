@@ -9,6 +9,7 @@
     # Crypto
     electrum
     electrum-ltc
+    vesktop
 
     # Development
     lmstudio

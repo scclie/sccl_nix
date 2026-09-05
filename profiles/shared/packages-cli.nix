@@ -17,5 +17,8 @@
     # Development
     nixd
     gh
+
+    # Deployment
+    nixos-anywhere
   ];
 }

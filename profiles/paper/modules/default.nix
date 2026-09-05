@@ -4,6 +4,6 @@
   imports = [
     ./opencode
     ./playground.nix
-    ./secure-vesktop
+    # ./secure-vesktop
   ];
 }
