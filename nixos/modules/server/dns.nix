@@ -2,7 +2,7 @@
 let
   cfg = config.sccl.dns;
   domain = cfg.zone;
-  records = import ./dns-records.nix { inherit domain; };
+  records = import ./dns-records.nix { inherit domain; serverIp = cfg.hostIp; };
 
   pdnsutil = "${pkgs.pdns}/bin/pdnsutil";
 
@@ -36,6 +36,11 @@ in {
       type = lib.types.str;
       default = "sccl.cc";
       description = "Primary DNS zone";
+    };
+    hostIp = lib.mkOption {
+      type = lib.types.str;
+      default = config.sccl.server.hostIp;
+      description = "IP that A records point to";
     };
   };
 

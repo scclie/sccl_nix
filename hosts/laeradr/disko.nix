@@ -1,10 +1,9 @@
-{ disks ? [ "/dev/nvme0n1" ], ... }:
 {
   disko.devices = {
     disk = {
       main = {
         type = "disk";
-        device = builtins.elemAt disks 0;
+        device = "/dev/disk/by-id/ata-Apacer_AS350_1TB_E15C0736039001802270";
         content = {
           type = "gpt";
           partitions = {
