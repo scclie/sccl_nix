@@ -114,13 +114,14 @@ in {
       };
       script = let
         psql = config.services.postgresql.package;
+        asPostgres = "${pkgs.sudo}/bin/sudo -u postgres ${psql}/bin/psql";
       in ''
         DB_PASS="$(cat $CREDENTIALS_DIRECTORY/db-password)"
-        ${psql}/bin/psql -tc "SELECT 1 FROM pg_roles WHERE rolname = 'vaultwarden'" | ${pkgs.gnugrep}/bin/grep -q 1 || \
-          ${psql}/bin/psql -c "CREATE USER vaultwarden WITH PASSWORD '$DB_PASS';"
-        ${psql}/bin/psql -tc "SELECT 1 FROM pg_database WHERE datname = 'vaultwarden'" | ${pkgs.gnugrep}/bin/grep -q 1 || \
-          ${psql}/bin/psql -c "CREATE DATABASE vaultwarden OWNER vaultwarden;"
-        ${psql}/bin/psql -c "GRANT ALL PRIVILEGES ON DATABASE vaultwarden TO vaultwarden;"
+        ${asPostgres} -tc "SELECT 1 FROM pg_roles WHERE rolname = 'vaultwarden'" | ${pkgs.gnugrep}/bin/grep -q 1 || \
+          ${asPostgres} -c "CREATE USER vaultwarden WITH PASSWORD '$DB_PASS';"
+        ${asPostgres} -tc "SELECT 1 FROM pg_database WHERE datname = 'vaultwarden'" | ${pkgs.gnugrep}/bin/grep -q 1 || \
+          ${asPostgres} -c "CREATE DATABASE vaultwarden OWNER vaultwarden;"
+        ${asPostgres} -c "GRANT ALL PRIVILEGES ON DATABASE vaultwarden TO vaultwarden;"
       '';
     };
   };

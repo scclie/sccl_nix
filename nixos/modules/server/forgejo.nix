@@ -146,13 +146,14 @@ in {
       };
       script = let
         psql = config.services.postgresql.package;
+        asPostgres = "${pkgs.sudo}/bin/sudo -u postgres ${psql}/bin/psql";
       in ''
         DB_PASS="$(cat $CREDENTIALS_DIRECTORY/db-password)"
-        ${psql}/bin/psql -tc "SELECT 1 FROM pg_roles WHERE rolname = 'forgejo'" | ${pkgs.gnugrep}/bin/grep -q 1 || \
-          ${psql}/bin/psql -c "CREATE USER forgejo WITH PASSWORD '$DB_PASS';"
-        ${psql}/bin/psql -tc "SELECT 1 FROM pg_database WHERE datname = 'forgejo'" | ${pkgs.gnugrep}/bin/grep -q 1 || \
-          ${psql}/bin/psql -c "CREATE DATABASE forgejo OWNER forgejo;"
-        ${psql}/bin/psql -c "GRANT ALL PRIVILEGES ON DATABASE forgejo TO forgejo;"
+        ${asPostgres} -tc "SELECT 1 FROM pg_roles WHERE rolname = 'forgejo'" | ${pkgs.gnugrep}/bin/grep -q 1 || \
+          ${asPostgres} -c "CREATE USER forgejo WITH PASSWORD '$DB_PASS';"
+        ${asPostgres} -tc "SELECT 1 FROM pg_database WHERE datname = 'forgejo'" | ${pkgs.gnugrep}/bin/grep -q 1 || \
+          ${asPostgres} -c "CREATE DATABASE forgejo OWNER forgejo;"
+        ${asPostgres} -c "GRANT ALL PRIVILEGES ON DATABASE forgejo TO forgejo;"
       '';
     };
   };
