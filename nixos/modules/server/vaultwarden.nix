@@ -115,7 +115,7 @@ in {
       script = let
         psql = config.services.postgresql.package;
       in ''
-        DB_PASS="$(cat %d/db-password)"
+        DB_PASS="$(cat $CREDENTIALS_DIRECTORY/db-password)"
         ${psql}/bin/psql -tc "SELECT 1 FROM pg_roles WHERE rolname = 'vaultwarden'" | ${pkgs.gnugrep}/bin/grep -q 1 || \
           ${psql}/bin/psql -c "CREATE USER vaultwarden WITH PASSWORD '$DB_PASS';"
         ${psql}/bin/psql -tc "SELECT 1 FROM pg_database WHERE datname = 'vaultwarden'" | ${pkgs.gnugrep}/bin/grep -q 1 || \

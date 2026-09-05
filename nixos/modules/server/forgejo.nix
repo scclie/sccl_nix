@@ -86,9 +86,9 @@ in {
               "jwt-secret:/run/secrets/forgejo/jwt-secret"
             ];
             ExecStart = lib.mkForce (pkgs.writeShellScript "forgejo-wrapped" ''
-              export FORGEJO__database__PASSWD="$(cat %d/db-password)"
-              export FORGEJO__security__INTERNAL_TOKEN="$(cat %d/internal-token)"
-              export FORGEJO__security__SECRET_KEY="$(cat %d/jwt-secret)"
+              export FORGEJO__database__PASSWD="$(cat $CREDENTIALS_DIRECTORY/db-password)"
+              export FORGEJO__security__INTERNAL_TOKEN="$(cat $CREDENTIALS_DIRECTORY/internal-token)"
+              export FORGEJO__security__SECRET_KEY="$(cat $CREDENTIALS_DIRECTORY/jwt-secret)"
               exec ${config.services.forgejo.package}/bin/forgejo web --config /var/lib/forgejo/conf/app.ini
             '');
           };
@@ -147,7 +147,7 @@ in {
       script = let
         psql = config.services.postgresql.package;
       in ''
-        DB_PASS="$(cat %d/db-password)"
+        DB_PASS="$(cat $CREDENTIALS_DIRECTORY/db-password)"
         ${psql}/bin/psql -tc "SELECT 1 FROM pg_roles WHERE rolname = 'forgejo'" | ${pkgs.gnugrep}/bin/grep -q 1 || \
           ${psql}/bin/psql -c "CREATE USER forgejo WITH PASSWORD '$DB_PASS';"
         ${psql}/bin/psql -tc "SELECT 1 FROM pg_database WHERE datname = 'forgejo'" | ${pkgs.gnugrep}/bin/grep -q 1 || \
