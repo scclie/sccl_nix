@@ -13,6 +13,7 @@
     secrets = {
       enable = true;
       user = "heimdall";
+      scopes = [ "infra" "db" "apps" ];
     };
     server = {
       enable = true;

@@ -3,7 +3,7 @@ keys:
   - &personal age1v925pdj23e5lhz38r6yyd35uzvfdjapznld0szv3e2y3gxvt2c8qf9nv57
 
 creation_rules:
-  - path_regex: common\.yaml$
+  - path_regex: secrets/personal\.yaml$
     key_groups:
       - age: [*personal]
   - path_regex: secrets/infra\.yaml$

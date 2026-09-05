@@ -16,7 +16,10 @@
     bluetooth.enable = true;
     net.enable = true;
     zapret.enable = true;
-    secrets.enable = true;
+    secrets = {
+      enable = true;
+      scopes = [ "personal" ];
+    };
     mihomo = {
       enable = true;
       fakeHwid = "B8A7E6D5C4B3";

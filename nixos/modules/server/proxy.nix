@@ -60,7 +60,7 @@ in {
       };
     };
 
-    # TODO: Add 'cloudflare-api-token' key to secrets/common.yaml and uncomment sops declaration
+    # TODO: Add 'cloudflare-api-token' key to secrets/personal.yaml and uncomment sops declaration
     # sops.secrets."cloudflare-api-token" = {
     #   path = "/etc/nixos/secrets/cloudflare-api-token.env";
     #   owner = "acme";

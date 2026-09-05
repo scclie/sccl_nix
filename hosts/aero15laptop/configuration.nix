@@ -18,7 +18,10 @@
     audio.enable = true;
     bluetooth.enable = true;
     net.enable = true;
-    secrets.enable = true;
+    secrets = {
+      enable = true;
+      scopes = [ "personal" ];
+    };
     mihomo = {
       enable = true;
       fakeHwid = "B8A7E6D5C4B3";
