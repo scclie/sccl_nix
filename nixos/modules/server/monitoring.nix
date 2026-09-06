@@ -29,18 +29,21 @@ in {
     # Ensure ZFS datasets exist for persistent state
     system.activationScripts.mon-dirs = lib.mkAfter ''
       mkdir -p /tank/mon/prometheus /tank/mon/grafana /tank/mon/loki
+      chown prometheus:prometheus /tank/mon/prometheus
+      chown grafana:grafana /tank/mon/grafana
+      chown -R loki:loki /tank/mon/loki
 
       # Generate grafana secret key if missing
       if [ ! -f /etc/grafana/secret_key ]; then
         mkdir -p /etc/grafana
         head -c 32 /dev/urandom | base64 > /etc/grafana/secret_key
-        chmod 600 /etc/grafana/secret_key
       fi
+      chown grafana:grafana /etc/grafana/secret_key
+      chmod 600 /etc/grafana/secret_key
     '';
 
     services.prometheus = {
       enable = true;
-      stateDir = "/tank/mon/prometheus";
       globalConfig = {
         scrape_interval = "15s";
         evaluation_interval = "15s";

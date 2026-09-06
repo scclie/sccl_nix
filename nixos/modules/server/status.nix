@@ -55,10 +55,13 @@ in {
       wants = [ "network-online.target" ];
       wantedBy = [ "multi-user.target" ];
       serviceConfig = {
-        ExecStart = "${pkgs.gatus}/bin/gatus --config ${gatusConfigFile}";
+        ExecStart = "${pkgs.gatus}/bin/gatus";
         Restart = "always";
         RestartSec = 5;
         StateDirectory = "gatus";
+      };
+      environment = {
+        GATUS_CONFIG_PATH = "${gatusConfigFile}";
       };
     };
 
