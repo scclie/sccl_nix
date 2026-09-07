@@ -19,9 +19,12 @@
 
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
+
+    forgesync.url = "github:lukaswrz/forgesync";
+    forgesync.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-outputs = { self, nixpkgs, nixpkgs-unstable, disko, home-manager, stylix, chaotic, ... }@inputs:
+outputs = { self, nixpkgs, nixpkgs-unstable, disko, home-manager, stylix, chaotic, forgesync, ... }@inputs:
 let
   system = "x86_64-linux";
 

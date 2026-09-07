@@ -28,6 +28,7 @@
     inputs.stylix.nixosModules.stylix
     inputs.home-manager.nixosModules.home-manager
     inputs.chaotic.nixosModules.default
+    inputs.forgesync.nixosModules.default
     ./boot.nix
     ./nix.nix
     ./env.nix

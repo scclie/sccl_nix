@@ -50,6 +50,50 @@ in {
       '';
     };
 
+    # push mirrors to github/codeberg for all repos via forgesync.
+    sops.secrets."github/mirror-env" = {
+      sopsFile = ../../../../secrets/infra.yaml;
+      mode = "0400";
+    };
+    sops.secrets."codeberg/mirror-env" = {
+      sopsFile = ../../../../secrets/infra.yaml;
+      mode = "0400";
+    };
+
+    services.forgesync = {
+      enable = true;
+      jobs = {
+        github = {
+          source = "http://10.69.0.10:3000/api/v1";
+          target = "github";
+          settings = {
+            remirror = true;
+            on-commit = true;
+            mirror-interval = "0h0m0s";
+          };
+          secretFile = config.sops.secrets."github/mirror-env".path;
+          timerConfig = {
+            OnCalendar = "hourly";
+            Persistent = true;
+          };
+        };
+        codeberg = {
+          source = "http://10.69.0.10:3000/api/v1";
+          target = "codeberg";
+          settings = {
+            remirror = true;
+            on-commit = true;
+            mirror-interval = "0h0m0s";
+          };
+          secretFile = config.sops.secrets."codeberg/mirror-env".path;
+          timerConfig = {
+            OnCalendar = "hourly";
+            Persistent = true;
+          };
+        };
+      };
+    };
+
     # Git container
     containers.git-ct = {
       autoStart = true;
@@ -99,9 +143,6 @@ ui = {
               # nord-sccl + built-in Forgejo themes (users can still switch per-account)
               THEMES = "forgejo-auto,forgejo-light,forgejo-dark,nord-sccl";
               DEFAULT_THEME = "nord-sccl";
-            };
-            migrations = {
-              ALLOWED_DOMAINS = "*";
             };
             actions = {
               ENABLED = true;
