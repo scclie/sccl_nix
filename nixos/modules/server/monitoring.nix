@@ -19,7 +19,20 @@ in {
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf cfg.enable (let
+    # Telegram receiver is only valid when a chat id is configured.
+    telegramEnabled = cfg.alertmanagerTelegramChatId != 0;
+    alertReceiver = if telegramEnabled then "telegram" else "null";
+    alertReceivers = lib.optional telegramEnabled {
+      name = "telegram";
+      telegram_configs = [{
+        bot_token_file = cfg.alertmanagerTelegramBotToken;
+        chat_id = cfg.alertmanagerTelegramChatId;
+        parse_mode = "HTML";
+        message = "{{ range .Alerts }}<b>{{ .Labels.alertname }}</b>\n{{ .Annotations.description }}\n{{ end }}";
+      }];
+    } ++ lib.optional (!telegramEnabled) { name = "null"; };
+  in {
     # Telegram bot token via sops
     sops.secrets."telegram/bot-token" = {
       sopsFile = ../../../secrets/apps.yaml;
@@ -224,7 +237,7 @@ in {
         }
       }
 
-      journald "system" {
+      loki.source.journal "system" {
         forward_to = [loki.write.default.receiver]
         max_age = "12h"
       }
@@ -249,22 +262,14 @@ in {
           group_wait = "30s";
           group_interval = "5m";
           repeat_interval = "12h";
-          receiver = "telegram";
+          receiver = alertReceiver;
         };
-        receivers = [{
-          name = "telegram";
-          telegram_configs = [{
-            bot_token_file = cfg.alertmanagerTelegramBotToken;
-            chat_id = cfg.alertmanagerTelegramChatId;
-            parse_mode = "HTML";
-            message = "{{ range .Alerts }}<b>{{ .Labels.alertname }}</b>\n{{ .Annotations.description }}\n{{ end }}";
-          }];
-        }];
+        receivers = alertReceivers;
       };
     };
 
     networking.firewall = {
       allowedTCPPorts = [ 3001 9090 9100 9113 9115 3100 9093 ];
     };
-  };
+  });
 }

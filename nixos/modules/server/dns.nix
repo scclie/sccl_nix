@@ -94,12 +94,13 @@ local-address=127.0.0.1:5300
         RemainAfterExit = true;
       };
       script = ''
+        mkdir -p /var/lib/pdns
+        chown pdns:pdns /var/lib/pdns
         if [ ! -f /var/lib/pdns/pdns.sqlite ]; then
           echo "Creating pdns database..."
-          mkdir -p /var/lib/pdns
           ${sqlite3} /var/lib/pdns/pdns.sqlite < ${pdnsSchema}
-          chown pdns:pdns /var/lib/pdns/pdns.sqlite
         fi
+        chown pdns:pdns /var/lib/pdns/pdns.sqlite
       '';
     };
 

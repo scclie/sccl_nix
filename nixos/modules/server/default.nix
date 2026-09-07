@@ -8,7 +8,7 @@
     ./dns.nix
     ./proxy.nix
     ./databases.nix
-    ./forgejo.nix
+    ./forgejo
     ./sftpgo.nix
     ./vaultwarden.nix
     ./mail.nix

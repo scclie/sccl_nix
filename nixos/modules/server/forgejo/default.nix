@@ -2,6 +2,7 @@
 let
   cfg = config.sccl.forgejo;
   serverCfg = config.sccl.server;
+  themeNordCss = ./theme-nord-sccl.css;
 in {
   options.sccl.forgejo = {
     enable = lib.mkEnableOption "Forgejo git forge + runner + registry";
@@ -10,7 +11,7 @@ in {
   config = lib.mkIf cfg.enable {
     # Declare secrets at host level (decrypted to /run/secrets/)
     sops.secrets."forgejo/db-password" = {
-      sopsFile = ../../../secrets/db.yaml;
+      sopsFile = ../../../../secrets/db.yaml;
     };
 
     # NB: Forgejo's own secrets (SECRET_KEY, INTERNAL_TOKEN, oauth2 JWT, LFS JWT)
@@ -25,6 +26,29 @@ in {
       nameserver 8.8.8.8
       options edns0 trust-ad
     '';
+
+    # theme-nord-sccl.css + Cascadia Code
+    # into the persistent (/tank/forgejo) volume that git-ct mounts at
+    # /var/lib/forgejo/custom. Forgejo serves the custom theme from
+    # custom/public/assets/css/theme-<name>.css and static assets under
+    # custom/public/assets/, so theme @font-face references /assets/fonts/...
+    systemd.services.forgejo-theme = {
+      description = "Deploy Forgejo Nord theme + fonts";
+      wantedBy = [ "multi-user.target" ];
+      before = [ "container@git-ct.service" ];
+      unitConfig.RequiresMountsFor = [ "/tank/forgejo" ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+      };
+      script = ''
+        install -Dm644 ${themeNordCss} /tank/forgejo/custom/public/assets/css/theme-nord-sccl.css
+        for w in Regular Italic SemiBold SemiBoldItalic Bold BoldItalic; do
+          install -Dm644 ${pkgs.cascadia-code}/share/fonts/truetype/CascadiaCode-$w.ttf \
+            /tank/forgejo/custom/public/assets/fonts/CascadiaCode-$w.ttf
+        done
+      '';
+    };
 
     # Git container
     containers.git-ct = {
@@ -64,23 +88,19 @@ in {
               DOMAIN = "git.${serverCfg.domain}";
               ROOT_URL = "https://git.${serverCfg.domain}/";
               HTTP_PORT = 3000;
-              SSH_DOMAIN = "git.${serverCfg.domain}";
-              # external port shown in clone URLs (router 194.26.100.18:22 -> host :2222 -> container)
-              SSH_PORT = 22;
-              DISABLE_SSH = false;
-              # built-in Forgejo SSH server (git-only, no shell) binds inside the container
-              START_SSH_SERVER = true;
-              SSH_LISTEN_HOST = "0.0.0.0";
-              # host DNATs :2222 -> 10.69.0.10:2222 (see base.nix networking.nat.forwardPorts)
-              SSH_LISTEN_PORT = 2222;
+              DISABLE_SSH = true;
             };
             service = {
-              DISABLE_REGISTRATION = false;
-              # public repos must be cloneable without login (REQUIRE_SIGNIN_VIEW=true made even public repos 401)
+              DISABLE_REGISTRATION = true;
               REQUIRE_SIGNIN_VIEW = false;
+              LANDING_PAGE = "explore";
+            };
+ui = {
+              # nord-sccl + built-in Forgejo themes (users can still switch per-account)
+              THEMES = "forgejo-auto,forgejo-light,forgejo-dark,nord-sccl";
+              DEFAULT_THEME = "nord-sccl";
             };
             migrations = {
-              # allow importing repos from any external host (needed for Codeberg migration)
               ALLOWED_DOMAINS = "*";
             };
             actions = {
@@ -107,7 +127,7 @@ in {
         };
 
         networking.firewall = {
-          allowedTCPPorts = [ 3000 22 2222 ];
+          allowedTCPPorts = [ 3000 ];
         };
       };
     };
