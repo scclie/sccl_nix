@@ -17,6 +17,11 @@
       pull.rebase = false;
       core.editor = "vim";
 
+      credential."https://git.sccl.cc" = {
+        username = "scclie";
+        helper = "!f() { test \"$1\" = get && printf 'username=%s\\npassword=%s\\n' scclie \"$(cat /run/secrets/forgejo/api-token 2>/dev/null)\"; }; f";
+      };
+
       alias = {
         st = "status";
         co = "checkout";

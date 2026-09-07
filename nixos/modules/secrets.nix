@@ -56,6 +56,10 @@ in {
           path = "/home/${cfg.user}/.ssh/gpg_signing_key.asc";
           owner = cfg.user;
         };
+        "forgejo/api-token" = {
+          owner = cfg.user;
+          mode = "0400";
+        };
       };
     };
 
