@@ -18,6 +18,14 @@ in {
     # /var/lib/forgejo/custom/conf/ (on the persistent /tank/forgejo bind),
     # so they survive restarts. sops values would have incompatible formats.
 
+    # Provide an external-resolver resolv.conf for the git-ct container
+    # (see bindMap resolv.conf comment).
+    environment.etc."resolv.conf.git-ct".text = ''
+      nameserver 1.1.1.1
+      nameserver 8.8.8.8
+      options edns0 trust-ad
+    '';
+
     # Git container
     containers.git-ct = {
       autoStart = true;
@@ -37,6 +45,11 @@ in {
           hostPath = "/run/secrets";
           isReadOnly = true;
         };
+        # оverride with external resolvers so push mirrors work.
+        "/etc/resolv.conf" = {
+          hostPath = "/etc/resolv.conf.git-ct";
+          isReadOnly = true;
+        };
       };
 
       config = { config, lib, pkgs, ... }: {
@@ -52,12 +65,23 @@ in {
               ROOT_URL = "https://git.${serverCfg.domain}/";
               HTTP_PORT = 3000;
               SSH_DOMAIN = "git.${serverCfg.domain}";
+              # external port shown in clone URLs (router 194.26.100.18:22 -> host :2222 -> container)
               SSH_PORT = 22;
               DISABLE_SSH = false;
+              # built-in Forgejo SSH server (git-only, no shell) binds inside the container
+              START_SSH_SERVER = true;
+              SSH_LISTEN_HOST = "0.0.0.0";
+              # host DNATs :2222 -> 10.69.0.10:2222 (see base.nix networking.nat.forwardPorts)
+              SSH_LISTEN_PORT = 2222;
             };
             service = {
               DISABLE_REGISTRATION = false;
-              REQUIRE_SIGNIN_VIEW = true;
+              # public repos must be cloneable without login (REQUIRE_SIGNIN_VIEW=true made even public repos 401)
+              REQUIRE_SIGNIN_VIEW = false;
+            };
+            migrations = {
+              # allow importing repos from any external host (needed for Codeberg migration)
+              ALLOWED_DOMAINS = "*";
             };
             actions = {
               ENABLED = true;
@@ -83,7 +107,7 @@ in {
         };
 
         networking.firewall = {
-          allowedTCPPorts = [ 3000 22 ];
+          allowedTCPPorts = [ 3000 22 2222 ];
         };
       };
     };

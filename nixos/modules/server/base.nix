@@ -42,9 +42,25 @@ in {
         prefixLength = 24;
       }];
 
+      # NAT containers on br-svc (10.69.0.0/24) to reach the internet,
+      # plus DNAT of external port 2222 -> git-ct (Forgejo built-in SSH).
+      # Router port-forwards public 194.26.100.18:22 -> 192.168.0.10:2222.
+      nat = {
+        enable = true;
+        internalInterfaces = [ "br-svc" ];
+        externalInterface = "enp4s0";
+        forwardPorts = [
+          {
+            sourcePort = 2222;
+            destination = "10.69.0.10:2222";
+            proto = "tcp";
+          }
+        ];
+      };
+
       firewall = {
         enable = true;
-        allowedTCPPorts = [ 22 80 443 25 465 587 993 8448 ];
+        allowedTCPPorts = [ 22 80 443 25 465 587 993 8448 2222 ];
         allowedUDPPorts = [ 51820 ];
         allowedTCPPortRanges = [ { from = 25565; to = 25590; } ];
         allowedUDPPortRanges = [ { from = 25565; to = 25590; } ];
@@ -60,6 +76,18 @@ in {
         X11Forwarding = false;
         AllowTcpForwarding = "no";
       };
+      # Bind admin SSH only to LAN + WireGuard; public SSH (port 22 forwarded
+      # to container :2222) is handled by Forgejo's built-in SSH server.
+      listenAddresses = [
+        { addr = "192.168.0.10"; }
+        { addr = "10.100.0.1"; }
+      ];
+    };
+
+    # Ensure static addresses (enp4s0, wg0) exist before sshd binds them.
+    systemd.services.sshd = {
+      wants = [ "network-online.target" ];
+      after = [ "network-online.target" ];
     };
 
     # SSH access

@@ -55,13 +55,13 @@ in {
       };
     };
 
-    # TODO: Add 'cloudflare-api-token' key to secrets/personal.yaml and uncomment sops declaration
-    # sops.secrets."cloudflare-api-token" = {
-    #   path = "/etc/nixos/secrets/cloudflare-api-token.env";
-    #   owner = "acme";
-    #   group = "acme";
-    #   mode = "0400";
-    # };
+    sops.secrets."cloudflare/api-token" = {
+      sopsFile = ../../../secrets/infra.yaml;
+      path = "/etc/nixos/secrets/cloudflare-api-token.env";
+      owner = "acme";
+      group = "acme";
+      mode = "0400";
+    };
 
     # All virtual hosts: default catch-all + site proxies
     services.nginx.virtualHosts = lib.mkMerge [

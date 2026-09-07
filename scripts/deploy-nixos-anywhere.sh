@@ -1,3 +1,10 @@
+# !!!!!!!!!!!!!!!!!!!!
+# FOR NEW SERVERS ONLY
+# FOR NEW SERVERS ONLY
+# FOR NEW SERVERS ONLY
+# !!!!!!!!!!!!!!!!!!!!
+# EDIT BEFORE USE (am lazy to make universal script)
+
 #!/usr/bin/env bash
 set -euo pipefail
 
