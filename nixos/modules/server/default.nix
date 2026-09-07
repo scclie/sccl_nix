@@ -13,7 +13,7 @@
     ./vaultwarden.nix
     ./mail.nix
     ./monitoring.nix
-    ./status.nix
+    ./status
     ./backup.nix
     ./minecraft.nix
     ./matrix.nix

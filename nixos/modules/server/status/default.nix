@@ -7,6 +7,10 @@ let
       address = "0.0.0.0";
       port = 8080;
     };
+    ui = {
+      dark-mode = true;
+      custom-css = builtins.readFile ./gatus-nord-sccl.css;
+    };
     storage = {
       type = "sqlite";
       path = "/tank/mon/gatus/db";
@@ -62,6 +66,16 @@ in {
       };
       environment = {
         GATUS_CONFIG_PATH = "${gatusConfigFile}";
+      };
+    };
+
+    # Serve Cascadia Code (deployed by forgejo-theme.service) on this origin
+    services.nginx.virtualHosts."status.${config.sccl.server.domain}" = {
+      locations."/assets/fonts/" = {
+        alias = "/tank/forgejo/custom/public/assets/fonts/";
+        extraConfig = ''
+          add_header Cache-Control "public, max-age=31536000, immutable";
+        '';
       };
     };
 

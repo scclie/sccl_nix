@@ -1,0 +1,102 @@
+/* Gatus Nord theme (nord-sccl) — matches Flake's Stylix nord base16.
+   Gatus v5 theming uses HSL CSS variables (Tailwind/shadcn style).
+   NB: /css/custom.css loads BEFORE /css/app.css, so all overrides need !important. */
+
+@font-face {
+    font-family: "Cascadia Code";
+    font-style: normal;
+    font-weight: 400;
+    src: url("/assets/fonts/CascadiaCode-Regular.ttf");
+}
+@font-face {
+    font-family: "Cascadia Code";
+    font-style: italic;
+    font-weight: 400;
+    src: url("/assets/fonts/CascadiaCode-Italic.ttf");
+}
+@font-face {
+    font-family: "Cascadia Code";
+    font-style: normal;
+    font-weight: 600;
+    src: url("/assets/fonts/CascadiaCode-SemiBold.ttf");
+}
+@font-face {
+    font-family: "Cascadia Code";
+    font-style: italic;
+    font-weight: 600;
+    src: url("/assets/fonts/CascadiaCode-SemiBoldItalic.ttf");
+}
+@font-face {
+    font-family: "Cascadia Code";
+    font-style: normal;
+    font-weight: 700;
+    src: url("/assets/fonts/CascadiaCode-Bold.ttf");
+}
+@font-face {
+    font-family: "Cascadia Code";
+    font-style: italic;
+    font-weight: 700;
+    src: url("/assets/fonts/CascadiaCode-BoldItalic.ttf");
+}
+
+:root {
+    --background: 220 16% 22% !important;
+    --foreground: 219 28% 88% !important;
+    --card: 222 16% 28% !important;
+    --card-foreground: 219 28% 88% !important;
+    --popover: 222 16% 28% !important;
+    --popover-foreground: 219 28% 88% !important;
+    --primary: 213 32% 63% !important;
+    --primary-foreground: 220 16% 22% !important;
+    --secondary: 220 17% 32% !important;
+    --secondary-foreground: 219 28% 88% !important;
+    --muted: 220 16% 36% !important;
+    --muted-foreground: 218 27% 84% !important;
+    --accent: 213 32% 63% !important;
+    --accent-foreground: 220 16% 22% !important;
+    --destructive: 355 40% 56% !important;
+    --destructive-foreground: 220 16% 22% !important;
+    --border: 220 17% 32% !important;
+    --input: 220 17% 32% !important;
+    --ring: 213 32% 63% !important;
+    --success: 92 28% 65% !important;
+    --chart-1: 193 43% 67% !important;
+    --chart-2: 92 28% 65% !important;
+    --chart-3: 40 71% 73% !important;
+    --chart-4: 311 20% 63% !important;
+    --chart-5: 18 50% 63% !important;
+}
+
+/* Square corners — no rounding */
+:root {
+    --radius: 0 !important;
+}
+*,
+*::before,
+*::after {
+    border-radius: 0 !important;
+}
+.rounded,
+.rounded-md,
+.rounded-lg,
+.rounded-xl {
+    border-radius: 0 !important;
+}
+
+/* Cascadia Code everywhere */
+body,
+.endpoint,
+.endpoint-header,
+.endpoint-content,
+button,
+input,
+select,
+textarea,
+table {
+    font-family:
+        "Cascadia Code", "CaskaydiaCove Nerd Font Mono", monospace !important;
+}
+
+a {
+    color: hsl(213 32% 63% / 1) !important;
+}
