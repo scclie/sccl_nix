@@ -2,7 +2,11 @@
 let
   cfg = config.sccl.dns;
   domain = cfg.zone;
-  records = import ./dns-records.nix { inherit domain; serverIp = cfg.hostIp; };
+  records = import ./dns-records.nix {
+    inherit domain;
+    serverIp = cfg.hostIp;
+    publicIp = cfg.publicIp;
+  };
 
   pdns = pkgs.pdns;
   pdnsutil = "${pdns}/bin/pdnsutil";
@@ -28,6 +32,54 @@ let
 
     echo "DNS records applied for ${domain} at $(date)"
   '';
+
+  cfSyncOneshot = r:
+    let
+      name = if r.name == "@" then domain else "${r.name}.${domain}";
+      proxied = if (r ? proxied) && r.proxied then "true" else "false";
+    in ''
+      NAME='${name}'
+      TYPE='${r.type}'
+      CONTENT='${r.content}'
+      DATA=$($JQ -nc --arg t "$TYPE" --arg n "$NAME" --arg c "$CONTENT" \
+        '{type:$t,name:$n,content:$c,ttl:1,proxied:${proxied}}')
+      EXISTING=$($CURL -s --max-time 20 "$BASE?name=$NAME" -H "Authorization: Bearer $TOKEN")
+      ID=$($JQ -r --arg t "$TYPE" '.result[]? | select(.type == $t) | .id' <<<"$EXISTING" | head -n 1)
+      if [ -n "$ID" ]; then
+        CODE=$($CURL -s --max-time 20 -X PUT "$BASE/$ID" \
+          -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+          --data "$DATA" -o /dev/null -w '%{http_code}')
+        echo "cf-dns-sync: $TYPE $NAME updated (http=$CODE)"
+      else
+        CODE=$($CURL -s --max-time 20 -X POST "$BASE" \
+          -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+          --data "$DATA" -o /dev/null -w '%{http_code}')
+        echo "cf-dns-sync: $TYPE $NAME created (http=$CODE)"
+      fi
+      [ "$CODE" = "200" ] || { echo "cf-dns-sync: $TYPE $NAME failed"; exit 1; }
+    '';
+
+  cfSyncScript = pkgs.writeShellScript "cf-dns-sync" ''
+    set -euo pipefail
+    CURL='${pkgs.curl}/bin/curl'
+    JQ='${pkgs.jq}/bin/jq'
+    TOKEN_FILE=/etc/nixos/secrets/cloudflare-api-token.env
+    if [ ! -f "$TOKEN_FILE" ]; then
+      echo "cf-dns-sync: cloudflare token not installed yet; skipping"
+      exit 0
+    fi
+    TOKEN=$(tr -d '\r\n' < "$TOKEN_FILE")
+    [ -n "$TOKEN" ] || { echo "cf-dns-sync: empty token; skipping"; exit 0; }
+    ZONE=$($CURL -s --max-time 20 "https://api.cloudflare.com/client/v4/zones?name=${domain}" \
+      -H "Authorization: Bearer $TOKEN" | $JQ -r '.result[0].id // empty')
+    if [ -z "$ZONE" ]; then
+      echo "cf-dns-sync: zone ${domain} not found"
+      exit 1
+    fi
+    BASE="https://api.cloudflare.com/client/v4/zones/$ZONE/dns_records"
+    ${lib.concatStringsSep "\n" (map cfSyncOneshot records.cfRecords)}
+    echo "cf-dns-sync: done at $(date)"
+  '';
 in {
   options.sccl.dns = {
     enable = lib.mkEnableOption "PowerDNS authoritative DNS + Unbound resolver";
@@ -40,6 +92,11 @@ in {
       type = lib.types.str;
       default = config.sccl.server.hostIp;
       description = "IP that A records point to";
+    };
+    publicIp = lib.mkOption {
+      type = lib.types.str;
+      default = config.sccl.server.hostIp;
+      description = "Public IP used for proxied Cloudflare A records (origin)";
     };
   };
 
@@ -118,6 +175,28 @@ local-address=127.0.0.1:5300
 
     systemd.timers.dns-apply = {
       description = "Periodically re-apply DNS records";
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnBootSec = "5min";
+        OnUnitActiveSec = "1h";
+        Persistent = true;
+      };
+    };
+
+    systemd.services.cf-dns-sync = {
+      description = "Sync declarative DNS records to Cloudflare";
+      after = [ "network-online.target" "sops-install-secrets.service" ];
+      wants = [ "network-online.target" ];
+      wantedBy = [ "multi-user.target" ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = "${cfSyncScript}";
+      };
+    };
+
+    systemd.timers.cf-dns-sync = {
+      description = "Periodically sync declarative DNS records to Cloudflare";
       wantedBy = [ "timers.target" ];
       timerConfig = {
         OnBootSec = "5min";

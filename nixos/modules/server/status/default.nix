@@ -23,7 +23,7 @@ let
         "[STATUS] == 200"
         "[RESPONSE_TIME] < 5000"
       ];
-    }) cfg.endpoints;
+    } // lib.optionalAttrs (ep.group != "") { group = ep.group; }) cfg.endpoints;
   };
 
   gatusConfigFile = pkgs.writeText "gatus-config.yaml" (builtins.toJSON gatusConfig);
@@ -35,6 +35,11 @@ in {
       type = lib.types.listOf (lib.types.submodule {
         options = {
           name = lib.mkOption { type = lib.types.str; };
+          group = lib.mkOption {
+            type = lib.types.str;
+            default = "";
+            description = "Group shown as a section header in the Gatus UI";
+          };
           url = lib.mkOption { type = lib.types.str; };
           interval = lib.mkOption {
             type = lib.types.str;

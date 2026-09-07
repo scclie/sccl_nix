@@ -17,6 +17,16 @@ in {
       default = 0;
       description = "Telegram chat ID for Alertmanager notifications";
     };
+
+    htpasswdFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = null;
+      description = ''
+        htpasswd file protecting the monitoring web UIs (prometheus, loki,
+        alertmanager) served behind nginx basic auth, e.g.
+        /run/secrets/monitoring/htpasswd
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable (let
@@ -32,12 +42,66 @@ in {
         message = "{{ range .Alerts }}<b>{{ .Labels.alertname }}</b>\n{{ .Annotations.description }}\n{{ end }}";
       }];
     } ++ lib.optional (!telegramEnabled) { name = "null"; };
+
+    # nginx basic auth shared by the prometheus/loki/alertmanager virtual hosts
+    authBasic = ''
+      auth_basic "Monitoring";
+      auth_basic_user_file ${toString cfg.htpasswdFile};
+    '';
   in {
     # Telegram bot token via sops
     sops.secrets."telegram/bot-token" = {
       sopsFile = ../../../secrets/apps.yaml;
     };
     sccl.monitoring.alertmanagerTelegramBotToken = lib.mkDefault config.sops.secrets."telegram/bot-token".path;
+
+    # htpasswd for the monitoring web UIs (create monitoring.htpasswd in apps.yaml)
+    sops.secrets."monitoring/htpasswd" = {
+      sopsFile = ../../../secrets/apps.yaml;
+      owner = "nginx";
+      group = "nginx";
+      mode = "0440";
+    };
+    sccl.monitoring.htpasswdFile = lib.mkDefault config.sops.secrets."monitoring/htpasswd".path;
+
+    # reachable via nginx with basic auth
+    sccl.proxy.sites = {
+      grafana = {
+        upstream = "http://127.0.0.1:3001";
+      };
+      prometheus = {
+        upstream = "http://127.0.0.1:9090";
+        extraConfig = (lib.optionalString (cfg.htpasswdFile != null) authBasic);
+      };
+      loki = {
+        upstream = "http://127.0.0.1:3100";
+        extraConfig = (lib.optionalString (cfg.htpasswdFile != null) authBasic);
+      };
+      alertmanager = {
+        upstream = "http://127.0.0.1:9093";
+        extraConfig = (lib.optionalString (cfg.htpasswdFile != null) authBasic);
+      };
+    };
+
+    # Exempt the health check paths from basic auth so the public Gatus status
+    # page can probe the CF-proxied domains end-to-end without credentials.
+    services.nginx.virtualHosts = {
+      "prometheus.${config.sccl.server.domain}" = {
+        locations."= /-/healthy" = {
+          proxyPass = "http://127.0.0.1:9090";
+        };
+      };
+      "loki.${config.sccl.server.domain}" = {
+        locations."= /ready" = {
+          proxyPass = "http://127.0.0.1:3100";
+        };
+      };
+      "alertmanager.${config.sccl.server.domain}" = {
+        locations."= /-/healthy" = {
+          proxyPass = "http://127.0.0.1:9093";
+        };
+      };
+    };
 
     # Ensure ZFS datasets exist for persistent state
     system.activationScripts.mon-dirs = lib.mkAfter ''
@@ -57,6 +121,7 @@ in {
 
     services.prometheus = {
       enable = true;
+      listenAddress = "127.0.0.1";
       globalConfig = {
         scrape_interval = "15s";
         evaluation_interval = "15s";
@@ -136,22 +201,22 @@ in {
       ];
     };
 
-    # Prometheus exporters on host
+    # Prometheus exporters on host (loopback only; scraped by Prometheus on the same machine)
     services.prometheus.exporters.node = {
       enable = true;
-      listenAddress = "0.0.0.0";
+      listenAddress = "127.0.0.1";
       port = 9100;
     };
 
     services.prometheus.exporters.nginx = {
       enable = true;
-      listenAddress = "0.0.0.0";
+      listenAddress = "127.0.0.1";
       port = 9113;
     };
 
     services.prometheus.exporters.blackbox = {
       enable = true;
-      listenAddress = "0.0.0.0";
+      listenAddress = "127.0.0.1";
       port = 9115;
       configFile = pkgs.writeText "blackbox.yml" ''
         modules:
@@ -170,7 +235,7 @@ in {
     services.grafana = {
       enable = true;
       settings = {
-        server.http_addr = "0.0.0.0";
+        server.http_addr = "127.0.0.1";
         server.http_port = 3001;
         security.admin_user = "admin";
         security.admin_password = "admin"; # change on first login
@@ -203,6 +268,7 @@ in {
         auth_enabled = false;
         server = {
           http_listen_port = 3100;
+          http_listen_address = "127.0.0.1";
         };
         common = {
           path_prefix = "/tank/mon/loki";
@@ -250,7 +316,7 @@ in {
 
     services.prometheus.alertmanager = {
       enable = true;
-      listenAddress = "0.0.0.0";
+      listenAddress = "127.0.0.1";
       port = 9093;
       checkConfig = false; # disabled: placeholder tokens fail validation
       configuration = {
@@ -269,7 +335,7 @@ in {
     };
 
     networking.firewall = {
-      allowedTCPPorts = [ 3001 9090 9100 9113 9115 3100 9093 ];
+      allowedTCPPorts = [];
     };
   });
 }

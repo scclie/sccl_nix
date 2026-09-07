@@ -1,4 +1,4 @@
-{ domain ? "sccl.cc", serverIp ? "192.168.0.10" }:
+{ domain ? "sccl.cc", serverIp ? "192.168.0.10", publicIp ? serverIp }:
 
 {
   records = [
@@ -11,5 +11,18 @@
     { name = "@"; type = "MX"; content = "10 mail.${domain}."; }
     { name = "@"; type = "TXT"; content = "v=spf1 mx -all"; }
     { name = "_dmarc"; type = "TXT"; content = "v=DMARC1; p=quarantine; rua=mailto:dmarc@${domain}"; }
+    { name = "prometheus"; type = "A"; content = serverIp; }
+    { name = "loki"; type = "A"; content = serverIp; }
+    { name = "alertmanager"; type = "A"; content = serverIp; }
+    { name = "grafana"; type = "A"; content = serverIp; }
+  ];
+
+  cfRecords = [
+    { name = "status"; type = "A"; content = publicIp; proxied = true; }
+    { name = "git"; type = "A"; content = publicIp; proxied = true; }
+    { name = "prometheus"; type = "A"; content = publicIp; proxied = true; }
+    { name = "loki"; type = "A"; content = publicIp; proxied = true; }
+    { name = "alertmanager"; type = "A"; content = publicIp; proxied = true; }
+    { name = "grafana"; type = "A"; content = publicIp; proxied = true; }
   ];
 }
