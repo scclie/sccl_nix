@@ -52,14 +52,15 @@
     status = {
       enable = true;
       endpoints = [
-        { name = "main website"; group = "apps"; url = "https://sccl.cc"; interval = "1m"; }
-        { name = "forgejo"; group = "services"; url = "https://git.sccl.cc"; interval = "1m"; }
-        { name = "vaultwarden"; group = "services"; url = "https://pass.sccl.cc"; interval = "1m"; }
+        { name = "main website"; group = "apps"; url = "https://sccl.cc"; interval = "5m"; }
+        { name = "sftpgo"; group = "services"; url = "https://files.sccl.cc"; interval = "5m"; }
+        { name = "forgejo"; group = "services"; url = "https://git.sccl.cc"; interval = "5m"; }
+        { name = "vaultwarden"; group = "services"; url = "https://pass.sccl.cc"; interval = "5m"; }
         { name = "maddy"; group = "services"; url = "https://mail.sccl.cc"; interval = "5m"; }
-        { name = "prometheus"; group = "monitoring"; url = "https://prometheus.sccl.cc/-/healthy"; interval = "1m"; }
-        { name = "grafana"; group = "monitoring"; url = "https://grafana.sccl.cc/api/health"; interval = "1m"; }
-        { name = "loki"; group = "monitoring"; url = "https://loki.sccl.cc/ready"; interval = "1m"; }
-        { name = "alertmanager"; group = "monitoring"; url = "https://alertmanager.sccl.cc/-/healthy"; interval = "1m"; }
+        { name = "prometheus"; group = "monitoring"; url = "https://prometheus.sccl.cc/-/healthy"; interval = "5m"; }
+        { name = "grafana"; group = "monitoring"; url = "https://grafana.sccl.cc/api/health"; interval = "5m"; }
+        { name = "loki"; group = "monitoring"; url = "https://loki.sccl.cc/ready"; interval = "5m"; }
+        { name = "alertmanager"; group = "monitoring"; url = "https://alertmanager.sccl.cc/-/healthy"; interval = "5m"; }
       ];
     };
     backup = {

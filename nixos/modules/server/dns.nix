@@ -2,6 +2,10 @@
 let
   cfg = config.sccl.dns;
   domain = cfg.zone;
+  lanSubnet = let
+    parts = lib.splitString "." cfg.hostIp;
+    prefix = lib.concatStringsSep "." (lib.take 3 parts);
+  in "${prefix}.0/24";
   records = import ./dns-records.nix {
     inherit domain;
     serverIp = cfg.hostIp;
@@ -77,8 +81,17 @@ let
       exit 1
     fi
     BASE="https://api.cloudflare.com/client/v4/zones/$ZONE/dns_records"
-    ${lib.concatStringsSep "\n" (map cfSyncOneshot records.cfRecords)}
-    echo "cf-dns-sync: done at $(date)"
+    body() {
+      ${lib.concatStringsSep "\n" (map cfSyncOneshot records.cfRecords)}
+      echo "cf-dns-sync: done at $(date)"
+    }
+    attempts=0
+    until body 2>/dev/null; do
+      attempts=$((attempts + 1))
+      [ "$attempts" -ge 3 ] && { exit 1; }
+      echo "cf-dns-sync: transient failure, retrying ($attempts/3)"
+      sleep 5
+    done
   '';
 in {
   options.sccl.dns = {
@@ -117,12 +130,14 @@ local-address=127.0.0.1:5300
 
     services.unbound = {
       enable = true;
-      resolveLocalQueries = true;
+      # laeradr itself keeps public DNS (1.1.1.1/8.8.8.8): gatus and friends
+      # must go through the Cloudflare proxy loop, NOT the local zone.
+      resolveLocalQueries = false;
       settings = {
         server = {
-          interface = "127.0.0.1";
-          access-control = "127.0.0.0/8 allow";
-          do-ip6 = "no";
+          interface = [ "127.0.0.1" "::1" cfg.hostIp ];
+          access-control = [ "127.0.0.0/8 allow" "::1/128 allow" "${lanSubnet} allow" ];
+          do-ip6 = "yes";
           hide-identity = "yes";
           hide-version = "yes";
           minimal-responses = "yes";
@@ -132,12 +147,24 @@ local-address=127.0.0.1:5300
           num-threads = 2;
           rrset-cache-size = "128m";
           msg-cache-size = "64m";
+          do-not-query-localhost = "no";
+          local-zone = [ "\"${domain}.\" transparent" ];
         };
+        stub-zone = [{
+          name = "${domain}.";
+          stub-addr = "127.0.0.1@5300";
+        }];
         forward-zone = [{
           name = ".";
           forward-addr = [ "1.1.1.1" "8.8.8.8" ];
         }];
       };
+    };
+
+    # lan on 53 (laeradr is the dns for /24)
+    networking.firewall = {
+      allowedTCPPorts = [ 53 ];
+      allowedUDPPorts = [ 53 ];
     };
 
     # Initialize pdns sqlite DB before pdns starts (pdns 5.x refuses to start
@@ -189,8 +216,7 @@ local-address=127.0.0.1:5300
       wants = [ "network-online.target" ];
       wantedBy = [ "multi-user.target" ];
       serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
+        Type = "oneshot"; # cu
         ExecStart = "${cfSyncScript}";
       };
     };
@@ -204,5 +230,11 @@ local-address=127.0.0.1:5300
         Persistent = true;
       };
     };
+
+    system.activationScripts.cfDnsSync = ''
+      if systemctl is-active --quiet network-online.target; then
+        ${cfSyncScript}
+      fi
+    '';
   };
 }

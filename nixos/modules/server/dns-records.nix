@@ -15,6 +15,12 @@
     { name = "loki"; type = "A"; content = serverIp; }
     { name = "alertmanager"; type = "A"; content = serverIp; }
     { name = "grafana"; type = "A"; content = serverIp; }
+    # local zone mirrors: lan directly instead of cf
+    { name = "files"; type = "A"; content = serverIp; }
+    { name = "files-lan"; type = "A"; content = serverIp; }
+    { name = "status"; type = "A"; content = serverIp; }
+    #{ name = "git"; type = "A"; content = serverIp; }
+    #{ name = "pass"; type = "A"; content = serverIp; }
   ];
 
   cfRecords = [
@@ -24,5 +30,6 @@
     { name = "loki"; type = "A"; content = publicIp; proxied = true; }
     { name = "alertmanager"; type = "A"; content = publicIp; proxied = true; }
     { name = "grafana"; type = "A"; content = publicIp; proxied = true; }
+    { name = "files"; type = "A"; content = publicIp; proxied = true; }
   ];
 }

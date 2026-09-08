@@ -17,6 +17,11 @@ in {
             default = "";
             description = "Extra nginx location config";
           };
+          extraServerConfig = lib.mkOption {
+            type = lib.types.str;
+            default = "";
+            description = "Extra nginx server-level config (e.g. static location blocks)";
+          };
         };
       });
       default = {};
@@ -50,7 +55,7 @@ in {
       certs."wildcard.${serverCfg.domain}" = {
         domain = "*.${serverCfg.domain}";
         dnsProvider = "cloudflare";
-        environmentFile = "/etc/nixos/secrets/cloudflare-api-token.env";
+        environmentFile = "/etc/nixos/secrets/cloudflare-acme.env";
         extraDomainNames = [ serverCfg.domain ];
       };
     };
@@ -58,6 +63,18 @@ in {
     sops.secrets."cloudflare/api-token" = {
       sopsFile = ../../../secrets/infra.yaml;
       path = "/etc/nixos/secrets/cloudflare-api-token.env";
+      owner = "acme";
+      group = "acme";
+      mode = "0400";
+    };
+
+    # cf-dns-sync reads the raw token above
+    sops.templates."cloudflare-acme" = {
+      content = ''
+        CLOUDFLARE_DNS_API_TOKEN=${config.sops.placeholder."cloudflare/api-token"}
+        LEGO_DNS_RESOLVERS=1.1.1.1:53,8.8.8.8:53,1.0.0.1:53
+      '';
+      path = "/etc/nixos/secrets/cloudflare-acme.env";
       owner = "acme";
       group = "acme";
       mode = "0400";
@@ -77,7 +94,7 @@ in {
         };
       }
       (lib.mapAttrs' (name: site:
-        lib.nameValuePair "${name}.${serverCfg.domain}" {
+        lib.nameValuePair "${name}.${serverCfg.domain}" ({
           addSSL = true;
           sslCertificate = "/var/lib/acme/wildcard.${serverCfg.domain}/fullchain.pem";
           sslCertificateKey = "/var/lib/acme/wildcard.${serverCfg.domain}/key.pem";
@@ -87,7 +104,9 @@ in {
               limit_req zone=general burst=20 nodelay;
             '';
           };
-        }
+        } // lib.optionalAttrs (site.extraServerConfig != "") {
+          extraConfig = site.extraServerConfig;
+        })
       ) cfg.sites)
     ];
   };

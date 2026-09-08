@@ -1,0 +1,136 @@
+/* SFTPGo Nord theme (nord-sccl) — matches Flake's Stylix nord base16.
+   SB Admin2 / KeenThemes bootstrap build; injected via nginx sub_filter, so it
+   loads after the built-in stylesheet — overrides use the same !important
+   discipline as the gatus/forgejo nord themes. */
+
+@font-face { font-family: "Cascadia Code"; font-style: normal; font-weight: 400; src: url("/assets/fonts/CascadiaCode-Regular.ttf"); }
+@font-face { font-family: "Cascadia Code"; font-style: italic; font-weight: 400; src: url("/assets/fonts/CascadiaCode-Italic.ttf"); }
+@font-face { font-family: "Cascadia Code"; font-style: normal; font-weight: 600; src: url("/assets/fonts/CascadiaCode-SemiBold.ttf"); }
+@font-face { font-family: "Cascadia Code"; font-style: italic; font-weight: 600; src: url("/assets/fonts/CascadiaCode-SemiBoldItalic.ttf"); }
+@font-face { font-family: "Cascadia Code"; font-style: normal; font-weight: 700; src: url("/assets/fonts/CascadiaCode-Bold.ttf"); }
+@font-face { font-family: "Cascadia Code"; font-style: italic; font-weight: 700; src: url("/assets/fonts/CascadiaCode-BoldItalic.ttf"); }
+
+:root,
+[data-bs-theme="dark"] {
+  --bs-body-bg: #2e3440 !important;
+  --bs-body-color: #d8dee9 !important;
+  --bs-body-color-rgb: 216, 222, 233 !important;
+  --bs-emphasis-color: #d8dee9 !important;
+  --bs-secondary-color: #4c566a !important;
+  --bs-tertiary-color: #434c5e !important;
+  --bs-primary: #81a1c1 !important;
+  --bs-primary-rgb: 129, 161, 193 !important;
+  --bs-secondary: #434c5e !important;
+  --bs-secondary-rgb: 67, 76, 94 !important;
+  --bs-success: #a3be8c !important;
+  --bs-success-rgb: 163, 190, 140 !important;
+  --bs-danger: #bf616a !important;
+  --bs-danger-rgb: 191, 97, 106 !important;
+  --bs-warning: #ebcb8b !important;
+  --bs-warning-rgb: 235, 203, 139 !important;
+  --bs-info: #88c0d0 !important;
+  --bs-info-rgb: 136, 192, 208 !important;
+  --bs-border-color: #434c5e !important;
+  --bs-border-color-translucent: rgba(76, 86, 106, 0.5) !important;
+  --bs-link-color: #81a1c1 !important;
+  --bs-link-hover-color: #8fbcc8 !important;
+  --bs-link-color-rgb: 129, 161, 193 !important;
+  --bs-card-bg: #3b4252 !important;
+  --bs-card-border-color: #434c5e !important;
+  --bs-card-cap-bg: #3b4252 !important;
+  --bs-code-color: #a3be8c !important;
+  --bs-body-font-family: "Cascadia Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
+
+:root {
+  --is-dark-theme: true;
+  --color-primary: #81a1c1;
+  --color-primary-contrast: #2e3440;
+}
+
+body {
+  font-family: "Cascadia Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  background-color: #2e3440 !important;
+  color: #d8dee9 !important;
+  font-feature-settings: "calt" 1, "liga" 1, "ss01" 1;
+}
+
+.app-header,
+.app-sidebar {
+  background-color: #3b4252 !important;
+  border-color: #434c5e !important;
+}
+
+.card,
+.panel {
+  background-color: #3b4252 !important;
+  border-color: #434c5e !important;
+  color: #d8dee9 !important;
+}
+
+.section-title,
+.card-title {
+  color: #d8dee9 !important;
+}
+
+.text-sidebar {
+  color: #d8dee9 !important;
+}
+
+a {
+  color: #81a1c1 !important;
+}
+a:hover {
+  color: #8fbcc8 !important;
+}
+
+input,
+select,
+textarea {
+  background-color: #3b4252 !important;
+  color: #d8dee9 !important;
+  border-color: #4c566a !important;
+}
+input::placeholder,
+textarea::placeholder {
+  color: #6c7690 !important;
+}
+
+table {
+  --bs-table-bg: #3b4252 !important;
+  --bs-table-color: #d8dee9 !important;
+  --bs-table-border-color: #434c5e !important;
+  background-color: #3b4252 !important;
+  color: #d8dee9 !important;
+}
+
+/* terminal hover inversion on nav items */
+.app-navbar .item:hover,
+.app-navbar .btn:hover,
+.app-sidebar .menu .menu-item:hover,
+.app-sidebar .menu .menu-link:hover,
+.navbar .item:hover {
+  background: #81a1c1 !important;
+  color: #2e3440 !important;
+}
+
+/* square corners — no rounding */
+:root {
+  --radius: 0 !important;
+  --border-radius: 0 !important;
+}
+*,
+*:before,
+*:after {
+  border-radius: 0 !important;
+}
+
+::selection {
+  background: #81a1c1;
+  color: #2e3440;
+}
+
+*:focus-visible {
+  outline: 2px solid #81a1c1;
+  outline-offset: 1px;
+}

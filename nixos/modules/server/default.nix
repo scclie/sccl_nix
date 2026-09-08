@@ -9,7 +9,8 @@
     ./proxy.nix
     ./databases.nix
     ./forgejo
-    ./sftpgo.nix
+    ./sftpgo
+    ./webdav.nix
     ./vaultwarden.nix
     ./mail.nix
     ./monitoring.nix

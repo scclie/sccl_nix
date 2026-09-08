@@ -21,11 +21,16 @@ let
       nameserver:
         - 1.1.1.1
         - 8.8.8.8
+      nameserver-policy:
+        "sccl.cc": ${cfg.lanDns}
+        "*.sccl.cc": ${cfg.lanDns}
+        "git.sccl.cc": [ "1.1.1.1" ]
     tun:
       enable: true
       stack: gvisor
       auto-route: true
       auto-detect-interface: true
+    ipv6: true
     external-ui: ui
     proxy-groups:
       - name: proxy
@@ -34,6 +39,12 @@ let
           - proxy
     rules:
 ${processRules}
+      - IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
+      - IP-CIDR,10.0.0.0/8,DIRECT,no-resolve
+      - IP-CIDR,172.16.0.0/12,DIRECT,no-resolve
+      - IP-CIDR,100.64.0.0/10,DIRECT,no-resolve
+      - IP-CIDR,127.0.0.0/8,DIRECT,no-resolve
+      - GEOIP,LAN,DIRECT
       - DOMAIN-SUFFIX,github.com,DIRECT
       - DOMAIN-SUFFIX,githubusercontent.com,DIRECT
       - DOMAIN-SUFFIX,live.com,DIRECT
@@ -159,6 +170,12 @@ in
     configDir = lib.mkOption {
       type = lib.types.str;
       default = "/var/lib/mihomo";
+    };
+
+    lanDns = lib.mkOption {
+      type = lib.types.str;
+      default = "192.168.0.10";
+      description = "LAN DNS server (unbound on laeradr) for the local sccl.cc zone";
     };
   };
 

@@ -37,6 +37,11 @@
     playground.enable = true;
     nix-ld.enable = true;
     automount.enable = true;
+    files.webdav = {
+      enable = true;
+      url = "https://files-lan.sccl.cc:8081/";
+      mountPoint = "/home/paper/Files";
+    };
     ui.wallpaperSha256 = "sha256-cqL194wcTxCKmSFf+z0BfyZlLAlFs8pnzAManlQbkjQ=";
   };
 
