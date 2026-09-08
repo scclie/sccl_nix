@@ -93,6 +93,7 @@ in {
     # fail2ban
     services.fail2ban = {
       enable = true;
+      ignoreIP = [ "127.0.0.0/8" "::1" "192.168.0.20" ];
       jails = {
         sshd = {
           enabled = true;
