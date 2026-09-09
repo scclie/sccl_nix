@@ -94,6 +94,55 @@ in {
       };
     };
 
+    # Forgejo Actions runner (forgejo-runner), registered via server.connections.
+    # uuid+token live in sops next to each other (secrets/apps.yaml); the whole
+    # runner config is rendered at activation so the token never touches the repo.
+    sops.secrets."forgejo/runner-uuid" = {
+      sopsFile = ../../../../secrets/apps.yaml;
+    };
+
+    sops.secrets."forgejo/runner-token" = {
+      sopsFile = ../../../../secrets/apps.yaml;
+    };
+
+    sops.templates."forgejo-runner-config" = {
+      content = ''
+        log:
+          level: info
+          job_level: info
+        runner:
+          capacity: 2
+          timeout: 3h
+          fetch_interval: 2s
+          labels:
+            - ubuntu-latest:docker://codeberg.org/forgejo/runner-images:ubuntu-latest
+        container:
+          docker_host: automount
+          workdir_parent: /var/lib/forgejo-runner/workspace
+        server:
+          connections:
+            forgejo:
+              url: http://10.69.0.10:3000
+              uuid: ${config.sops.placeholder."forgejo/runner-uuid"}
+              token: ${config.sops.placeholder."forgejo/runner-token"}
+      '';
+      path = "/etc/nixos/secrets/forgejo-runner-config.yaml";
+      mode = "0400";
+    };
+
+    systemd.services.forgejo-runner = {
+      description = "Forgejo Actions runner";
+      after = [ "network-online.target" ];
+      wants = [ "network-online.target" ];
+      wantedBy = [ "multi-user.target" ];
+      serviceConfig = {
+        ExecStart = "${pkgs.forgejo-runner}/bin/forgejo-runner -c /etc/nixos/secrets/forgejo-runner-config.yaml daemon";
+        Restart = "always";
+        RestartSec = 5;
+        StateDirectory = "forgejo-runner";
+      };
+    };
+
     # Git container
     containers.git-ct = {
       autoStart = true;

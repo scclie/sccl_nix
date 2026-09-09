@@ -19,9 +19,12 @@ let
       name = ep.name;
       url = ep.url;
       interval = ep.interval;
+      client = {
+        timeout = "20s";
+      };
       conditions = [
         "[STATUS] == 200"
-        "[RESPONSE_TIME] < 5000"
+        "[RESPONSE_TIME] < 20000" # timeouts with cf proxy in ru**ia 😭😭😭😭😭😭😭😭 thx putin 💀
       ];
     } // lib.optionalAttrs (ep.group != "") { group = ep.group; }) cfg.endpoints;
   };
