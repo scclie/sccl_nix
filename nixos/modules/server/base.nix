@@ -82,6 +82,18 @@ in {
       after = [ "network-online.target" ];
     };
 
+    # arm the onboard NIC for wake-on-lan at every boot
+    systemd.services."wol-arm" = {
+      description = "Enable Wake-on-LAN on enp4s0";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "network-online.target" ];
+      wants = [ "network-online.target" ];
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = "${pkgs.ethtool}/bin/ethtool -s enp4s0 wol g";
+      };
+    };
+
     # SSH access
     users.users.root.openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILREBz4a7g2D+DfvOTHYn+yGiYnhBAU4eMnF6eTYkIxy sccl@sccl.cc"
@@ -128,6 +140,7 @@ in {
       htop
       tmux
       jq
+      ethtool
     ];
   };
 }
