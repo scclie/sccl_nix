@@ -3,7 +3,7 @@ let
   cfg = config.sccl.minecraft;
 in {
   options.sccl.minecraft = {
-    enable = lib.mkEnableOption "Minecraft server (stub — modpack build pending)";
+    enable = lib.mkEnableOption "Minecraft server (stub - modpack build pending)";
   };
 
   config = lib.mkIf cfg.enable {

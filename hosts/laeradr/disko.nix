@@ -50,7 +50,7 @@
           };
           data = {
             type = "zfs_fs";
-            # Parent dataset — not mounted, only children are mounted
+            # Parent dataset - not mounted, only children are mounted
           };
           "data/sites" = {
             type = "zfs_fs";

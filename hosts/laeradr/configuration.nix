@@ -23,7 +23,6 @@
     dns = {
       enable = true;
       zone = "sccl.cc";
-      publicIp = "REDACTED";
     };
     wireguard = {
       enable = true;

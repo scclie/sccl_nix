@@ -59,7 +59,7 @@ in {
           wantedBy = [ "multi-user.target" ];
           serviceConfig = {
             # LoadCredential copies the (0400 root) secrets into /run/credentials/<unit>/,
-            # which is owned by the service user — direct cat of /run/secrets would fail.
+            # which is owned by the service user - direct cat of /run/secrets would fail.
             LoadCredential = [
               "admin-token:/run/secrets/vaultwarden/admin-token"
               "db-password:/run/secrets/vaultwarden/db-password"

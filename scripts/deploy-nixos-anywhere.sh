@@ -26,7 +26,7 @@ if [ -f "$AGE_KEY" ]; then
   echo "Staging age key from $AGE_KEY"
   EXTRA_FILES=("--extra-files" "$STAGING")
 else
-  echo "WARNING: age key not found at $AGE_KEY — secrets will not decrypt on target" >&2
+  echo "WARNING: age key not found at $AGE_KEY - secrets will not decrypt on target" >&2
   EXTRA_FILES=()
 fi
 

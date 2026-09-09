@@ -3,13 +3,13 @@ let
   cfg = config.sccl.matrix;
 in {
   options.sccl.matrix = {
-    enable = lib.mkEnableOption "Matrix Synapse (stub — deploys after domain purchase)";
+    enable = lib.mkEnableOption "Matrix Synapse (stub - deploys after domain purchase)";
   };
 
   config = lib.mkIf cfg.enable {
     # Placeholder: reserved IP .19, dataset /tank/data/matrix
     # Actual deployment deferred until separate domain is purchased
-    # WARNING: server_name is immutable after first user — decide BEFORE deploy
+    # WARNING: server_name is immutable after first user - decide BEFORE deploy
 
     # When ready, uncomment and configure:
     # containers.matrix-ct = {

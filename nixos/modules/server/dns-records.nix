@@ -1,4 +1,4 @@
-{ domain ? "sccl.cc", serverIp ? "192.168.0.10", publicIp ? serverIp }:
+{ domain ? "sccl.cc", serverIp ? "192.168.0.10" }:
 
 {
   records = [
@@ -24,12 +24,12 @@
   ];
 
   cfRecords = [
-    { name = "status"; type = "A"; content = publicIp; proxied = true; }
-    { name = "git"; type = "A"; content = publicIp; proxied = true; }
-    { name = "prometheus"; type = "A"; content = publicIp; proxied = true; }
-    { name = "loki"; type = "A"; content = publicIp; proxied = true; }
-    { name = "alertmanager"; type = "A"; content = publicIp; proxied = true; }
-    { name = "grafana"; type = "A"; content = publicIp; proxied = true; }
-    { name = "files"; type = "A"; content = publicIp; proxied = true; }
+    { name = "status"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
+    { name = "git"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
+    { name = "prometheus"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
+    { name = "loki"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
+    { name = "alertmanager"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
+    { name = "grafana"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
+    { name = "files"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
   ];
 }

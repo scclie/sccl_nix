@@ -3,7 +3,7 @@ let
   cfg = config.sccl.radio;
 in {
   options.sccl.radio = {
-    enable = lib.mkEnableOption "Radio service (stub — app spec separate)";
+    enable = lib.mkEnableOption "Radio service (stub - app spec separate)";
   };
 
   config = lib.mkIf cfg.enable {

@@ -10,6 +10,6 @@ pkgs.mkShell {
   ];
 
   shellHook = ''
-    echo "Playground shell — type 'exit' to return"
+    echo "Playground shell - type 'exit' to return"
   '';
 }

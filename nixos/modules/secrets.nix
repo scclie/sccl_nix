@@ -14,7 +14,7 @@ in {
     };
     scopes = lib.mkOption {
       type = lib.types.listOf (lib.types.enum [ "personal" "infra" "db" "apps" ]);
-      description = "Sops files available to this host. Required — set explicitly per host.";
+      description = "Sops files available to this host. Required - set explicitly per host.";
     };
   };
 
@@ -36,7 +36,7 @@ in {
         keyFile = toString cfg.ageKeyFile;
       };
     } // lib.optionalAttrs (lib.elem "personal" config.sccl.secrets.scopes) {
-      # Personal-only secrets (SSH keys, GPG). Server must NOT see these —
+      # Personal-only secrets (SSH keys, GPG). Server must NOT see these -
       # personal.yaml is encrypted under the personal age key only.
       defaultSopsFile = ../../secrets/personal.yaml;
       secrets = {

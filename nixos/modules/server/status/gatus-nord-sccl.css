@@ -1,4 +1,4 @@
-/* Gatus Nord theme (nord-sccl) — matches Flake's Stylix nord base16.
+/* Gatus Nord theme (nord-sccl) - matches Flake's Stylix nord base16.
    Gatus v5 theming uses HSL CSS variables (Tailwind/shadcn style).
    NB: /css/custom.css loads BEFORE /css/app.css, so all overrides need !important. */
 
@@ -67,7 +67,7 @@
     --chart-5: 18 50% 63% !important;
 }
 
-/* Square corners — no rounding */
+/* Square corners - no rounding */
 :root {
     --radius: 0 !important;
 }

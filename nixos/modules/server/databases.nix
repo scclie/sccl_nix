@@ -55,7 +55,7 @@ in {
       };
     };
 
-    # Ensure data directory exists (0700 — PostgreSQL refuses to start otherwise)
+    # Ensure data directory exists (0700 - PostgreSQL refuses to start otherwise)
     systemd.tmpfiles.rules = [
       "d ${cfg.dataDir} 0755 postgres postgres -"
       "d ${cfg.dataDir}/postgresql 0700 postgres postgres -"
