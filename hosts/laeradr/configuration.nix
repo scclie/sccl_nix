@@ -39,6 +39,9 @@
     forgejo = {
       enable = true;
     };
+    gifs = {
+      enable = true;
+    };
     vaultwarden = {
       enable = true;
     };
@@ -51,7 +54,11 @@
     status = {
       enable = true;
       endpoints = [
-        { name = "main website"; group = "apps"; url = "https://sccl.cc"; interval = "5m"; }
+        { name = "main website"; group = "apps"; url = "https://sccl.cc"; interval = "3m"; }
+        { name = "xkb generator"; group = "apps"; url = "https://xkb.sccl.cc"; interval = "5m"; }
+        { name = "google otp migration decoder"; group = "apps"; url = "https://otp-migrate.sccl.cc"; interval = "5m"; }
+        { name = "gif.sccl api"; group = "apps"; url = "https://gif.sccl.cc/api/health"; interval = "1m"; }
+        { name = "postgresql"; group = "services"; url = "tcp://127.0.0.1:5432"; interval = "1m"; conditions = [ "[CONNECTED] == true" "[RESPONSE_TIME] < 2000" ]; }
         { name = "sftpgo"; group = "services"; url = "https://files.sccl.cc"; interval = "5m"; }
         { name = "forgejo"; group = "services"; url = "https://git.sccl.cc"; interval = "5m"; }
         { name = "vaultwarden"; group = "services"; url = "https://pass.sccl.cc"; interval = "5m"; }
@@ -71,6 +78,48 @@
       sites = {
         git = { upstream = "http://10.69.0.10:3000"; };
         # pass / pass-api are registered by the vaultwarden module itself
+      };
+    };
+    zapret = {
+      enable = true;
+      # discord only - gif.sccl api container talks to discord.com for oauth
+      hosts = [
+        "discord.com"
+        "discord.gg"
+        "discordapp.com"
+        "discordapp.net"
+        "media.discordapp.net"
+        "cdn.discordapp.com"
+        "discord.media"
+        "discordvoice.com"
+      ];
+      excludes = [];
+    };
+    sites = {
+      enable = true;
+      sites."sccl.cc" = {
+        domain = "sccl.cc";
+        extraDomains = [ "www.sccl.cc" ];
+      };
+      sites."xkb.sccl" = {
+        domain = "xkb.sccl.cc";
+      };
+      sites."otp-migrate" = {
+        domain = "otp-migrate.sccl.cc";
+      };
+      sites."gif.sccl" = {
+        domain = "gif.sccl.cc";
+        facade = {
+          upstream = "http://127.0.0.1:8083";
+          apiPrefix = "/api";
+          extraConfig = ''
+            client_max_body_size 25m;
+            proxy_read_timeout 60s;
+            proxy_set_header Host $host;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header CF-Connecting-IP $http_cf_connecting_ip;
+          '';
+        };
       };
     };
   };

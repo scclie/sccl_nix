@@ -43,6 +43,7 @@
     blender
     wf-recorder
     orca-slicer
+    pixieditor
 
     # Audio
     easyeffects

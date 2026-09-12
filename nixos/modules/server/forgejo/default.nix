@@ -115,9 +115,14 @@ in {
           timeout: 3h
           fetch_interval: 2s
           labels:
-            - ubuntu-latest:docker://codeberg.org/forgejo/runner-images:ubuntu-latest
+            - ubuntu-latest:docker://docker.io/library/node:22-bookworm
         container:
           docker_host: automount
+          options: "-v /tank/sites:/tank/sites -v /run/secrets/gif:/run/secrets/gif:ro -v /run/secrets/gif-sccl:/run/secrets/gif-sccl:ro"
+          valid_volumes:
+            - /tank/sites
+            - /run/secrets/gif
+            - /run/secrets/gif-sccl
           workdir_parent: /var/lib/forgejo-runner/workspace
         server:
           connections:

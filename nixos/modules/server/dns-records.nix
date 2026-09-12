@@ -19,6 +19,9 @@
     { name = "files"; type = "A"; content = serverIp; }
     { name = "files-lan"; type = "A"; content = serverIp; }
     { name = "status"; type = "A"; content = serverIp; }
+    { name = "xkb"; type = "A"; content = serverIp; }
+    { name = "otp-migrate"; type = "A"; content = serverIp; }
+    { name = "gif"; type = "A"; content = serverIp; }
     #{ name = "git"; type = "A"; content = serverIp; }
     #{ name = "pass"; type = "A"; content = serverIp; }
   ];
@@ -31,5 +34,10 @@
     { name = "alertmanager"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
     { name = "grafana"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
     { name = "files"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
+    { name = "@"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
+    { name = "www"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
+    { name = "xkb"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
+    { name = "otp-migrate"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
+    { name = "gif"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
   ];
 }

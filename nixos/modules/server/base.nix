@@ -127,6 +127,7 @@ in {
           max-size = "10m";
           max-file = "3";
         };
+        insecure-registries = [ "10.69.0.17:5000" ];
       };
     };
 

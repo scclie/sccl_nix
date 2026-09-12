@@ -22,10 +22,7 @@ let
       client = {
         timeout = "20s";
       };
-      conditions = [
-        "[STATUS] == 200"
-        "[RESPONSE_TIME] < 20000" # timeouts with cf proxy in ru**ia 😭😭😭😭😭😭😭😭 thx putin 💀
-      ];
+      conditions = ep.conditions;
     } // lib.optionalAttrs (ep.group != "") { group = ep.group; }) cfg.endpoints;
   };
 
@@ -47,6 +44,14 @@ in {
           interval = lib.mkOption {
             type = lib.types.str;
             default = "1m";
+          };
+          conditions = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            default = [
+              "[STATUS] == 200"
+              "[RESPONSE_TIME] < 20000" # cf proxy timeouts
+            ];
+            description = "Gatus success conditions for this endpoint";
           };
         };
       });

@@ -9,6 +9,7 @@
     ./proxy.nix
     ./databases.nix
     ./forgejo
+    ./gifs.nix
     ./sftpgo
     ./webdav.nix
     ./vaultwarden.nix
@@ -19,6 +20,7 @@
     ./minecraft.nix
     ./matrix.nix
     ./radio.nix
+    ./sites.nix
     ./sso.nix
   ];
 }

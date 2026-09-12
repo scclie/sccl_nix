@@ -142,7 +142,10 @@ in {
           static_configs = [{
             targets = [
               "https://sccl.cc"
+              "https://xkb.sccl.cc"
+              "https://otp-migrate.sccl.cc"
               "https://git.sccl.cc"
+              "https://gif.sccl.cc"
             ];
           }];
           relabel_configs = [
@@ -159,6 +162,11 @@ in {
               replacement = "localhost:9115";
             }
           ];
+        }
+        {
+          job_name = "gif-app";
+          metrics_path = "/metrics";
+          static_configs = [{ targets = [ "localhost:8083" ]; }];
         }
       ];
       alertmanagers = [{
