@@ -118,9 +118,10 @@ in {
             - ubuntu-latest:docker://docker.io/library/node:22-bookworm
         container:
           docker_host: automount
-          options: "-v /tank/sites:/tank/sites -v /run/secrets/gif:/run/secrets/gif:ro -v /run/secrets/gif-sccl:/run/secrets/gif-sccl:ro"
+          options: "-v /tank/sites:/tank/sites -v /tank/mon:/tank/mon -v /run/secrets/gif:/run/secrets/gif:ro -v /run/secrets/gif-sccl:/run/secrets/gif-sccl:ro"
           valid_volumes:
             - /tank/sites
+            - /tank/mon
             - /run/secrets/gif
             - /run/secrets/gif-sccl
           workdir_parent: /var/lib/forgejo-runner/workspace

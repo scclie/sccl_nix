@@ -94,7 +94,7 @@ in {
             --repo ${cfg.resticRepository} \
             --password-file ${cfg.resticPasswordFile} \
             --verbose \
-            /tank/data /tank/forgejo /tank/db /tank/mail /tank/vw /tank/mon
+            /tank/data /tank/forgejo /tank/db /tank/mail /tank/vw /tank/mon /tank/apps /tank/gifs /tank/sites
 
           ${pkgs.restic}/bin/restic forget \
             --repo ${cfg.resticRepository} \

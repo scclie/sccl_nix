@@ -23,6 +23,41 @@ in {
       sopsFile = ../../../secrets/apps.yaml;
     };
 
+    sops.templates."gif-env" = {
+      content = ''
+        DATABASE_URL=postgresql://gif:${config.sops.placeholder."gif-sccl/db-password"}@10.69.0.1:5432/gif
+        DATA_DIR=/var/gifs
+        DISCORD_CLIENT_ID=${config.sops.placeholder."gif/discord-client-id"}
+        DISCORD_CLIENT_SECRET=${config.sops.placeholder."gif/discord-client-secret"}
+        DISCORD_REDIRECT_URI=https://gif.sccl.cc/api/auth/callback
+        TURNSTILE_SITE_KEY=${config.sops.placeholder."gif/turnstile-site-key"}
+        TURNSTILE_SECRET_KEY=${config.sops.placeholder."gif/turnstile-secret-key"}
+        PORT=8083
+      '';
+      path = "/etc/nixos/secrets/gif-env";
+      mode = "0400";
+    };
+
+    virtualisation.oci-containers = {
+      backend = "docker";
+      containers.gifs = {
+        image = "10.69.0.17:5000/scclie/gif:main";
+        autoStart = true;
+        pull = "always";
+        volumes = [ "/tank/gifs:/var/gifs" ];
+        extraOptions = [ "--network=host" ];
+        environmentFiles = [ "/etc/nixos/secrets/gif-env" ];
+      };
+    };
+
+    systemd.services."docker-gifs" = {
+      after = lib.mkAfter [ "sops-install-secrets.service" ];
+      serviceConfig = {
+        Restart = lib.mkForce "always";
+        RestartSec = "5s";
+      };
+    };
+
     virtualisation.docker.autoPrune = {
       enable = true;
     };

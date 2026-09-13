@@ -110,6 +110,9 @@ in {
       chown grafana:grafana /tank/mon/grafana
       chown -R loki:loki /tank/mon/loki
 
+      mkdir -p /tank/mon/grafana/dashboards/gif
+      chown grafana:grafana /tank/mon/grafana/dashboards/gif
+
       # Generate grafana secret key if missing
       if [ ! -f /etc/grafana/secret_key ]; then
         mkdir -p /etc/grafana
@@ -251,6 +254,19 @@ in {
       };
       provision = {
         enable = true;
+        dashboards.settings = {
+          apiVersion = 1;
+          providers = [{
+            name = "gif";
+            orgId = 1;
+            folder = "GIF";
+            type = "file";
+            disableDeletion = false;
+            allowUiUpdates = false;
+            updateIntervalSeconds = 10;
+            options.path = "/tank/mon/grafana/dashboards/gif";
+          }];
+        };
         datasources.settings = {
           apiVersion = 1;
           datasources = [
