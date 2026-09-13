@@ -10,6 +10,7 @@
     electrum
     electrum-ltc
     vesktop
+    mumble
 
     # Development
     lmstudio

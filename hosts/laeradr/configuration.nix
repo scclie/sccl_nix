@@ -42,6 +42,10 @@
     gifs = {
       enable = true;
     };
+    murmur = {
+      enable = true;
+      channels = [ "Lounge" "Room 1" "Room 2" "Room 3" "Afk" ];
+    };
     vaultwarden = {
       enable = true;
     };

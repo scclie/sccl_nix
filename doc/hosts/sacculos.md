@@ -34,6 +34,11 @@ main desktop work-gaming machine.
 
 ## deploy
 
+i usually put everything right on the machine
+
 ```bash
 sudo nixos-rebuild switch --flake .#sacculos
+
+# or via fish alias (see 'profiles/shared/modules/fish.nix')
+rebuild sacculos
 ```

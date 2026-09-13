@@ -10,6 +10,7 @@
     ./databases.nix
     ./forgejo
     ./gifs.nix
+    ./murmur.nix
     ./sftpgo
     ./webdav.nix
     ./vaultwarden.nix

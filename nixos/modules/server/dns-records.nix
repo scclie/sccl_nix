@@ -22,6 +22,7 @@
     { name = "xkb"; type = "A"; content = serverIp; }
     { name = "otp-migrate"; type = "A"; content = serverIp; }
     { name = "gif"; type = "A"; content = serverIp; }
+    { name = "murmur"; type = "A"; content = serverIp; }
     #{ name = "git"; type = "A"; content = serverIp; }
     #{ name = "pass"; type = "A"; content = serverIp; }
   ];
@@ -39,5 +40,6 @@
     { name = "xkb"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
     { name = "otp-migrate"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
     { name = "gif"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
+    { name = "murmur"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
   ];
 }

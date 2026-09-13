@@ -28,23 +28,23 @@ in [laeradr-bios.md](./laeradr-bios.md).
 
 | network | address | purpose |
 |---|---|---|
-| LAN | `192.168.0.10/24` (`enp4s0`) | Static via router DHCP reservation |
-| Public origin | * | Behind Cloudflare proxy |
-| WireGuard | `10.100.0.1/24` | `wg0`, UDP `51820` |
-| Container bridge | `10.69.0.1/24` (`br-svc`) | Service containers (private network, NATed) |
+| lan | `192.168.0.10/24` (`enp4s0`) | static via router DHCP reservation |
+| public origin | * | behind Cloudflare proxy |
+| wireguard | `10.100.0.1/24` | `wg0`, UDP `51820` |
+| container bridge | `10.69.0.1/24` (`br-svc`) | service containers (private network, NATed) |
 
-### Container IPs (br-svc, `10.69.0.0/24`)
+### container ip's (br-svc, `10.69.0.0/24`)
 
 | IP | Service | Container | Listen ports |
 |---|---|---|---|
-| `10.69.0.9` | Mail (stalwart-mail) | `mail-ct` | 8080 (admin UI) |
-| `10.69.0.10` | Forgejo | `git-ct` | 3000 |
-| `10.69.0.11` | SFTPGo | `files-ct` | 8080 web / 8081 webdav / 8082 admin |
-| `10.69.0.16` | Vaultwarden | `vaultwarden-ct` | - |
-| `10.69.0.17` | Docker Registry (OCI) | `registry-ct` | 5000 |
-| `10.69.0.15` | Radio (stub, not deployed) | - | - |
-| `10.69.0.18` | Authelia SSO (stub) | - | - |
-| `10.69.0.19` | Matrix Synapse (stub, reserved for a separate domain) | - | - |
+| `10.69.0.9` | mail (stalwart-mail) | `mail-ct` | 8080 (admin UI) |
+| `10.69.0.10` | forgejo | `git-ct` | 3000 |
+| `10.69.0.11` | sftpgo | `files-ct` | 8080 web / 8081 webdav / 8082 admin |
+| `10.69.0.16` | vaultwarden | `vaultwarden-ct` | - |
+| `10.69.0.17` | docker registry (OCI) | `registry-ct` | 5000 |
+| `10.69.0.15` | radio (stub, not deployed) | - | - |
+| `10.69.0.18` | authelia SSO (stub) | - | - |
+| `10.69.0.19` | matrix synapse (stub, reserved for a separate domain) | - | - |
 
 containers r ephemeral NixOS containers (`containers.*`, `ephemeral = true`,
 `privateNetwork = true`) created by the `sccl.server.lib.mkServiceContainer`
@@ -56,19 +56,21 @@ they reach host DBs via the bridge gateway `10.69.0.1`.
 | port | service | bind |
 |---|---|---|
 | 22 | sshd (key-only) | `192.168.0.10`, `10.100.0.1` |
-| 53 | unbound (LAN resolver for `sccl.cc`) | `192.168.0.10` + loopback |
-| 5300/lo | PowerDNS authoritative | `127.0.0.1` |
+| 53 | unbound (lan resolver for `sccl.cc`) | `192.168.0.10` + loopback |
+| 5300/lo | powerdns authoritative | `127.0.0.1` |
 | 80, 443 | nginx + ACME wildcard `*.sccl.cc` | `192.168.0.10` |
-| 8081, 8082 | SFTPGo LAN mirrors (TLS) | `192.168.0.10` |
+| 8081, 8082 | sftpgo LAN mirrors (TLS) | `192.168.0.10` |
 | 3001/lo | grafana | `127.0.0.1` |
 | 5432 | pgSQL | `10.69.0.0/24` (bridge) |
 | 6379/lo | redis | `127.0.0.1` |
 | 8080 | gatus (public monitoring) | upstream via nginx |
 | 9090/3100/9093/lo | prometheus / Loki / Alertmanager | `127.0.0.1` |
 | 9100/9113/9115/lo | node / nginx / blackbox exporters | `127.0.0.1` |
+| 64738 TCP+UDP | murmur (Mumble voice server) | `*` |
 
 Firewall (host): TCP `22 80 443 25 465 587 993 8448`, UDP `51820`,
-TCP+UDP `25565-25590` (Minecraft, reserved), TCP+UDP `53` for LAN DNS.
+TCP+UDP `25565-25590` (Minecraft, reserved), TCP+UDP `53` for LAN DNS,
+TCP+UDP `64738` (murmur).
 
 ## public services (`*.sccl.cc`, HTTPS via nginx + Cloudflare)
 
@@ -87,6 +89,8 @@ TCP+UDP `25565-25590` (Minecraft, reserved), TCP+UDP `53` for LAN DNS.
 | `https://prometheus.sccl.cc` | prometheus (basic auth) | `127.0.0.1:9090` |
 | `https://loki.sccl.cc` | loki (basic auth) | `127.0.0.1:3100` |
 | `https://alertmanager.sccl.cc` | alertmanager (basic auth) | `127.0.0.1:9093` |
+| `https://gif.sccl.cc` | gif generator / hosting | `127.0.0.1:8083` (API, /api) |
+| `murmur.sccl.cc:64738` | Mumble voice server | host, TCP+UDP `64738` |
 
 grafana is admin-only; prometheus/loki/alertmanager public paths (`/-/healthy`,
 `/ready`, `/-/healthy`) are exempt from basic auth so the gatus page can probe
@@ -110,7 +114,7 @@ points to the LAN IP in the local zone;.
 
 ## storage (ZFS `tank`)
 
-| Dataset | Mount | Used by |
+| dataset | mount | used by |
 |---|---|---|
 | `tank/root` | `/` | root fs |
 | `tank/nix` | `/nix` (quota 200G) | nix store |
@@ -130,7 +134,7 @@ points to the LAN IP in the local zone;.
 
 all from [`hosts/laeradr/disko.nix`](../../hosts/laeradr/disko.nix).
 
-## Backup
+## backup
 
 - **sanoid** snapshots: `tank/root`, `tank/data` - hourly 24 / daily 7 /
   weekly 4 / monthly 3 (auto snap + prune).
@@ -148,7 +152,7 @@ host-scoped secret files under `secrets/`, scopes enabled in host config:
 |---|---|---|
 | infra | `secrets/infra.yaml` | cf API token, wg keys |
 | db | `secrets/db.yaml` | pgsql, app passwords |
-| apps | `secrets/apps.yaml` | restic, tg bot, monitoring htpasswd, vaultwarden admin token |
+| apps | `secrets/apps.yaml` | restic, tg bot, monitoring htpasswd, vaultwarden admin token, gif (discord oauth, turnstile), murmur (server + superuser passwords) |
 
 secrets decrypt under `/run/secrets/...` at activation. Containers get them
 read-only via `/run/secrets` bind mount.
@@ -161,7 +165,7 @@ sudo nixos-rebuild switch --flake .#laeradr --target-host root@192.168.0.10
 
 users & packages for `heimdall` come from [`profiles/server/`](../../profiles/server/).
 
-## Monitoring & alerts
+## monitoring & alerts
 
 - prometheus scrapes node/nginx exporters and blackbox HTTP probes; rules
   alert on node-down, high CPU/RAM, low disk.

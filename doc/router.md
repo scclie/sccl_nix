@@ -13,7 +13,7 @@
 
 | host | ip | reason |
 |---|---|---|
-| laeradr | `192.168.0.10` | server (static services) |
+| laeradr | `192.168.0.10` | server |
 | sacculos | `192.168.0.20` | desktop |
 
 ## port forwarding (WAN -> laeradr)
@@ -21,3 +21,4 @@
 | port | proto | purpose |
 |---|---|---|
 | 443 | TCP | https origin for cf |
+| 64738 | TCP+UDP| murmur (mumble voice server) |
