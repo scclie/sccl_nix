@@ -15,7 +15,20 @@
     audio.enable = true;
     bluetooth.enable = true;
     net.enable = true;
-    zapret.enable = true;
+    zapret = {
+      enable = true;
+      hosts = [
+        "discord.com"
+        "discord.gg"
+        "discordapp.com"
+        "discordapp.net"
+        "media.discordapp.net"
+        "cdn.discordapp.com"
+        "discord.media"
+        "discordvoice.com"
+      ];
+      excludes = [];
+    };
     secrets = {
       enable = true;
       scopes = [ "personal" ];

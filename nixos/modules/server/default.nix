@@ -19,6 +19,7 @@
     ./status
     ./backup.nix
     ./minecraft.nix
+    ./valheim.nix
     ./matrix.nix
     ./radio.nix
     ./sites.nix

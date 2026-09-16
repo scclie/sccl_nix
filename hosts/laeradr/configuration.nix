@@ -46,6 +46,11 @@
       enable = true;
       channels = [ "Lounge" "Room 1" "Room 2" "Room 3" "Afk" ];
     };
+    valheim = {
+      enable = true;
+      name = "laeradr";
+      world = "Midgard";
+    };
     vaultwarden = {
       enable = true;
     };
