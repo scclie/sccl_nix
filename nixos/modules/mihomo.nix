@@ -25,6 +25,8 @@ let
         "sccl.cc": ${cfg.lanDns}
         "*.sccl.cc": ${cfg.lanDns}
         "git.sccl.cc": [ "1.1.1.1" ]
+        "pierdol.ing": ${cfg.lanDns}
+        "*.pierdol.ing": ${cfg.lanDns}
     tun:
       enable: true
       stack: gvisor

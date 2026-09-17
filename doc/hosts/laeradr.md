@@ -44,7 +44,7 @@ in [laeradr-bios.md](./laeradr-bios.md).
 | `10.69.0.17` | docker registry (OCI) | `registry-ct` | 5000 |
 | `10.69.0.15` | radio (stub, not deployed) | - | - |
 | `10.69.0.18` | authelia SSO (stub) | - | - |
-| `10.69.0.19` | matrix synapse (stub, reserved for a separate domain) | - | - |
+| `10.69.0.19` | matrix (continuwuity) | `matrix-ct` | 6167 (client+federation) |
 
 containers r ephemeral NixOS containers (`containers.*`, `ephemeral = true`,
 `privateNetwork = true`) created by the `sccl.server.lib.mkServiceContainer`
@@ -90,6 +90,8 @@ TCP+UDP `64738` (murmur).
 | `https://loki.sccl.cc` | loki (basic auth) | `127.0.0.1:3100` |
 | `https://alertmanager.sccl.cc` | alertmanager (basic auth) | `127.0.0.1:9093` |
 | `https://gif.sccl.cc` | gif generator / hosting | `127.0.0.1:8083` (API, /api) |
+| `https://pierdol.ing` | matrix (server_name) + meme page | `10.69.0.19:6167` (/ matrix) |
+| `pierdol.ing:8448` | matrix federation | `10.69.0.19:6167` |
 | `murmur.sccl.cc:64738` | Mumble voice server | host, TCP+UDP `64738` |
 
 grafana is admin-only; prometheus/loki/alertmanager public paths (`/-/healthy`,
@@ -101,15 +103,18 @@ points to the LAN IP in the local zone;.
 
 ## dns
 
-- **authoritative:** PowerDNS (sqlite, `127.0.0.1:5300`), zone `sccl.cc`
-  managed from [`dns-records.nix`](../../nixos/modules/server/dns-records.nix).
+- **authoritative:** PowerDNS (sqlite, `127.0.0.1:5300`), zones `sccl.cc` and
+  `pierdol.ing` (second zone via `sccl.dns.extraZones`)
+  managed from [`dns-records.nix`](../../nixos/modules/server/dns-records.nix)
+  and [`dns-records-pierdolling.nix`](../../nixos/modules/server/dns-records-pierdolling.nix).
   `systemd` `dns-apply` service + hourly timer push the records.
 - **resolver:** Unbound on `192.168.0.10:53` answers `*.sccl.cc` locally and
   forwards everything else to `1.1.1.1`/`8.8.8.8`. LAN clients use it for fast
   split-horizon (subdomains → `192.168.0.10` directly, no Cloudflare loop).
 - **cf:** `cf-dns-sync` (service + hourly timer + activation script)
   mirrors selected records as proxied.
-- **tls:** single wildcard cert `*.sccl.cc` via ACME DNS-01
+- **phase 2:** `id.pierdol.ing` record reserved for Kanidm.
+- **tls:** wildcard certs `*.sccl.cc` and `*.pierdol.ing` via ACME DNS-01
   (`security.acme`, Cloudflare token from sops `infra.yaml`).
 
 ## storage (ZFS `tank`)
@@ -127,7 +132,7 @@ points to the LAN IP in the local zone;.
 | `tank/data/vw` | `/tank/vw` | vaultwarden |
 | `tank/data/mon` | `/tank/mon` | prometheus / grafana / loki / gatus |
 | `tank/data/minecraft` | `/tank/minecraft` | (reserved) |
-| `tank/data/matrix` | `/tank/matrix` | (reserved) |
+| `tank/data/matrix` | `/tank/matrix` | matrix-ct |
 | `tank/data/music` | `/tank/music` | (reserved) |
 | `tank/backups` | `/tank/backups` | local backups |
 | `tank/swap` | (zvol 8G) | swap |

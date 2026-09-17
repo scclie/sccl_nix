@@ -9,6 +9,9 @@
   ];
 
   networking.hostName = "sacculos";
+  networking.extraHosts = ''
+    192.168.0.10 pierdol.ing id.pierdol.ing sccl.cc
+  '';
 
   sccl = {
     ui.enable = true;

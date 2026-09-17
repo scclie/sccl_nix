@@ -23,6 +23,11 @@
     dns = {
       enable = true;
       zone = "sccl.cc";
+      extraZones = [
+        (import ../../nixos/modules/server/dns-records-pierdolling.nix {
+          serverIp = "192.168.0.10";
+        } // { name = "pierdol.ing"; })
+      ];
     };
     wireguard = {
       enable = true;
@@ -47,7 +52,7 @@
       channels = [ "Lounge" "Room 1" "Room 2" "Room 3" "Afk" ];
     };
     valheim = {
-      enable = true;
+      enable = false;
       name = "laeradr";
       world = "Midgard";
     };
@@ -56,6 +61,12 @@
     };
     mail = {
       enable = true;
+    };
+    matrix = {
+      enable = true;
+      web = {
+        enable = true;
+      };
     };
     monitoring = {
       enable = true;
@@ -67,6 +78,8 @@
         { name = "xkb generator"; group = "apps"; url = "https://xkb.sccl.cc"; interval = "5m"; }
         { name = "google otp migration decoder"; group = "apps"; url = "https://otp-migrate.sccl.cc"; interval = "5m"; }
         { name = "gif.sccl api"; group = "apps"; url = "https://gif.sccl.cc/api/health"; interval = "1m"; }
+        { name = "matrix"; group = "apps"; url = "https://pierdol.ing/_matrix/client/versions"; interval = "5m"; }
+        { name = "pierdol ing"; group = "apps"; url = "https://pierdol.ing"; interval = "5m"; }
         { name = "postgresql"; group = "services"; url = "tcp://127.0.0.1:5432"; interval = "1m"; conditions = [ "[CONNECTED] == true" "[RESPONSE_TIME] < 2000" ]; }
         { name = "sftpgo"; group = "services"; url = "https://files.sccl.cc"; interval = "5m"; }
         { name = "forgejo"; group = "services"; url = "https://git.sccl.cc"; interval = "5m"; }

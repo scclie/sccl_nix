@@ -11,6 +11,10 @@
     electrum-ltc
     vesktop
     mumble
+    fluffychat
+    element-web
+    #nheko
+    #commet-chat
 
     # Development
     lmstudio

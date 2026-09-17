@@ -10,35 +10,38 @@ let
     inherit domain;
     serverIp = cfg.hostIp;
   };
+  primaryZone = {
+    name = domain;
+    inherit (records) records cfRecords;
+  };
+  allZones = [ primaryZone ] ++ cfg.extraZones;
 
   pdns = pkgs.pdns;
   pdnsutil = "${pdns}/bin/pdnsutil";
   pdnsSchema = "${pdns}/share/doc/pdns/schema.sqlite3.sql";
   sqlite3 = "${pkgs.sqlite}/bin/sqlite3";
 
-  recordCmd = r:
+  recordCmd = zone: r:
     let
-      name = if r.name == "@" then domain else "${r.name}.${domain}";
+      name = if r.name == "@" then zone else "${r.name}.${zone}";
       content = if r.type == "TXT" then "\"${r.content}\"" else r.content;
     in
-    if r.type == "NS" then "${pdnsutil} rrset replace ${domain} '${name}' NS '${r.content}'"
-    else if r.type == "MX" then "${pdnsutil} rrset replace ${domain} '${name}' MX '${r.content}'"
-    else if r.type == "SOA" then "${pdnsutil} rrset replace ${domain} '${name}' SOA '${r.content}'"
-    else "${pdnsutil} rrset replace ${domain} '${name}' ${r.type} '${content}'";
+    if r.type == "NS" then "${pdnsutil} rrset replace ${zone} '${name}' NS '${r.content}'"
+    else if r.type == "MX" then "${pdnsutil} rrset replace ${zone} '${name}' MX '${r.content}'"
+    else if r.type == "SOA" then "${pdnsutil} rrset replace ${zone} '${name}' SOA '${r.content}'"
+    else "${pdnsutil} rrset replace ${zone} '${name}' ${r.type} '${content}'";
 
   applyScript = pkgs.writeShellScript "dns-apply" ''
     set -euo pipefail
-
-    ${pdnsutil} create-zone ${domain} || true
-
-    ${lib.concatStringsSep "\n" (map recordCmd records.records)}
-
-    echo "DNS records applied for ${domain} at $(date)"
+    ${lib.concatStringsSep "\n" (lib.concatMap (z:
+      [ "${pdnsutil} create-zone ${z.name} || true" ]
+      ++ map (recordCmd z.name) z.records) allZones)}
+    echo "DNS records applied for ${toString (builtins.length allZones)} zone(s) at $(date)"
   '';
 
-  cfSyncOneshot = r:
+  cfSyncOneshot = zone: r:
     let
-      name = if r.name == "@" then domain else "${r.name}.${domain}";
+      name = if r.name == "@" then zone else "${r.name}.${zone}";
       proxied = if (r ? proxied) && r.proxied then "true" else "false";
     in ''
       NAME='${name}'
@@ -82,15 +85,18 @@ let
       PUBLIC_IP=$(tr -d '\r\n' < "$PUBLIC_IP_FILE")
       [ -n "$PUBLIC_IP" ] || { echo "cf-dns-sync: empty publicIp; skipping"; exit 0; }
 
-      ZONE=$($CURL -s --max-time 20 "https://api.cloudflare.com/client/v4/zones?name=${domain}" \
-        -H "Authorization: Bearer $TOKEN" | $JQ -r '.result[0].id // empty')
-      if [ -z "$ZONE" ]; then
-        echo "cf-dns-sync: zone ${domain} not found"
-        exit 1
-      fi
-      BASE="https://api.cloudflare.com/client/v4/zones/$ZONE/dns_records"
       body() {
-        ${lib.concatStringsSep "\n" (map cfSyncOneshot records.cfRecords)}
+        ${lib.concatStringsSep "\n" (lib.concatMap (z: [
+          ''
+            ZONE=$($CURL -s --max-time 20 "https://api.cloudflare.com/client/v4/zones?name=${z.name}" \
+              -H "Authorization: Bearer $TOKEN" | $JQ -r '.result[0].id // empty')
+            if [ -z "$ZONE" ]; then
+              echo "cf-dns-sync: zone ${z.name} not found"
+              exit 1
+            fi
+            BASE="https://api.cloudflare.com/client/v4/zones/$ZONE/dns_records"
+          ''
+        ] ++ map (cfSyncOneshot z.name) z.cfRecords) allZones)}
         echo "cf-dns-sync: done at $(date)"
       }
       body
@@ -107,6 +113,23 @@ in {
       type = lib.types.str;
       default = config.sccl.server.hostIp;
       description = "IP that A records point to";
+    };
+    extraZones = lib.mkOption {
+      type = lib.types.listOf (lib.types.submodule {
+        options = {
+          name = lib.mkOption { type = lib.types.str; };
+          records = lib.mkOption {
+            type = lib.types.listOf (lib.types.attrsOf lib.types.anything);
+            description = "Records: {name,type,content} (cfRecords may add proxied)";
+          };
+          cfRecords = lib.mkOption {
+            type = lib.types.listOf (lib.types.attrsOf lib.types.anything);
+            default = [ ];
+          };
+        };
+      });
+      default = [ ];
+      description = "Additional authoritative zones beyond the primary `zone`";
     };
   };
 
@@ -149,12 +172,12 @@ local-address=127.0.0.1:5300
           rrset-cache-size = "128m";
           msg-cache-size = "64m";
           do-not-query-localhost = "no";
-          local-zone = [ "\"${domain}.\" transparent" ];
+          local-zone = map (z: ''"${z.name}." transparent'') allZones;
         };
-        stub-zone = [{
-          name = "${domain}.";
+        stub-zone = map (z: {
+          name = "${z.name}.";
           stub-addr = "127.0.0.1@5300";
-        }];
+        }) allZones;
         forward-zone = [{
           name = ".";
           forward-addr = [ "1.1.1.1" "8.8.8.8" ];
