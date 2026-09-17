@@ -1,8 +1,14 @@
 { config, lib, pkgs, ... }:
 let
   cfg = config.sccl.matrix;
+  # bridge web-ui vhost only when both the matrix-side gate and the actual
+  # bridge service are on (appservice registration itself is done at runtime
+  # by the bridge's own systemd unit, not from this config)
+  discordBridgeOn = cfg.discordBridge.enable && config.sccl.discordBridge.enable;
+  # OIDC delegated auth to kanidm (id.pierdol.ing) when the IdP is enabled
+  kanidmOn = config.sccl.kanidm.enable;
   wellKnownServer = pkgs.writeText "matrix-server-wk" ''{"m.server": "pierdol.ing:443"}'';
-  wellKnownClient = pkgs.writeText "matrix-client-wk" ''{"m.homeserver": {"base_url": "https://pierdol.ing"}}'';
+  wellKnownClient = pkgs.writeText "matrix-client-wk" ''{"m.homeserver": {"base_url": "https://pierdol.ing"}, "org.matrix.msc4143.rtc_foci": [{"type": "livekit", "livekit_service_url": "https://livekit.pierdol.ing"}]}'';
   elementConfigFile = pkgs.writeText "element-config.json" (builtins.toJSON {
     default_server_config = {
       "m.homeserver" = { base_url = "https://pierdol.ing"; server_name = "pierdol.ing"; };
@@ -11,6 +17,7 @@ let
     brand = "pierdol.ing";
     default_country_code = "RU";
     show_labs_settings = false;
+    element_call = { url = "https://call.${cfg.domain}"; use_exclusively = true; };
   });
 in {
   options.sccl.matrix = {
@@ -26,6 +33,9 @@ in {
         type = lib.types.str;
         default = "chat";
       };
+    };
+    discordBridge = {
+      enable = lib.mkEnableOption "discord bridge tenant vhost";
     };
   };
 
@@ -113,7 +123,7 @@ in {
       # matrix account (homeserver prefilled but switchable in the login ui)
       "chat.${cfg.domain}" = lib.mkIf cfg.web.enable {
         addSSL = true;
-        root = "${pkgs.element-web}/share/element-web";
+        root = "${pkgs.element-web}";
         sslCertificate = "/var/lib/acme/wildcard.${cfg.domain}/fullchain.pem";
         sslCertificateKey = "/var/lib/acme/wildcard.${cfg.domain}/key.pem";
         locations = {
@@ -123,6 +133,20 @@ in {
               default_type application/json;
             '';
           };
+        };
+      };
+
+      # mautrix-discord web ui helper, proxied to the host bridge listener
+      "discord-bridge.${cfg.domain}" = lib.mkIf discordBridgeOn {
+        addSSL = true;
+        sslCertificate = "/var/lib/acme/wildcard.${cfg.domain}/fullchain.pem";
+        sslCertificateKey = "/var/lib/acme/wildcard.${cfg.domain}/key.pem";
+        locations."/" = {
+          proxyPass = "http://127.0.0.1:29334";
+          proxyWebsockets = true;
+          extraConfig = ''
+            client_max_body_size 25m;
+          '';
         };
       };
     };
@@ -150,7 +174,13 @@ in {
           hostPath = "/etc/resolv.conf.matrix-ct";
           isReadOnly = true;
         };
-      };
+      } // (lib.optionalAttrs kanidmOn {
+        # sops-rendered client secret for OIDC (read by the continnuity unit)
+        "/run/continuwuity-oidc.env" = {
+          hostPath = config.sops.templates."continuwuity-oidc.env".path;
+          isReadOnly = true;
+        };
+      });
 
       config = { config, lib, pkgs, ... }: {
         system.stateVersion = "26.05";
@@ -171,7 +201,18 @@ in {
               # federation delegated to 443: cloudflare does not proxy 8448
               server = "pierdol.ing:443";
             };
-          };
+
+            matrix_rtc.foci = [{
+              type = "livekit";
+              livekit_service_url = "https://livekit.pierdol.ing";
+            }];
+          } // (lib.optionalAttrs kanidmOn {
+
+            oauth.oidc = {
+              discovery_url = "https://id.pierdol.ing/oauth2/openid/continuwuity";
+              client_id = "continuwuity";
+            };
+          });
         };
 
         # bind mount is the sole state dir: dynamic user can't own it (random
@@ -188,6 +229,7 @@ in {
             DynamicUser = lib.mkForce false;
             StateDirectory = lib.mkForce "";
             ReadWritePaths = [ "/var/lib/continuwuity" ];
+            EnvironmentFile = lib.mkIf kanidmOn "/run/continuwuity-oidc.env";
           };
         };
         systemd.tmpfiles.rules = [
