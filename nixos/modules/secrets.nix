@@ -35,6 +35,12 @@ in {
         # Fallback to explicit key file
         keyFile = toString cfg.ageKeyFile;
       };
+      # Service containers bind-mount /run/secrets. sops-nix otherwise bumps the
+      # generation dir on every activation and prunes the previous one, leaving
+      # running containers pointing at a deleted path. Keep old generations so
+      # those mounts stay valid; secret updates are applied explicitly through
+      # sops.secrets.*.restartUnits.
+      keepGenerations = 0;
     } // lib.optionalAttrs (lib.elem "personal" config.sccl.secrets.scopes) {
       # Personal-only secrets (SSH keys, GPG). Server must NOT see these -
       # personal.yaml is encrypted under the personal age key only.

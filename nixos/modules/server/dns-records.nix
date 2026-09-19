@@ -24,8 +24,8 @@
     { name = "gif"; type = "A"; content = serverIp; }
     { name = "murmur"; type = "A"; content = serverIp; }
     { name = "valheim"; type = "A"; content = serverIp; }
+    { name = "pass"; type = "A"; content = serverIp; }
     #{ name = "git"; type = "A"; content = serverIp; }
-    #{ name = "pass"; type = "A"; content = serverIp; }
   ];
 
   cfRecords = [
@@ -36,6 +36,7 @@
     { name = "alertmanager"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
     { name = "grafana"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
     { name = "files"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
+    { name = "pass"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
     { name = "@"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
     { name = "www"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
     { name = "xkb"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }

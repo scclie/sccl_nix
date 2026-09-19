@@ -33,6 +33,13 @@ in {
         TURNSTILE_SITE_KEY=${config.sops.placeholder."gif/turnstile-site-key"}
         TURNSTILE_SECRET_KEY=${config.sops.placeholder."gif/turnstile-secret-key"}
         PORT=8083
+        ${lib.optionalString config.sccl.kanidm.enable ''
+        KANIDM_ISSUER=https://id.pierdol.ing/oauth2/openid/gif
+        KANIDM_CLIENT_ID=gif
+        KANIDM_CLIENT_SECRET=${config.sops.placeholder."kanidm/oauth2-gif-secret"}
+        KANIDM_REDIRECT_URI=https://gif.sccl.cc/api/auth/kanidm/callback
+        KANIDM_ADMIN_GROUP=gif_admins
+        ''}
       '';
       path = "/etc/nixos/secrets/gif-env";
       mode = "0400";

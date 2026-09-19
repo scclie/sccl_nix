@@ -48,6 +48,30 @@ in {
       auth_basic "Monitoring";
       auth_basic_user_file ${toString cfg.htpasswdFile};
     '';
+
+    # forward-auth to kanidm via oauth2-proxy (replaces basic auth)
+    oauthOn = config.sccl.kanidm.enable;
+    oauth2AuthRequest = ''
+      auth_request /oauth2/auth;
+      error_page 401 = /oauth2/sign_in;
+      auth_request_set $auth_user $upstream_http_x_auth_request_user;
+      proxy_set_header X-Forwarded-User $auth_user;
+    '';
+    oauth2Locations = ''
+      location /oauth2/ {
+        proxy_pass http://127.0.0.1:4180;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      }
+      location = /oauth2/auth {
+        internal;
+        proxy_pass http://127.0.0.1:4180;
+        proxy_pass_request_body off;
+        proxy_set_header Content-Length "";
+        proxy_set_header X-Original-URI $request_uri;
+      }
+    '';
   in {
     # Telegram bot token via sops
     sops.secrets."telegram/bot-token" = {
@@ -64,6 +88,26 @@ in {
     };
     sccl.monitoring.htpasswdFile = lib.mkDefault config.sops.secrets."monitoring/htpasswd".path;
 
+    services.oauth2-proxy = lib.mkIf oauthOn {
+      enable = true;
+      provider = "oidc";
+      oidcIssuerUrl = "https://id.pierdol.ing/oauth2/openid/oauth2proxy";
+      clientID = "oauth2proxy";
+      clientSecretFile = config.sops.templates."oauth2proxy-client-secret".path;
+      cookie = {
+        secretFile = config.sops.secrets."oauth2-proxy/cookie-secret".path;
+        domain = ".sccl.cc";
+        secure = true;
+      };
+      email.domains = [ "*" ];
+      reverseProxy = true;
+      trustedProxyIP = [ "127.0.0.1" ];
+      setXauthrequest = true;
+      proxyPrefix = "/oauth2";
+      upstream = "static://202";
+      extraConfig = { whitelist-domain = [ ".sccl.cc" ]; };
+    };
+
     # reachable via nginx with basic auth
     sccl.proxy.sites = {
       grafana = {
@@ -71,15 +115,18 @@ in {
       };
       prometheus = {
         upstream = "http://127.0.0.1:9090";
-        extraConfig = (lib.optionalString (cfg.htpasswdFile != null) authBasic);
+        extraConfig = if oauthOn then oauth2AuthRequest else lib.optionalString (cfg.htpasswdFile != null) authBasic;
+        extraServerConfig = lib.optionalString oauthOn oauth2Locations;
       };
       loki = {
         upstream = "http://127.0.0.1:3100";
-        extraConfig = (lib.optionalString (cfg.htpasswdFile != null) authBasic);
+        extraConfig = if oauthOn then oauth2AuthRequest else lib.optionalString (cfg.htpasswdFile != null) authBasic;
+        extraServerConfig = lib.optionalString oauthOn oauth2Locations;
       };
       alertmanager = {
         upstream = "http://127.0.0.1:9093";
-        extraConfig = (lib.optionalString (cfg.htpasswdFile != null) authBasic);
+        extraConfig = if oauthOn then oauth2AuthRequest else lib.optionalString (cfg.htpasswdFile != null) authBasic;
+        extraServerConfig = lib.optionalString oauthOn oauth2Locations;
       };
     };
 
@@ -248,9 +295,27 @@ in {
       settings = {
         server.http_addr = "127.0.0.1";
         server.http_port = 3001;
+        server.root_url = "https://grafana.sccl.cc/";
+        # SSO-only: no local password logins
+        "auth.basic".enabled = false;
         security.admin_user = "admin";
         security.admin_password = "admin"; # change on first login
         security.secret_key = "$__file{/etc/grafana/secret_key}";
+        "auth.generic_oauth" = lib.mkIf config.sccl.kanidm.enable {
+          enabled = true;
+          name = "Kanidm";
+          client_id = "grafana";
+          scopes = "openid profile email groups";
+          auth_url = "https://id.pierdol.ing/ui/oauth2";
+          token_url = "https://id.pierdol.ing/oauth2/token";
+          api_url = "https://id.pierdol.ing/oauth2/openid/grafana/userinfo";
+          login_attribute_path = "preferred_username";
+          email_attribute_path = "email";
+          name_attribute_path = "name";
+          # group must exist in kanidm; non-members fall back to Viewer
+          role_attribute_path = "contains(groups[*], 'grafana_admins') && 'Admin' || 'Viewer'";
+          allow_sign_up = true;
+        };
       };
       provision = {
         enable = true;
@@ -285,6 +350,9 @@ in {
         };
       };
     };
+
+    systemd.services.grafana.serviceConfig.EnvironmentFile =
+      lib.mkIf config.sccl.kanidm.enable config.sops.templates."grafana-oidc.env".path;
 
     services.loki = {
       enable = true;

@@ -21,9 +21,11 @@ in {
     # Declare secrets at host level
     sops.secrets."vaultwarden/admin-token" = {
       sopsFile = ../../../secrets/apps.yaml;
+      restartUnits = [ "container@vaultwarden-ct.service" ];
     };
     sops.secrets."vaultwarden/db-password" = {
       sopsFile = ../../../secrets/db.yaml;
+      restartUnits = [ "container@vaultwarden-ct.service" ];
     };
 
     containers.vaultwarden-ct = {
@@ -78,6 +80,8 @@ in {
             DATA_FOLDER = "/var/lib/vaultwarden";
             DOMAIN = cfg.domain;
             WEBSOCKET_ENABLED = "true";
+            # No public self-registration; accounts are created by the owner.
+            SIGNUPS_ALLOWED = "false";
             # Listen on all interfaces so nginx on the host/bridge can reach it
             ROCKET_ADDRESS = "0.0.0.0";
             # Serve the bundled web vault UI from the package
@@ -85,11 +89,19 @@ in {
           };
         };
 
+        # /tank/vw is bind-mounted from the host and owned by root; make the
+        # data dir writable by the service user (vaultwarden needs to create
+        # rsa_key.pem etc. on first start).
+        systemd.tmpfiles.rules = [
+          "Z /var/lib/vaultwarden 0700 vaultwarden vaultwarden -"
+        ];
+
         users.users.vaultwarden = {
           isSystemUser = true;
           group = "vaultwarden";
+          uid = 997;
         };
-        users.groups.vaultwarden = {};
+        users.groups.vaultwarden = { gid = 995; };
 
         networking.firewall.allowedTCPPorts = [ cfg.port ];
       };

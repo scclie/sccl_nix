@@ -7,8 +7,28 @@ let
   discordBridgeOn = cfg.discordBridge.enable && config.sccl.discordBridge.enable;
   # OIDC delegated auth to kanidm (id.pierdol.ing) when the IdP is enabled
   kanidmOn = config.sccl.kanidm.enable;
+  # pinned upstream continuwuity: nixpkgs still ships 0.5.10, which lacks
+  # delegated OIDC; use the project's prebuilt static binary instead
+  continuwuity = pkgs.stdenvNoCC.mkDerivation {
+    pname = "matrix-continuwuity";
+    version = "26.9.0";
+    src = pkgs.fetchurl {
+      url = "https://forgejo.ellis.link/continuwuation/continuwuity/releases/download/v26.9.0/conduwuit-linux-static-amd64";
+      hash = "sha256-qQmDzu18G53LTrK/VP5UcS+mGs4F40RRuCRrax3r+k0=";
+    };
+    dontUnpack = true;
+    installPhase = "install -Dm755 $src $out/bin/conduwuit";
+    meta.mainProgram = "conduwuit";
+  };
   wellKnownServer = pkgs.writeText "matrix-server-wk" ''{"m.server": "pierdol.ing:443"}'';
-  wellKnownClient = pkgs.writeText "matrix-client-wk" ''{"m.homeserver": {"base_url": "https://pierdol.ing"}, "org.matrix.msc4143.rtc_foci": [{"type": "livekit", "livekit_service_url": "https://livekit.pierdol.ing"}]}'';
+  wellKnownClient = pkgs.writeText "matrix-client-wk" (builtins.toJSON ({
+    "m.homeserver" = { base_url = "https://pierdol.ing"; };
+    "org.matrix.msc4143.rtc_foci" = [{ type = "livekit"; livekit_service_url = "https://livekit.pierdol.ing"; }];
+  } // lib.optionalAttrs kanidmOn {
+    # MSC2965: element discovers the OAuth authorization server (continuwuity,
+    # which delegates the actual login to kanidm)
+    "m.authentication" = { issuer = "https://pierdol.ing/"; };
+  }));
   elementConfigFile = pkgs.writeText "element-config.json" (builtins.toJSON {
     default_server_config = {
       "m.homeserver" = { base_url = "https://pierdol.ing"; server_name = "pierdol.ing"; };
@@ -87,6 +107,14 @@ in {
             '';
           };
           "/_matrix/" = {
+            proxyPass = "http://10.69.0.19:6167";
+            extraConfig = ''
+              client_max_body_size 25m;
+              proxy_read_timeout 600s;
+            '';
+          };
+          # OAuth / account endpoints of continuwuity when OIDC is enabled
+          "/_continuwuity/" = lib.mkIf kanidmOn {
             proxyPass = "http://10.69.0.19:6167";
             extraConfig = ''
               client_max_body_size 25m;
@@ -187,6 +215,7 @@ in {
 
         services.matrix-continuwuity = {
           enable = true;
+          package = continuwuity;
           settings.global = {
             server_name = "${cfg.domain}";
             address = [ "10.69.0.19" ];

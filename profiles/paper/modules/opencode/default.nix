@@ -1,5 +1,13 @@
-{ pkgs, ... }:
+{ pkgs, pkgs-unstable, ... }:
 let
+  # temp fix
+  opencode = pkgs-unstable.opencode.overrideAttrs (old: {
+    postPatch = (old.postPatch or "") + ''
+      substituteInPlace packages/opencode/script/build.ts \
+        --replace 'splitting: true,' 'splitting: false,'
+    '';
+  });
+
   devops-skills = pkgs.fetchFromGitHub {
     owner = "abdullahkhawer";
     repo = "devops-skills";
@@ -14,7 +22,7 @@ let
     sha256 = "sha256-fnl+HbPL2qD5Zgz8a1NctjFJSqu6UsyHJAhQMLQNXXc=";
   };
 in {
-  home.packages = [ pkgs.opencode ];
+  home.packages = [ opencode ];
 
   home.file.".opencode" = {
     source = pkgs.runCommand "opencode-config" { } ''
