@@ -29,14 +29,14 @@
   ];
 
   cfRecords = [
-    { name = "status"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
+    { name = "status"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "git"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
-    { name = "prometheus"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
-    { name = "loki"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
-    { name = "alertmanager"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
-    { name = "grafana"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
-    { name = "files"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
-    { name = "pass"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
+    { name = "prometheus"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
+    { name = "loki"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
+    { name = "alertmanager"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
+    { name = "grafana"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
+    { name = "files"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
+    { name = "pass"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "@"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
     { name = "www"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
     { name = "xkb"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }

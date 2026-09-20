@@ -90,7 +90,7 @@
         { name = "xkb generator"; group = "apps"; url = "https://xkb.sccl.cc"; interval = "5m"; }
         { name = "google otp migration decoder"; group = "apps"; url = "https://otp-migrate.sccl.cc"; interval = "5m"; }
         { name = "gif.sccl api"; group = "apps"; url = "https://gif.sccl.cc/api/health"; interval = "1m"; }
-        { name = "matrix"; group = "apps"; url = "https://pierdol.ing/_matrix/client/versions"; interval = "5m"; }
+        { name = "matrix"; group = "services"; url = "https://pierdol.ing/_matrix/client/versions"; interval = "5m"; }
         { name = "pierdol ing"; group = "apps"; url = "https://pierdol.ing"; interval = "5m"; }
         { name = "postgresql"; group = "services"; url = "tcp://127.0.0.1:5432"; interval = "1m"; conditions = [ "[CONNECTED] == true" "[RESPONSE_TIME] < 2000" ]; }
         { name = "sftpgo"; group = "services"; url = "https://files.sccl.cc"; interval = "5m"; }
@@ -101,6 +101,7 @@
         { name = "grafana"; group = "monitoring"; url = "https://grafana.sccl.cc/api/health"; interval = "5m"; }
         { name = "loki"; group = "monitoring"; url = "https://loki.sccl.cc/ready"; interval = "5m"; }
         { name = "alertmanager"; group = "monitoring"; url = "https://alertmanager.sccl.cc/-/healthy"; interval = "5m"; }
+        { name = "comments api"; group = "apps"; url = "https://comments.pierdol.ing/health"; interval = "1m"; }
       ];
     };
     backup = {
@@ -116,7 +117,6 @@
     };
     zapret = {
       enable = true;
-      # discord only - gif.sccl api container talks to discord.com for oauth
       hosts = [
         "discord.com"
         "discord.gg"
@@ -126,6 +126,10 @@
         "cdn.discordapp.com"
         "discord.media"
         "discordvoice.com"
+        "ziglang.org" # putin blocks ziglang :D
+        "docker.io"
+        "registry-1.docker.io"
+        "production.cloudflare.docker.com"
       ];
       excludes = [];
     };
@@ -155,6 +159,12 @@
           '';
         };
       };
+    };
+    mirror = {
+      enable = true;
+    };
+    comments = {
+      enable = true;
     };
   };
 

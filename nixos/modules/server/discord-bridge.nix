@@ -145,7 +145,7 @@ in {
           # webhook with their own name/avatar (seamless relay)
           enable_webhook_avatars = true;
           prefix_webhook_messages = false;
-          encryption = { allow = true; default = false; };
+          encryption = { allow = false; default = false; };
         };
       };
     };

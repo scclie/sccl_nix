@@ -26,6 +26,8 @@
     ./kanidm.nix
     ./radio.nix
     ./sites.nix
+    ./mirror.nix
+    ./comments.nix
     ./sso.nix
   ];
 }
