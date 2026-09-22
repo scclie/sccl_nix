@@ -130,6 +130,12 @@
         "docker.io"
         "registry-1.docker.io"
         "production.cloudflare.docker.com"
+        "telegram.org"
+        "t.me"
+        "telegram.me"
+        "api.telegram.org"
+        "web.telegram.org"
+        "core.telegram.org"
       ];
       excludes = [];
     };

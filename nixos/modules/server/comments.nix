@@ -14,11 +14,11 @@ in
       sopsFile = ../../../secrets/db.yaml;
     };
 
-    sops.secrets."comments/user-id" = {
+    sops.secrets."comments/matrix-bot-token" = {
       sopsFile = ../../../secrets/apps.yaml;
     };
 
-    sops.secrets."comments/tg-bot-token" = {
+    sops.secrets."comments/matrix-room-id" = {
       sopsFile = ../../../secrets/apps.yaml;
     };
 
@@ -29,8 +29,9 @@ in
     sops.templates."comments-env" = {
       content = ''
         DATABASE_URL=postgresql://comments:${config.sops.placeholder."comments/db-password"}@10.69.0.1:5432/comments
-        TELEGRAM_USER_ID=${config.sops.placeholder."comments/user-id"}
-        TELEGRAM_BOT_TOKEN=${config.sops.placeholder."comments/tg-bot-token"}
+        MATRIX_HOMESERVER=https://pierdol.ing
+        MATRIX_BOT_TOKEN=${config.sops.placeholder."comments/matrix-bot-token"}
+        MATRIX_ROOM_ID=${config.sops.placeholder."comments/matrix-room-id"}
         BOT_SECRET=${config.sops.placeholder."comments/api-secret"}
       '';
       path = "/etc/nixos/secrets/comments-env";

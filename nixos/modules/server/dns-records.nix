@@ -30,7 +30,7 @@
 
   cfRecords = [
     { name = "status"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
-    { name = "git"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
+    { name = "git"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "prometheus"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "loki"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "alertmanager"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
@@ -38,10 +38,10 @@
     { name = "files"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "pass"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "@"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
-    { name = "www"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
+    { name = "www"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "xkb"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
     { name = "otp-migrate"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
-    { name = "gif"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
+    { name = "gif"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "murmur"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "valheim"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
   ];
