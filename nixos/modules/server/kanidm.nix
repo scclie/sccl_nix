@@ -24,11 +24,12 @@ in {
       owner = "kanidm";
       group = "kanidm";
     };
-    sops.secrets."kanidm/oauth2-continuwuity-secret" = {
-      sopsFile = ../../../secrets/apps.yaml;
-      owner = "kanidm";
-      group = "kanidm";
-    };
+    # matrix (continuwuity) dropped SSO 2026-09-22; client/secret kept commented
+    # sops.secrets."kanidm/oauth2-continuwuity-secret" = {
+    #   sopsFile = ../../../secrets/apps.yaml;
+    #   owner = "kanidm";
+    #   group = "kanidm";
+    # };
     sops.secrets."kanidm/oauth2-grafana-secret" = {
       sopsFile = ../../../secrets/apps.yaml;
       owner = "kanidm";
@@ -40,6 +41,12 @@ in {
       group = "kanidm";
     };
     sops.secrets."kanidm/oauth2-gif-secret" = {
+      sopsFile = ../../../secrets/apps.yaml;
+      owner = "kanidm";
+      group = "kanidm";
+    };
+    # macc account portal (self-service matrix users)
+    sops.secrets."kanidm/oauth2-macc-secret" = {
       sopsFile = ../../../secrets/apps.yaml;
       owner = "kanidm";
       group = "kanidm";
@@ -63,8 +70,9 @@ in {
       "GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET=${config.sops.placeholder."kanidm/oauth2-grafana-secret"}\n";
 
 
-    sops.templates."continuwuity-oidc.env".content =
-      "CONTINUWUITY_OAUTH__OIDC__CLIENT_SECRET=${config.sops.placeholder."kanidm/oauth2-continuwuity-secret"}\n";
+    # matrix (continuwuity) dropped SSO 2026-09-22
+    # sops.templates."continuwuity-oidc.env".content =
+    #   "CONTINUWUITY_OAUTH__OIDC__CLIENT_SECRET=${config.sops.placeholder."kanidm/oauth2-continuwuity-secret"}\n";
 
     services.kanidm = {
       server.enable = true;
@@ -81,12 +89,13 @@ in {
 
         acceptInvalidCerts = true;
         idmAdminPasswordFile = config.sops.secrets."kanidm/admin-password".path;
-        systems.oauth2.continuwuity = {
-          displayName = "Continuwuity";
-          originUrl = "https://${cfg.domain}/_continuwuity/oidc/complete";
-          originLanding = "https://${cfg.domain}";
-          basicSecretFile = config.sops.secrets."kanidm/oauth2-continuwuity-secret".path;
-        };
+        # matrix (continuwuity) dropped SSO 2026-09-22
+        # systems.oauth2.continuwuity = {
+        #   displayName = "Continuwuity";
+        #   originUrl = "https://${cfg.domain}/_continuwuity/oidc/complete";
+        #   originLanding = "https://${cfg.domain}";
+        #   basicSecretFile = config.sops.secrets."kanidm/oauth2-continuwuity-secret".path;
+        # };
         systems.oauth2.grafana = {
           displayName = "Grafana";
           originUrl = "https://grafana.sccl.cc/login/generic_oauth";
@@ -101,6 +110,8 @@ in {
         groups.services = { overwriteMembers = false; };
         groups.grafana_admins = { overwriteMembers = false; };
         groups.gif_admins = { overwriteMembers = false; };
+        # who may use the macc account portal (members added via kanidm CLI)
+        groups.matrix_users = { overwriteMembers = false; };
         systems.oauth2.oauth2proxy = {
           displayName = "Monitoring SSO";
           originUrl = [
@@ -120,6 +131,15 @@ in {
           basicSecretFile = config.sops.secrets."kanidm/oauth2-gif-secret".path;
           preferShortUsername = true;
         };
+        systems.oauth2.macc = {
+          displayName = "macc (matrix account portal)";
+          originUrl = "https://macc.${cfg.domain}/oauth2/callback";
+          originLanding = "https://macc.${cfg.domain}";
+          basicSecretFile = config.sops.secrets."kanidm/oauth2-macc-secret".path;
+          scopeMaps."services" = [ "openid" "profile" "email" "groups" ];
+          # oauth2-proxy skips PKCE on first hop
+          allowInsecureClientDisablePkce = true;
+        };
       };
     };
 
@@ -138,23 +158,18 @@ in {
     };
 
     # kanidm-provision cannot target the builtin idm_all_persons in scopeMaps,
-    # so set the gif client's scope map to it via the CLI: any kanidm person
-    # may sign in to gif.sccl.cc (admin role still needs the gif_admins group)
+    # so set the gif/macc clients' scope maps to it via the CLI: any kanidm
+    # person may sign in (gif.sccl.cc, macc.pierdol.ing)
     systemd.services.kanidm-oauth-scopes = {
-      description = "kanidm: allow idm_all_persons to sign in to gif.sccl.cc";
-      after = [ "kanidm.service" ];
-      requires = [ "kanidm.service" ];
-      wantedBy = [ "multi-user.target" ];
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-      };
+      description = "kanidm: allow idm_all_persons to sign in to gif/macc";
+
       script = ''
         export KANIDM_URL=https://id.${cfg.domain}
         export KANIDM_PASSWORD="$(cat ${config.sops.secrets."kanidm/admin-password".path})"
         KANIDM=${lib.getExe' pkgs.kanidm_1_8.withSecretProvisioning "kanidm"}
         "$KANIDM" login --name idm_admin
         "$KANIDM" system oauth2 update-scope-map gif idm_all_persons openid profile email groups
+        "$KANIDM" system oauth2 update-scope-map macc idm_all_persons openid profile email groups
       '';
     };
   };

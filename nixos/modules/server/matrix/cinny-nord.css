@@ -1,0 +1,117 @@
+/* Nord theme for Cinny - dark */
+
+/* Override dark theme */
+.dark-theme,
+._15q3ngn1 {
+
+  /* Nord Polar Night (dark backgrounds) */
+  --oq6d070: #2E3440 !important; /* nord0 - darkest */
+  --oq6d071: #3B4252 !important; /* nord1 */
+  --oq6d072: #434C5E !important; /* nord2 */
+  --oq6d073: #4C566A !important; /* nord3 */
+
+  /* Nord Snow Storm (light text) */
+  --oq6d074: #ECEFF4 !important; /* nord6 - lightest */
+  --oq6d075: #2E3440!important; /* nord5 */
+  --oq6d076: #D8DEE9 !important; /* nord4 */
+  --oq6d077: #C8D0DC !important; /* nord4 darker */
+  --oq6d078: #B8C0CC !important; /* nord4 even darker */
+  --oq6d079: #ECEFF4 !important; /* nord6 */
+
+  /* More background variants */
+  --oq6d07a: #3B4252 !important; /* nord1 */
+  --oq6d07b: #434C5E !important; /* nord2 */
+  --oq6d07c: #4C566A !important; /* nord3 */
+  --oq6d07d: #5E6779 !important; /* nord3 lighter */
+  --oq6d07e: #ECEFF4 !important; /* nord6 */
+
+  /* Primary/accent colors (Nord Frost) */
+  --oq6d07f: #88C0D0 !important; /* nord8 - cyan */
+  --oq6d07g: #81A1C1 !important; /* nord9 - blue */
+  --oq6d07h: #5E81AC !important; /* nord10 - darker blue */
+  --oq6d07i: #4C7AA8 !important; /* nord10 darker */
+  --oq6d07j: #2E3440 !important; /* nord0 - for text on primary */
+
+  /* Hover/active states */
+  --oq6d07k: #434C5E !important; /* nord2 */
+  --oq6d07l: #4C566A !important; /* nord3 */
+  --oq6d07m: #5E6779 !important; /* nord3 lighter */
+  --oq6d07n: #6B7589 !important; /* nord3 even lighter */
+  --oq6d07o: #ECEFF4 !important; /* nord6 */
+
+  /* Text colors */
+  --oq6d07p: #ECEFF4 !important; /* nord6 */
+  --oq6d07q: #E5E9F0 !important; /* nord5 */
+  --oq6d07r: #D8DEE9 !important; /* nord4 */
+  --oq6d07s: #C8D0DC !important; /* nord4 darker */
+  --oq6d07t: #2E3440 !important; /* nord0 */
+
+  /* More variants */
+  --oq6d07u: #434C5E !important; /* nord2 */
+  --oq6d07v: #4C566A !important; /* nord3 */
+  --oq6d07w: #5E6779 !important; /* nord3 lighter */
+  --oq6d07x: #6B7589 !important; /* nord3 even lighter */
+  --oq6d07y: #ECEFF4 !important; /* nord6 */
+
+  /* Positive/success (Nord Aurora green) */
+  --oq6d07z: #A3BE8C !important; /* nord14 */
+  --oq6d0710: #96B07F !important; /* nord14 darker */
+  --oq6d0711: #89A272 !important; /* nord14 even darker */
+  --oq6d0712: #7C9465 !important; /* nord14 darkest */
+  --oq6d0713: #2E3440 !important; /* nord0 - for text on positive */
+
+  /* Teal/cyan variants */
+  --oq6d0714: #8FBCBB !important; /* nord7 */
+  --oq6d0715: #82AFAF !important; /* nord7 darker */
+  --oq6d0716: #75A2A3 !important; /* nord7 even darker */
+  --oq6d0717: #689597 !important; /* nord7 darkest */
+  --oq6d0718: #ECEFF4 !important; /* nord6 - for text on teal */
+
+  /* Warning/caution (Nord Aurora orange) */
+  --oq6d0719: #D08770 !important; /* nord12 */
+  --oq6d071a: #C37A63 !important; /* nord12 darker */
+  --oq6d071b: #B66D56 !important; /* nord12 even darker */
+  --oq6d071c: #A96049 !important; /* nord12 darkest */
+  --oq6d071d: #2E3440 !important; /* nord0 - for text on warning */
+
+  /* More warning variants */
+  --oq6d071e: #4C566A !important; /* nord3 */
+  --oq6d071f: #5E6779 !important; /* nord3 lighter */
+  --oq6d071g: #6B7589 !important; /* nord3 even lighter */
+  --oq6d071h: #788399 !important; /* nord3 lightest */
+  --oq6d071i: #ECEFF4 !important; /* nord6 */
+
+  /* Danger/error (Nord Aurora red) */
+  --oq6d071j: #BF616A !important; /* nord11 */
+  --oq6d071k: #B2545D !important; /* nord11 darker */
+  --oq6d071l: #A54750 !important; /* nord11 even darker */
+  --oq6d071m: #983A43 !important; /* nord11 darkest */
+  --oq6d071n: #2E3440 !important; /* nord0 - for text on danger */
+
+  /* More danger variants */
+  --oq6d071o: #4C566A !important; /* nord3 */
+  --oq6d071p: #5E6779 !important; /* nord3 lighter */
+  --oq6d071q: #6B7589 !important; /* nord3 even lighter */
+  --oq6d071r: #788399 !important; /* nord3 lightest */
+  --oq6d071s: #ECEFF4 !important; /* nord6 */
+
+  /* Overlay/transparent colors */
+  --oq6d071t: rgba(46, 52, 64, 0.5) !important; /* nord0 with alpha */
+  --oq6d071u: rgba(0, 0, 0, 0.2) !important;
+  --oq6d071v: rgba(0, 0, 0, 0.8) !important;
+}
+
+/* User message colors (Nord palette) */
+:root {
+  --mx-uc-1: #88C0D0 !important; /* nord8 - cyan */
+  --mx-uc-2: #B48EAD !important; /* nord15 - purple */
+  --mx-uc-3: #8FBCBB !important; /* nord7 - teal */
+  --mx-uc-4: #BF616A !important; /* nord11 - red */
+  --mx-uc-5: #D08770 !important; /* nord12 - orange */
+  --mx-uc-6: #81A1C1 !important; /* nord9 - blue */
+  --mx-uc-7: #5E81AC !important; /* nord10 - dark blue */
+  --mx-uc-8: #A3BE8C !important; /* nord14 - green */
+
+  /* Link color */
+  --tc-link: #88C0D0 !important; /* nord8 - cyan */
+}

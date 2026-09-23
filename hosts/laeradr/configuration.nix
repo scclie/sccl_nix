@@ -172,6 +172,9 @@
     comments = {
       enable = true;
     };
+    macc = {
+      enable = true;
+    };
   };
 
   # mautrix-discord pulls libolm 3.2.16 (deprecated upstream, no maintained

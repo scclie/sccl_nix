@@ -60,6 +60,10 @@
             type = "zfs_fs";
             mountpoint = "/tank/apps";
           };
+          "data/apps/registry" = {
+            type = "zfs_fs";
+            mountpoint = "/tank/apps/registry";
+          };
           "data/forgejo" = {
             type = "zfs_fs";
             mountpoint = "/tank/forgejo";
@@ -95,6 +99,10 @@
           "data/music" = {
             type = "zfs_fs";
             mountpoint = "/tank/music";
+          };
+          "data/macc" = {
+            type = "zfs_fs";
+            mountpoint = "/tank/macc";
           };
           backups = {
             type = "zfs_fs";

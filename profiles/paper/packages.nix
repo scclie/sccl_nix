@@ -12,7 +12,7 @@
     vesktop
     mumble
     fluffychat
-    element-web
+    cinny
     #nheko
     #commet-chat
 

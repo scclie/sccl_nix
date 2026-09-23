@@ -14,6 +14,7 @@
     { name = "call"; type = "A"; content = serverIp; }
     { name = "mirror"; type = "A"; content = serverIp; }
     { name = "comments"; type = "A"; content = serverIp; }
+    { name = "macc"; type = "A"; content = serverIp; }
   ];
 
   cfRecords = [
@@ -25,5 +26,6 @@
     { name = "call"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "mirror"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "comments"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
+    { name = "macc"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
   ];
 }

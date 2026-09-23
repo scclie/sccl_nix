@@ -21,7 +21,7 @@
     ./backup.nix
     ./minecraft.nix
     ./valheim.nix
-    ./matrix.nix
+    ./matrix
     ./voice.nix
     ./kanidm.nix
     ./radio.nix
@@ -29,5 +29,6 @@
     ./mirror.nix
     ./comments.nix
     ./sso.nix
+    ./macc.nix
   ];
 }

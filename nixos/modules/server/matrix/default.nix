@@ -1,14 +1,13 @@
 { config, lib, pkgs, ... }:
 let
   cfg = config.sccl.matrix;
-  # bridge web-ui vhost only when both the matrix-side gate and the actual
-  # bridge service are on (appservice registration itself is done at runtime
-  # by the bridge's own systemd unit, not from this config)
   discordBridgeOn = cfg.discordBridge.enable && config.sccl.discordBridge.enable;
-  # OIDC delegated auth to kanidm (id.pierdol.ing) when the IdP is enabled
-  kanidmOn = config.sccl.kanidm.enable;
+  # oidc delegated auth to kanidm (id.pierdol.ing); kept for re-enabling oidc,
+  # currently unused (sso dropped for matrix 2026-09-22)
+  # kanidmOn = config.sccl.kanidm.enable;
   # pinned upstream continuwuity: nixpkgs still ships 0.5.10, which lacks
-  # delegated OIDC; use the project's prebuilt static binary instead
+  # delegated OIDC
+  # use the project's prebuilt static binary instead
   continuwuity = pkgs.stdenvNoCC.mkDerivation {
     pname = "matrix-continuwuity";
     version = "26.9.0";
@@ -21,24 +20,18 @@ let
     meta.mainProgram = "conduwuit";
   };
   wellKnownServer = pkgs.writeText "matrix-server-wk" ''{"m.server": "pierdol.ing:443"}'';
-  wellKnownClient = pkgs.writeText "matrix-client-wk" (builtins.toJSON ({
+  # msc2965 m.authentication (element -> kanidm oauth) removed 2026-09-22:
+  # matrix dropped out of SSO, clients use plain password login again.
+  wellKnownClient = pkgs.writeText "matrix-client-wk" (builtins.toJSON {
     "m.homeserver" = { base_url = "https://pierdol.ing"; };
     "org.matrix.msc4143.rtc_foci" = [{ type = "livekit"; livekit_service_url = "https://livekit.pierdol.ing"; }];
-  } // lib.optionalAttrs kanidmOn {
-    # MSC2965: element discovers the OAuth authorization server (continuwuity,
-    # which delegates the actual login to kanidm)
-    "m.authentication" = { issuer = "https://pierdol.ing/"; };
-  }));
-  elementConfigFile = pkgs.writeText "element-config.json" (builtins.toJSON {
-    default_server_config = {
-      "m.homeserver" = { base_url = "https://pierdol.ing"; server_name = "pierdol.ing"; };
-    };
-    room_directory = { servers = [ "pierdol.ing" "matrix.org" ]; };
-    brand = "pierdol.ing";
-    default_country_code = "RU";
-    show_labs_settings = false;
-    element_call = { url = "https://call.${cfg.domain}"; use_exclusively = true; };
   });
+  cinnyConfigFile = pkgs.writeText "cinny-config.json" (builtins.toJSON {
+    defaultHomeserver = 0;
+    homeserverList = [ "https://pierdol.ing" ];
+    allowCustomHomeservers = false;
+  });
+  cinnyNordCss = ./cinny-nord.css;
 in {
   options.sccl.matrix = {
     enable = lib.mkEnableOption "Matrix homeserver (continuwuity) + pierdol.ing web host";
@@ -48,7 +41,7 @@ in {
       description = "Matrix server_name. IMMUTABLE once the first user is registered.";
     };
     web = {
-      enable = lib.mkEnableOption "element-web browser client on chat.<domain>";
+      enable = lib.mkEnableOption "cinny browser client on chat.<domain>";
       subdomain = lib.mkOption {
         type = lib.types.str;
         default = "chat";
@@ -113,14 +106,15 @@ in {
               proxy_read_timeout 600s;
             '';
           };
-          # OAuth / account endpoints of continuwuity when OIDC is enabled
-          "/_continuwuity/" = lib.mkIf kanidmOn {
-            proxyPass = "http://10.69.0.19:6167";
-            extraConfig = ''
-              client_max_body_size 25m;
-              proxy_read_timeout 600s;
-            '';
-          };
+          # OAuth / account endpoints of continuwuity, only relevant with OIDC
+          # (kanidm) wired; disabled since matrix dropped SSO (2026-09-22)
+          # "/_continuwuity/" = lib.mkIf kanidmOn {
+          #   proxyPass = "http://10.69.0.19:6167";
+          #   extraConfig = ''
+          #     client_max_body_size 25m;
+          #     proxy_read_timeout 600s;
+          #   '';
+          # };
           "/" = {
             tryFiles = "$uri $uri/ =404";
           };
@@ -128,9 +122,8 @@ in {
       };
 
       # federation (server-to-server) listener; same upstream as client api.
-      # ssl cert emitted via extraConfig: with a custom listen list NixOS
-      # skips ssl_certificate unless addSSL/forceSSL (and addSSL would also
-      # open a 443 listener under the same server_name - collision with apex)
+      # ssl cert emitted via extraConfig: with a custom listen list nixos
+      # skips ssl_certificate unless addSSL/forceSSL (and addSSL would also open a 443 listener under the same server_name - collision with apex)
       "matrix-federation" = {
         serverName = cfg.domain;
         listen = [ { addr = "0.0.0.0"; port = 8448; ssl = true; } ];
@@ -147,18 +140,41 @@ in {
         };
       };
 
-      # element-web: browser matrix client; anyone can log in with any
-      # matrix account (homeserver prefilled but switchable in the login ui)
+      # cinny browser matrix client; anyone can log in with any matrix acc
       "chat.${cfg.domain}" = lib.mkIf cfg.web.enable {
         addSSL = true;
-        root = "${pkgs.element-web}";
+        root = "${pkgs.cinny}";
         sslCertificate = "/var/lib/acme/wildcard.${cfg.domain}/fullchain.pem";
         sslCertificateKey = "/var/lib/acme/wildcard.${cfg.domain}/key.pem";
         locations = {
           "= /config.json" = {
-            alias = "${elementConfigFile}";
+            alias = "${cinnyConfigFile}";
             extraConfig = ''
               default_type application/json;
+            '';
+          };
+          "= /nord.css" = {
+            alias = "${cinnyNordCss}";
+            extraConfig = ''
+              default_type text/css;
+              add_header Cache-Control "public, max-age=86400";
+            '';
+          };
+          "= /index.html" = {
+            alias = "${pkgs.cinny}/index.html";
+            extraConfig = ''
+              sub_filter '</head>' '<link rel="stylesheet" href="/nord.css"></head>';
+              sub_filter_once on;
+              sub_filter_types text/html;
+            '';
+          };
+          "/" = {
+            index = "index.html";
+            tryFiles = "$uri $uri/ /index.html";
+            extraConfig = ''
+              sub_filter '</head>' '<link rel="stylesheet" href="/nord.css"></head>';
+              sub_filter_once on;
+              sub_filter_types text/html;
             '';
           };
         };
@@ -202,13 +218,14 @@ in {
           hostPath = "/etc/resolv.conf.matrix-ct";
           isReadOnly = true;
         };
-      } // (lib.optionalAttrs kanidmOn {
-        # sops-rendered client secret for OIDC (read by the continnuity unit)
-        "/run/continuwuity-oidc.env" = {
-          hostPath = config.sops.templates."continuwuity-oidc.env".path;
-          isReadOnly = true;
-        };
-      });
+      # sops-rendered client secret for OIDC; dead with SSO off (2026-09-22)
+        # } // (lib.optionalAttrs kanidmOn {
+        #   "/run/continuwuity-oidc.env" = {
+        #     hostPath = config.sops.templates."continuwuity-oidc.env".path;
+        #     isReadOnly = true;
+        #   };
+        # });
+      };
 
       config = { config, lib, pkgs, ... }: {
         system.stateVersion = "26.05";
@@ -227,7 +244,6 @@ in {
             max_request_size = 25165824; # match nginx 25m
             well_known = {
               client = "https://pierdol.ing";
-              # federation delegated to 443: cloudflare does not proxy 8448
               server = "pierdol.ing:443";
             };
 
@@ -235,13 +251,15 @@ in {
               type = "livekit";
               livekit_service_url = "https://livekit.pierdol.ing";
             }];
-          } // (lib.optionalAttrs kanidmOn {
-
-            oauth.oidc = {
-              discovery_url = "https://id.pierdol.ing/oauth2/openid/continuwuity";
-              client_id = "continuwuity";
-            };
-          });
+          # OIDC delegated auth to kanidm disabled 2026-09-22 (password login):
+            # } // (lib.optionalAttrs kanidmOn {
+            #
+            #   oauth.oidc = {
+            #     discovery_url = "https://id.pierdol.ing/oauth2/openid/continuwuity";
+            #     client_id = "continuwuity";
+            #   };
+            # });
+          };
         };
 
         # bind mount is the sole state dir: dynamic user can't own it (random
@@ -258,7 +276,7 @@ in {
             DynamicUser = lib.mkForce false;
             StateDirectory = lib.mkForce "";
             ReadWritePaths = [ "/var/lib/continuwuity" ];
-            EnvironmentFile = lib.mkIf kanidmOn "/run/continuwuity-oidc.env";
+            # EnvironmentFile = lib.mkIf kanidmOn "/run/continuwuity-oidc.env";
           };
         };
         systemd.tmpfiles.rules = [
