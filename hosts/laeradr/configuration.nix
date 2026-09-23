@@ -102,6 +102,7 @@
         { name = "loki"; group = "monitoring"; url = "https://loki.sccl.cc/ready"; interval = "5m"; }
         { name = "alertmanager"; group = "monitoring"; url = "https://alertmanager.sccl.cc/-/healthy"; interval = "5m"; }
         { name = "comments api"; group = "apps"; url = "https://comments.pierdol.ing/health"; interval = "1m"; }
+        { name = "searxng"; group = "services"; url = "https://sx.pierdol.ing/healthz"; interval = "5m"; }
       ];
     };
     backup = {
@@ -173,6 +174,9 @@
       enable = true;
     };
     macc = {
+      enable = true;
+    };
+    searxng = {
       enable = true;
     };
   };

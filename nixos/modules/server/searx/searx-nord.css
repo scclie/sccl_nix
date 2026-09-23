@@ -1,0 +1,396 @@
+/* SearXNG nord theme */
+
+:root {
+  /* Nord Polar Night */
+  --nord0: #2e3440;
+  --nord1: #3b4252;
+  --nord2: #434c5e;
+  --nord3: #4c566a;
+  /* Nord Snow Storm */
+  --nord4: #d8dee9;
+  --nord5: #e5e9f0;
+  --nord6: #eceff4;
+  /* Nord Frost */
+  --nord7: #8fbcbb;
+  --nord8: #88c0d0;
+  --nord9: #81a1c1;
+  --nord10: #5e81ac;
+  /* Nord Aurora */
+  --nord11: #bf616a;
+  --nord12: #d08770;
+  --nord13: #ebcb8b;
+  --nord14: #a3be8c;
+  --nord15: #b48ead;
+}
+
+html.theme-dark {
+  --bg: var(--nord0);
+  --bg-alt: var(--nord1);
+  --bg-input: var(--nord0);
+  --border: var(--nord2);
+  --border-strong: var(--nord3);
+  --fg: var(--nord4);
+  --fg-muted: #93a0b5;
+  --accent: var(--nord8);
+  --link: var(--nord8);
+
+  /* SearXNG simple theme variables */
+  --color-base-background: var(--nord0) !important;
+  --color-base-background-mobile: var(--nord0) !important;
+  --color-base-font: var(--nord4) !important;
+  --color-header-background: var(--nord1) !important;
+  --color-footer-background: var(--nord1) !important;
+  --color-footer-border: var(--nord2) !important;
+}
+
+/* --- basics --- */
+html.theme-dark body {
+  background: var(--bg);
+  color: var(--fg);
+}
+html.theme-dark a {
+  color: var(--link);
+}
+html.theme-dark a:hover,
+html.theme-dark a:focus {
+  color: var(--nord7);
+}
+
+/* --- search header --- */
+html.theme-dark #search_header {
+  background: var(--nord1);
+}
+html.theme-dark .search_box input#q {
+  background: var(--bg);
+  border-color: var(--border);
+  color: var(--fg);
+}
+html.theme-dark .search_box input#q:focus {
+  border-color: var(--accent);
+}
+html.theme-dark .search_box button {
+  background: var(--nord2);
+  border-color: var(--border);
+  color: var(--fg);
+}
+html.theme-dark .search_box button:hover {
+  background: var(--nord3);
+}
+
+/* --- footer --- */
+html.theme-dark footer {
+  background: var(--nord1);
+  border-top: 1px solid var(--border);
+  color: var(--fg-muted);
+}
+html.theme-dark footer a {
+  color: var(--link);
+}
+html.theme-dark footer a:hover {
+  color: var(--nord7);
+}
+html.theme-dark ::selection {
+  background: var(--nord9);
+  color: var(--nord0);
+}
+html.theme-dark .dark_mode,
+html.theme-dark .dark_mode svg {
+  fill: var(--nord0) !important;
+  color: var(--nord0) !important;
+}
+html.theme-dark .dark_mode {
+  background: var(--nord8) !important;
+}
+
+/* --- top links / footer --- */
+html.theme-dark #links_on_top a,
+html.theme-dark footer a {
+  color: var(--fg-muted);
+}
+html.theme-dark #links_on_top a:hover,
+html.theme-dark footer a:hover {
+  color: var(--nord7);
+}
+
+/* --- search form --- */
+html.theme-dark #search {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+}
+html.theme-dark #search :focus-visible {
+  border-color: var(--nord8);
+  outline: none;
+}
+html.theme-dark .search_box {
+  background: var(--bg-input);
+  border: 1px solid var(--border-strong);
+  border-radius: 0;
+}
+html.theme-dark .search_box:focus-within {
+  border-color: var(--nord8);
+}
+html.theme-dark #q {
+  background: transparent;
+  color: var(--fg);
+  border: none;
+  border-radius: 0;
+}
+html.theme-dark #q::placeholder {
+  color: var(--fg-muted);
+}
+html.theme-dark #send_search,
+html.theme-dark #clear_search {
+  background: transparent;
+  border: none;
+  color: var(--fg-muted);
+}
+html.theme-dark #send_search:hover,
+html.theme-dark #clear_search:hover {
+  color: var(--nord8);
+}
+html.theme-dark .autocomplete ul {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+}
+html.theme-dark .autocomplete ul li {
+  border-bottom: 1px solid var(--border);
+}
+html.theme-dark .autocomplete ul li:hover,
+html.theme-dark .autocomplete ul li.selected {
+  background: var(--nord2);
+}
+
+/* --- categories --- */
+html.theme-dark .category_button {
+  background: transparent;
+  color: var(--fg-muted);
+  border: 1px solid transparent;
+}
+html.theme-dark .category_button:hover {
+  color: var(--fg);
+  border-color: var(--border-strong);
+}
+html.theme-dark .category_button.selected {
+  color: var(--nord0);
+  background: var(--nord8);
+  border-color: var(--nord8);
+}
+
+/* --- filters --- */
+html.theme-dark .search_filters select,
+html.theme-dark select.language,
+html.theme-dark select#safesearch,
+html.theme-dark #preferences select {
+  background: var(--bg-alt);
+  color: var(--fg);
+  border: 1px solid var(--border-strong);
+  border-radius: 0;
+}
+html.theme-dark .search_filters select:focus,
+html.theme-dark select.language:focus {
+  border-color: var(--nord8);
+}
+
+/* --- results --- */
+html.theme-dark #results {
+  color: var(--fg);
+}
+html.theme-dark article.result {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 0;
+}
+html.theme-dark article.result:hover {
+  border-color: var(--border-strong);
+}
+html.theme-dark article.result h3 a {
+  color: var(--link);
+}
+html.theme-dark article.result h3 a:hover {
+  color: var(--nord7);
+}
+html.theme-dark article.result .url_header {
+  color: var(--nord10);
+}
+html.theme-dark article.result .url_wrapper .url_o1,
+html.theme-dark article.result .url_wrapper .url_o2,
+html.theme-dark article.result .url_wrapper .url_o3 {
+  color: var(--nord9);
+}
+html.theme-dark article.result .content {
+  color: var(--fg);
+}
+html.theme-dark article.result .content .highlight {
+  color: var(--nord13);
+}
+html.theme-dark article.result .engines span {
+  background: var(--nord2);
+  color: var(--fg-muted);
+  border-radius: 0;
+}
+html.theme-dark article.result .published_date,
+html.theme-dark article.result .result_author,
+html.theme-dark article.result .result_views,
+html.theme-dark article.result .result_length {
+  color: var(--fg-muted);
+}
+html.theme-dark article.result .cache_link {
+  color: var(--fg-muted);
+}
+html.theme-dark article.result .cache_link:hover {
+  color: var(--nord8);
+}
+
+/* --- sidebar / infobox / suggestions --- */
+html.theme-dark #sidebar {
+  color: var(--fg);
+}
+html.theme-dark .sidebar-collapsible summary.title,
+html.theme-dark #infoboxes summary.title,
+html.theme-dark #suggestions summary.title {
+  color: var(--fg);
+  border-bottom: 1px solid var(--border-strong);
+}
+html.theme-dark .infobox {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+}
+html.theme-dark .infobox .title {
+  color: var(--nord8);
+}
+html.theme-dark .infobox dl dt {
+  color: var(--fg-muted);
+}
+html.theme-dark .infobox dl dd {
+  color: var(--fg);
+}
+html.theme-dark .infobox .urls li a {
+  color: var(--nord9);
+}
+html.theme-dark .infobox .urls li a:hover {
+  color: var(--nord8);
+}
+html.theme-dark #suggestions ul.wrapper li input.suggestion {
+  background: var(--nord2);
+  color: var(--fg);
+  border: 1px solid var(--border-strong);
+}
+html.theme-dark #suggestions ul.wrapper li input.suggestion:hover {
+  border-color: var(--nord8);
+  color: var(--nord8);
+}
+html.theme-dark #result_count {
+  color: var(--fg-muted);
+}
+
+/* --- pagination --- */
+html.theme-dark #pagination button,
+html.theme-dark #pagination input[type="submit"],
+html.theme-dark #pagination input[type="button"] {
+  background: var(--bg-alt);
+  color: var(--fg-muted);
+  border: 1px solid var(--border);
+}
+html.theme-dark #pagination button:hover,
+html.theme-dark #pagination input[type="submit"]:hover {
+  color: var(--nord8);
+  border-color: var(--nord8);
+}
+html.theme-dark #pagination input.page_number_current {
+  background: var(--nord8);
+  color: var(--nord0);
+  border-color: var(--nord8);
+}
+html.theme-dark #backToTop a {
+  background: var(--bg-alt);
+  color: var(--fg-muted);
+  border: 1px solid var(--border);
+}
+html.theme-dark #backToTop a:hover {
+  color: var(--nord8);
+  border-color: var(--nord8);
+}
+
+/* --- buttons / badges --- */
+html.theme-dark button,
+html.theme-dark input[type="submit"],
+html.theme-dark input[type="button"],
+html.theme-dark .btn {
+  background: var(--bg-alt);
+  color: var(--fg);
+  border: 1px solid var(--border-strong);
+  border-radius: 0;
+}
+html.theme-dark button:hover,
+html.theme-dark input[type="submit"]:hover,
+html.theme-dark input[type="button"]:hover {
+  border-color: var(--nord8);
+  color: var(--nord8);
+}
+html.theme-dark .badge {
+  background: var(--nord2);
+  color: var(--fg);
+}
+
+/* --- errors / messages --- */
+html.theme-dark .dialog-error {
+  background: var(--nord11);
+  color: var(--nord6);
+  border: none;
+}
+html.theme-dark .dialog-error a {
+  color: var(--nord6);
+}
+html.theme-dark #results .corrections {
+  color: var(--fg-muted);
+}
+html.theme-dark #results .corrections a {
+  color: var(--nord13);
+}
+
+/* --- preferences page --- */
+html.theme-dark #main_preferences form {
+  background: var(--bg-alt);
+  color: var(--fg);
+}
+html.theme-dark #main_preferences h1,
+html.theme-dark #main_preferences h2,
+html.theme-dark #main_preferences h3 {
+  color: var(--nord8);
+}
+html.theme-dark #main_preferences table {
+  border-collapse: collapse;
+}
+html.theme-dark #main_preferences td,
+html.theme-dark #main_preferences th {
+  border: 1px solid var(--border);
+  color: var(--fg);
+}
+html.theme-dark #main_preferences input[type="text"],
+html.theme-dark #main_preferences textarea {
+  background: var(--bg-input);
+  color: var(--fg);
+  border: 1px solid var(--border-strong);
+}
+
+/* --- cards / engines on the index page --- */
+html.theme-dark .engine_card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+}
+html.theme-dark .engine_card:hover,
+html.theme-dark .engine_card.engine_card_selected {
+  border-color: var(--nord8);
+}
+html.theme-dark .engine_stats,
+html.theme-dark .engine_stats table {
+  color: var(--fg-muted);
+}
+html.theme-dark .engine_stats a {
+  color: var(--nord9);
+}
+
+/* --- misc inputs --- */
+html.theme-dark input[type="checkbox"].checkbox-onoff {
+  accent-color: var(--nord8);
+}

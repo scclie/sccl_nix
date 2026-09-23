@@ -59,11 +59,14 @@ they reach host DBs via the bridge gateway `10.69.0.1`.
 | 53 | unbound (lan resolver for `sccl.cc`) | `192.168.0.10` + loopback |
 | 5300/lo | powerdns authoritative | `127.0.0.1` |
 | 80, 443 | nginx + ACME wildcard `*.sccl.cc` | `192.168.0.10` |
+| 8448 | matrix federation (continuwuity) | `0.0.0.0` |
 | 8081, 8082 | sftpgo LAN mirrors (TLS) | `192.168.0.10` |
 | 3001/lo | grafana | `127.0.0.1` |
 | 5432 | pgSQL | `10.69.0.0/24` (bridge) |
 | 6379/lo | redis | `127.0.0.1` |
+| 29334/lo | mautrix-discord bridge | `127.0.0.1` |
 | 8080 | gatus (public monitoring) | upstream via nginx |
+| 8094/lo | searxng (uWSGI) | `127.0.0.1` |
 | 9090/3100/9093/lo | prometheus / Loki / Alertmanager | `127.0.0.1` |
 | 9100/9113/9115/lo | node / nginx / blackbox exporters | `127.0.0.1` |
 | 64738 TCP+UDP | murmur (Mumble voice server) | `*` |
@@ -92,6 +95,7 @@ TCP+UDP `64738` (murmur).
 | `https://gif.sccl.cc` | gif generator / hosting | `127.0.0.1:8083` (API, /api) |
 | `https://pierdol.ing` | matrix (server_name) + meme page | `10.69.0.19:6167` (/ matrix) |
 | `pierdol.ing:8448` | matrix federation | `10.69.0.19:6167` |
+| `https://sx.pierdol.ing` | searxng metasearch | `127.0.0.1:8094` |
 | `murmur.sccl.cc:64738` | Mumble voice server | host, TCP+UDP `64738` |
 
 grafana is admin-only; prometheus/loki/alertmanager public paths (`/-/healthy`,

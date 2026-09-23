@@ -26,6 +26,7 @@
     ./kanidm.nix
     ./radio.nix
     ./sites.nix
+    ./searx
     ./mirror.nix
     ./comments.nix
     ./sso.nix
