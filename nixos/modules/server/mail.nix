@@ -5,6 +5,7 @@ let
   certDomains = [ cfg.domain ] ++ cfg.extraDomains;
   forwardedPorts = [ 25 465 587 993 ];
   forwardPortsSpec = lib.concatStringsSep "," (map toString forwardedPorts);
+  extIf = config.networking.nat.externalInterface;
 in {
   options.sccl.mail = {
     enable = lib.mkEnableOption "Stalwart mail server";
@@ -23,16 +24,45 @@ in {
       default = "mail.sccl.cc";
       description = "Mail server hostname";
     };
+    outboundRelay = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Route all non-local outbound mail through a relay host instead of direct MX delivery";
+      };
+      host = lib.mkOption {
+        type = lib.types.str;
+        default = "smtp.gmail.com";
+        description = "Relay SMTP host";
+      };
+      port = lib.mkOption {
+        type = lib.types.port;
+        default = 465;
+        description = "Relay SMTP port";
+      };
+    };
   };
 
   config = lib.mkIf cfg.enable {
-    sops.secrets."mail/admin-password" = {
-      sopsFile = ../../../secrets/apps.yaml;
+    sops.secrets = {
+      "mail/admin-password" = {
+        sopsFile = ../../../secrets/apps.yaml;
+      };
+    } // lib.optionalAttrs cfg.outboundRelay.enable {
+      "mail/gmail-relay-password" = {
+        sopsFile = ../../../secrets/apps.yaml;
+      };
+      "mail/gmail-relay-username" = {
+        sopsFile = ../../../secrets/apps.yaml;
+      };
     };
 
     sops.templates."stalwart-env" = {
       content = ''
         STALWART_ADMIN_PASSWORD=${config.sops.placeholder."mail/admin-password"}
+      '' + lib.optionalString cfg.outboundRelay.enable ''
+        STALWART_GMAIL_RELAY_PASSWORD=${config.sops.placeholder."mail/gmail-relay-password"}
+        STALWART_GMAIL_RELAY_USERNAME=${config.sops.placeholder."mail/gmail-relay-username"}
       '';
     };
 
@@ -136,6 +166,40 @@ in {
               secret = "%{env:STALWART_ADMIN_PASSWORD}%";
             };
             session.rcpt.catch-all = true;
+
+            queue = lib.optionalAttrs cfg.outboundRelay.enable {
+              strategy.route = [
+                {
+                  "if" = "is_local_domain('', rcpt_domain)";
+                  "then" = "'local'";
+                }
+                {
+                  "else" = "'relay'";
+                }
+              ];
+
+              route = {
+                local.type = "local";
+                mx = {
+                  type = "mx";
+                  ip-lookup = "ipv4_then_ipv6";
+                };
+                relay = {
+                  type = "relay";
+                  address = cfg.outboundRelay.host;
+                  port = cfg.outboundRelay.port;
+                  protocol = "smtp";
+                  tls = {
+                    implicit = cfg.outboundRelay.port == 465;
+                    allow-invalid-certs = false;
+                  };
+                  auth = {
+                    username = "%{env:STALWART_GMAIL_RELAY_USERNAME}%";
+                    secret = "%{env:STALWART_GMAIL_RELAY_PASSWORD}%";
+                  };
+                };
+              };
+            };
           };
         };
 
@@ -148,7 +212,8 @@ in {
     networking.firewall = {
       allowedTCPPorts = forwardedPorts;
       extraCommands = (lib.concatStringsSep "\n" (map (p: ''
-        iptables -t nat -C PREROUTING -p tcp --dport ${toString p} -j DNAT --to-destination ${containerIp}:${toString p} 2>/dev/null || iptables -t nat -A PREROUTING -p tcp --dport ${toString p} -j DNAT --to-destination ${containerIp}:${toString p}
+        while iptables -t nat -C PREROUTING -p tcp --dport ${toString p} -j DNAT --to-destination ${containerIp}:${toString p} 2>/dev/null; do iptables -t nat -D PREROUTING -p tcp --dport ${toString p} -j DNAT --to-destination ${containerIp}:${toString p}; done
+        iptables -t nat -C PREROUTING -i ${extIf} -p tcp --dport ${toString p} -j DNAT --to-destination ${containerIp}:${toString p} 2>/dev/null || iptables -t nat -A PREROUTING -i ${extIf} -p tcp --dport ${toString p} -j DNAT --to-destination ${containerIp}:${toString p}
       '') forwardedPorts)) + "\n" + ''
         iptables -C FORWARD -d ${containerIp} -p tcp -m multiport --dports ${forwardPortsSpec} -j ACCEPT 2>/dev/null || iptables -I FORWARD -d ${containerIp} -p tcp -m multiport --dports ${forwardPortsSpec} -j ACCEPT
       '';

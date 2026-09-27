@@ -35,7 +35,7 @@
     { name = "sx"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "mail"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "@"; type = "MX"; content = "1 mail.${domain}"; proxied = false; }
-    { name = "@"; type = "TXT"; content = "v=spf1 mx -all"; proxied = false; }
+    { name = "@"; type = "TXT"; content = "v=spf1 mx include:_spf.google.com -all"; proxied = false; }
     { name = "_dmarc"; type = "TXT"; content = "v=DMARC1; p=quarantine; rua=mailto:dmarc@pierdol.ing"; proxied = false; }
   ];
 }

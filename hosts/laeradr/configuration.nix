@@ -63,6 +63,7 @@
     mail = {
       enable = true;
       extraDomains = [ "pierdol.ing" ];
+      outboundRelay.enable = true;
     };
     matrix = {
       enable = true;
