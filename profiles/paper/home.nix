@@ -1,4 +1,4 @@
-{ config, pkgs, lib, inputs, hasSecrets ? false, ... }:
+{ config, pkgs, lib, inputs, hasSecrets ? false, mailPasswordPath ? "/run/secrets/mail/app-password", ... }:
 
 {
   imports = [
@@ -7,6 +7,10 @@
     ./packages.nix
     ./modules
   ];
+
+  _module.args = {
+    inherit mailPasswordPath;
+  };
 
   home = {
     username = "paper";

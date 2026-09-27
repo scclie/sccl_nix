@@ -47,22 +47,43 @@ let
       NAME='${name}'
       TYPE='${r.type}'
       CONTENT="${r.content}"
-      DATA=$($JQ -nc --arg t "$TYPE" --arg n "$NAME" --arg c "$CONTENT" \
-        '{type:$t,name:$n,content:$c,ttl:1,proxied:${proxied}}')
+      ${if r.type == "MX" then ''
+        PRIORITY=$(echo "$CONTENT" | cut -d' ' -f1)
+        CONTENT=$(echo "$CONTENT" | cut -d' ' -f2-)
+        DATA=$($JQ -nc --arg t "$TYPE" --arg n "$NAME" --arg c "$CONTENT" --argjson p "$PRIORITY" \
+          '{type:$t,name:$n,content:$c,priority:$p,ttl:1,proxied:${proxied}}')
+        echo "cf-dns-sync: MX DATA=$DATA"
+      '' else ''
+        DATA=$($JQ -nc --arg t "$TYPE" --arg n "$NAME" --arg c "$CONTENT" \
+          '{type:$t,name:$n,content:$c,ttl:1,proxied:${proxied}}')
+      ''}
       EXISTING=$($CURL -s --max-time 20 "$BASE?name=$NAME" -H "Authorization: Bearer $TOKEN")
-      ID=$($JQ -r --arg t "$TYPE" '.result[]? | select(.type == $t) | .id' <<<"$EXISTING" | head -n 1)
+      ${if r.type == "MX" then ''
+        ID=$($JQ -r --arg t "$TYPE" --arg c "$CONTENT" '.result[]? | select(.type == $t and .content == $c) | .id' <<<"$EXISTING" | head -n 1)
+      '' else ''
+        ID=$($JQ -r --arg t "$TYPE" '.result[]? | select(.type == $t) | .id' <<<"$EXISTING" | head -n 1)
+      ''}
       if [ -n "$ID" ]; then
-        CODE=$($CURL -s --max-time 20 -X PUT "$BASE/$ID" \
+        RESPONSE=$($CURL -s --max-time 20 -X PUT "$BASE/$ID" \
           -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
-          --data "$DATA" -o /dev/null -w '%{http_code}')
-        echo "cf-dns-sync: $TYPE $NAME updated (http=$CODE)"
+          --data "$DATA")
+        CODE=$(echo "$RESPONSE" | $JQ -r '.success')
+        echo "cf-dns-sync: $TYPE $NAME updated (success=$CODE)"
+        if [ "$CODE" != "true" ]; then
+          echo "cf-dns-sync: $TYPE $NAME error: $(echo "$RESPONSE" | $JQ -c '.errors')"
+          exit 1
+        fi
       else
-        CODE=$($CURL -s --max-time 20 -X POST "$BASE" \
+        RESPONSE=$($CURL -s --max-time 20 -X POST "$BASE" \
           -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
-          --data "$DATA" -o /dev/null -w '%{http_code}')
-        echo "cf-dns-sync: $TYPE $NAME created (http=$CODE)"
+          --data "$DATA")
+        CODE=$(echo "$RESPONSE" | $JQ -r '.success')
+        echo "cf-dns-sync: $TYPE $NAME created (success=$CODE)"
+        if [ "$CODE" != "true" ]; then
+          echo "cf-dns-sync: $TYPE $NAME error: $(echo "$RESPONSE" | $JQ -c '.errors')"
+          exit 1
+        fi
       fi
-      [ "$CODE" = "200" ] || { echo "cf-dns-sync: $TYPE $NAME failed"; exit 1; }
     '';
 
     cfSyncScript = pkgs.writeShellScript "cf-dns-sync" ''

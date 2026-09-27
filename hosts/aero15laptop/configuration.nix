@@ -111,6 +111,7 @@
     extraSpecialArgs = {
       inherit inputs;
       hasSecrets = config.sccl.secrets.enable;
+      mailPasswordPath = config.sops.secrets."mail/app-password".path;
       pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system};
       niriKbLayout = "colemak_caws,rulemak_caws";
       niriKbOptions = "caps:backspace,grp:rwin_toggle,lv3:ralt_switch";

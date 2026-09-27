@@ -20,5 +20,6 @@
 
 | port | proto | purpose |
 |---|---|---|
+| 25 | TCP | smtp (MX for sccl.cc, pierdol.ing) |
 | 443 | TCP | https origin for cf |
 | 64738 | TCP+UDP| murmur (mumble voice server) |

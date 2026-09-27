@@ -66,6 +66,10 @@ in {
           owner = cfg.user;
           mode = "0400";
         };
+        "mail/app-password" = {
+          owner = cfg.user;
+          mode = "0400";
+        };
       };
     };
 

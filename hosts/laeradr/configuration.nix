@@ -25,6 +25,7 @@
       zone = "sccl.cc";
       extraZones = [
         (import ../../nixos/modules/server/dns-records-pierdolling.nix {
+          domain = "pierdol.ing";
           serverIp = "192.168.0.10";
         } // { name = "pierdol.ing"; })
       ];
@@ -61,6 +62,7 @@
     };
     mail = {
       enable = true;
+      extraDomains = [ "pierdol.ing" ];
     };
     matrix = {
       enable = true;
@@ -96,7 +98,7 @@
         { name = "sftpgo"; group = "services"; url = "https://files.sccl.cc"; interval = "5m"; }
         { name = "forgejo"; group = "services"; url = "https://git.sccl.cc"; interval = "5m"; }
         { name = "vaultwarden"; group = "services"; url = "https://pass.sccl.cc"; interval = "5m"; }
-        { name = "maddy"; group = "services"; url = "https://mail.sccl.cc"; interval = "5m"; }
+        { name = "stalwart"; group = "services"; url = "https://mail.sccl.cc"; interval = "5m"; }
         { name = "prometheus"; group = "monitoring"; url = "https://prometheus.sccl.cc/-/healthy"; interval = "5m"; }
         { name = "grafana"; group = "monitoring"; url = "https://grafana.sccl.cc/api/health"; interval = "5m"; }
         { name = "loki"; group = "monitoring"; url = "https://loki.sccl.cc/ready"; interval = "5m"; }

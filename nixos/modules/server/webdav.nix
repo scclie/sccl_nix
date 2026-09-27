@@ -48,9 +48,9 @@ in {
 
     services.davfs2.settings.globalSection.use_locks = false;
 
-    security.pki.certificateFiles = [
-      ../../../certs/home-ca.pem
-    ];
+    # security.pki.certificateFiles = [
+    #   ../../../certs/home-ca.pem
+    # ];
 
     networking.hosts."${cfg.mountAddress}" = [ cfg.mountHost ];
 
