@@ -52,6 +52,7 @@
     };
     playground.enable = true;
     nix-ld.enable = true;
+    gamepad.enable = true;
     automount.enable = true;
     files.webdav = {
       enable = true;

@@ -2,7 +2,7 @@
 
 overengineered nixos shit-config for my homelab. flakes + home-manager + disko + sops-nix.
 
-![desktop_img](img/niri.webp)
+![desktop_img](img/niri2.webp)
 
 - repo: [git.sccl.cc/scclie/sccl_nix](https://git.sccl.cc/scclie/sccl_nix),
   mirrored to [Codeberg](https://codeberg.org/scclie/sccl_nix)

@@ -12,6 +12,7 @@
     sccl.playground.enable = lib.mkEnableOption "Docker + dev tools";
     sccl.chaotic.enable = lib.mkEnableOption "chaotic-nyx repo";
     sccl.nix-ld.enable = lib.mkEnableOption "nix-ld for binaries";
+    sccl.gamepad.enable = lib.mkEnableOption "gamepad support (steam input virtual devices)";
     sccl.boot.cachyos = lib.mkOption {
       type = lib.types.bool;
       default = true;
@@ -46,6 +47,7 @@
     ./mihomo.nix
     ./playground.nix
     ./nix-ld.nix
+    ./gamepad.nix
     ./server
   ];
 
