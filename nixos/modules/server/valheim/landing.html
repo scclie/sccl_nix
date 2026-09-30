@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>draumur valheim</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --nord0:#2e3440;--nord1:#3b4252;--nord2:#434c5e;--nord3:#4c566a;
+      --nord4:#d8dee9;--nord8:#88c0d0;--nord14:#a3be8c;
+      --bg:var(--nord0);--fg:var(--nord4);--fg-dim:var(--nord3)
+    }
+    html{
+      background:var(--bg);color:var(--fg);
+      font-family:"Space Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:clamp(14px,1.2vw,24px);line-height:1.6;
+      -webkit-font-smoothing:none;font-smooth:never
+    }
+    body{background:var(--bg);min-height:100vh}
+    main{min-height:100vh;padding:1.875rem 1.25rem;display:flex;align-items:center;justify-content:center}
+    ::selection{background:var(--nord8);color:#000}
+    ::-webkit-scrollbar{width:6px}
+    ::-webkit-scrollbar-track{background:var(--bg)}
+    ::-webkit-scrollbar-thumb{background:var(--fg-dim)}
+    *:focus-visible{outline:2px solid var(--nord8);outline-offset:2px}
+
+    .card{
+      width:min(80vw,42rem);
+      background:var(--nord1);
+      padding:1.25rem;
+      border:2px solid var(--nord8)
+    }
+    .card-header{
+      display:flex;align-items:center;gap:1rem;
+      margin-bottom:1.25rem;padding-bottom:.9375rem;
+      border-bottom:1px solid var(--nord8)
+    }
+    .logo{
+      box-sizing:content-box;
+      width:84px;height:84px;flex:0 0 auto;
+      border:2px solid var(--nord8);
+      image-rendering:pixelated;
+      background-repeat:no-repeat;background-size:100% 100%;
+      background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAVCAMAAACeyVWkAAAAAXNSR0IArs4c6QAAADNQTFRFAAAALjRAO0JSQ0xeTFZqv2Fq0IdwXoGso76MtI6tj7y768uLgaHBiMDQ2N7p5enw7O/04qpLvAAAABF0Uk5TAP////////////////////8QFUChAAAAYklEQVQYlYWQUQ7AIAhD3eCjhPvfdyLRBVczopg8m6bQLlbtTE2iSz4vtTwo1OOH+Pq4VYsDTfXmkKbildK8K+dMsmnNmJb4YqM6DDHnKcluRk2Zb6ytd18UfSzNfeJntk897NsDR55xPzsAAAAASUVORK5CYII=)
+    }
+    .user{color:var(--nord8);font-size:1.25rem;font-weight:700;display:block}
+    .bio{color:var(--fg);font-size:1rem;margin:0}
+    .card-footer{
+      margin-top:1.25rem;padding-top:.625rem;
+      border-top:1px solid var(--nord8);
+      display:flex;justify-content:space-between;align-items:center;gap:1rem;
+      font-size:1rem;color:var(--fg)
+    }
+    .foot-note{color:var(--fg-dim);font-size:.875rem}
+    .symbol{color:var(--nord8);text-decoration:none}
+    .symbol:hover{color:var(--fg)}
+
+    .rows{margin:0 0 1.25rem}
+    .rows div{display:flex;gap:.75rem;padding:.15rem 0}
+    .rows dt{color:var(--fg-dim);flex:0 0 7rem}
+    .rows dd{margin:0;color:var(--fg)}
+    .rows dd b{color:var(--nord8);font-weight:700}
+    .links{display:flex;gap:1rem;flex-wrap:wrap;margin:0 0 .25rem}
+    .links a{color:var(--nord8);text-decoration:none}
+    .links a:hover{text-decoration:underline}
+
+    @media(max-width:767px){
+      html{font-size:14px}
+      .card{width:95vw;padding:.625rem}
+      .rows dt{flex:0 0 6rem}
+      .card-footer{flex-direction:column;gap:.5rem;text-align:center}
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="card">
+      <div class="card-header">
+        <div class="logo" role="img" aria-label="draumur"></div>
+        <div>
+          <span class="user">draumur valheim</span>
+          <p class="bio">public server</p>
+        </div>
+      </div>
+
+      <div class="card-content">
+        <dl class="rows">
+          <div>
+            <dt>engine</dt>
+            <dd>valheim-dedicated-server, app 896660</dd>
+          </div>
+          <div>
+            <dt>address</dt>
+            <dd><b>@@ADDRESS@@:@@GAME_PORT@@</b></dd>
+          </div>
+          <div>
+            <dt>password</dt>
+            <dd>from discord</dd>
+          </div>
+          <div>
+            <dt>access</dt>
+            <dd>steam only, no crossplay, vanilla clients</dd>
+          </div>
+        </dl>
+
+        <p class="links">
+          <!--map:start-->
+          <a href="@@MAP_URL@@">[ 3d web map ]</a>
+          <!--map:end-->
+          <!--discord:start-->
+          <a href="@@DISCORD_INVITE@@">[ discord ]</a>
+          <!--discord:end-->
+          <!--matrix:start-->
+          <a href="@@MATRIX_URL@@">[ matrix ]</a>
+          <!--matrix:end-->
+          <a href="@@STATUS_URL@@">[ status ]</a>
+        </p>
+      </div>
+
+      <div class="card-footer">
+        <span class="foot-note">landing.html</span>
+        <a href="https://sccl.cc" class="symbol" target="_blank" rel="noopener">sccl.cc</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

@@ -84,6 +84,10 @@
             type = "zfs_fs";
             mountpoint = "/tank/minecraft";
           };
+          "data/valheim" = {
+            type = "zfs_fs";
+            mountpoint = "/tank/valheim";
+          };
           "data/vw" = {
             type = "zfs_fs";
             mountpoint = "/tank/vw";

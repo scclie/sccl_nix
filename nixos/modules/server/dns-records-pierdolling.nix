@@ -17,6 +17,8 @@
     { name = "comments"; type = "A"; content = serverIp; }
     { name = "macc"; type = "A"; content = serverIp; }
     { name = "sx"; type = "A"; content = serverIp; }
+    { name = "valheim"; type = "A"; content = serverIp; }
+    { name = "map-valheim"; type = "A"; content = serverIp; }
     { name = "mail"; type = "A"; content = serverIp; }
     { name = "@"; type = "MX"; content = "1 mail.${domain}."; }
   ];
@@ -33,6 +35,8 @@
     { name = "comments"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "macc"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "sx"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
+    { name = "valheim"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
+    { name = "map-valheim"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "mail"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "@"; type = "MX"; content = "1 mail.${domain}"; proxied = false; }
     { name = "@"; type = "TXT"; content = "v=spf1 mx include:_spf.google.com -all"; proxied = false; }

@@ -53,9 +53,18 @@
       channels = [ "Lounge" "Room 1" "Room 2" "Room 3" "Afk" ];
     };
     valheim = {
-      enable = false;
-      name = "laeradr";
+      enable = true;
+      name = "draumur";
       world = "Midgard";
+      rcon.enable = true;
+      discord.enable = true;
+      webmap.enable = true;
+      qol = {
+        passwordOnce = true;
+        autoSaveInterval = true;
+      };
+      discordInvite = "https://discord.gg/MNXnGGG3zt";
+      matrixRoom = "https://matrix.to/#/#draumur:pierdol.ing";
     };
     vaultwarden = {
       enable = true;
@@ -106,6 +115,12 @@
         { name = "alertmanager"; group = "monitoring"; url = "https://alertmanager.sccl.cc/-/healthy"; interval = "5m"; }
         { name = "comments api"; group = "apps"; url = "https://comments.pierdol.ing/health"; interval = "1m"; }
         { name = "searxng"; group = "services"; url = "https://sx.pierdol.ing/healthz"; interval = "5m"; }
+        # name must equal sccl.valheim.statusEndpoint, the landing page links to
+        # https://status.sccl.cc/endpoints/games_valheim. A rename here is a 404.
+        # loopback because Gatus runs on this host. The map itself is not
+        # loopback-bound: websocket-sharp's HttpServer(int) binds every interface,
+        # 3002 is closed only by being absent from allowedTCPPorts.
+        { name = "valheim"; group = "games"; url = "http://127.0.0.1:${toString config.sccl.valheim.webmap.port}/"; interval = "1m"; }
       ];
     };
     backup = {

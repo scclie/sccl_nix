@@ -20,7 +20,7 @@
     ./status
     ./backup.nix
     ./minecraft.nix
-    ./valheim.nix
+    ./valheim
     ./matrix
     ./voice.nix
     ./kanidm.nix

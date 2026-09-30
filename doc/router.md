@@ -23,3 +23,5 @@
 | 25 | TCP | smtp (MX for sccl.cc, pierdol.ing) |
 | 443 | TCP | https origin for cf |
 | 64738 | TCP+UDP| murmur (mumble voice server) |
+| 2456 | UDP | valheim game |
+| 2457 | UDP | valheim query, port+1 |
