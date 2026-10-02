@@ -1,4 +1,4 @@
-{ pkgs, dataDir, bepinex, steamEnv, steamcmd, rcon, rconPort, rconCidrs, discord, webmap, webmapPort, webmapHost, webmapInvite, pwonce, autosave }:
+{ pkgs, dataDir, bepinex, steamEnv, steamcmd, rcon, rconPort, rconCidrs, discord, discordWorldSave, webmap, webmapPort, webmapHost, webmapInvite, pwonce, autosave, jotunn, jsonDotNet, yamlDotNet, reefCharacters, reefOneCharacter, epicLoot, plantEverything, protectiveWards, wearableTrophies, equipmentAndQuickSlots, craftFromChestsPlus, farmGridRemake, ghettoNetworking, quickStackPlus, conditionalConfigSync, buildCamera, speedyPaths, odinHorse, odinArchitect }:
 
 pkgs.writeShellApplication {
   name = "valheim-deploy";
@@ -15,7 +15,6 @@ pkgs.writeShellApplication {
     link_path() {
       local src=$1
       local dst=$2
-      # check the source too: a wrong store path is invisible here and ln -s would
       if [ ! -e "$src" ]; then
         echo "valheim-deploy: source $src does not exist" >&2
         exit 1
@@ -46,6 +45,32 @@ pkgs.writeShellApplication {
       cp "$src" "$dst"
       chmod 0644 "$dst"
       echo "valheim-deploy: copied $dst as a real file (must not be a symlink)"
+    }
+
+    # mod <0|1> <package> <entry>...
+    mod() {
+      local enabled=$1
+      local src=$2
+      shift 2
+      local dst="$DATA_DIR/BepInEx/plugins"
+      local f
+      mkdir -p "$dst"
+      if [ "$enabled" = "1" ]; then
+        if [ ! -d "$src/plugins" ]; then
+          echo "valheim-deploy: $src/plugins does not exist" >&2
+          exit 1
+        fi
+        for f in "$src"/plugins/*; do
+          link_path "$f" "$dst/$(basename "$f")"
+        done
+      else
+        for f in "$@"; do
+          if [ -L "$dst/$f" ]; then
+            rm -f "$dst/$f"
+            echo "valheim-deploy: unlinked $dst/$f"
+          fi
+        done
+      fi
     }
 
     # writes a config value bare
@@ -86,8 +111,8 @@ pkgs.writeShellApplication {
 
     echo "valheim-deploy: BepInEx core -> $BEPINEX/BepInEx/core"
 
+    mod "''${VALHEIM_RCON_ENABLE:-0}" ${rcon} ValheimRcon.dll
     if [ "''${VALHEIM_RCON_ENABLE:-0}" = "1" ]; then
-      link_path "${rcon}/plugins/ValheimRcon.dll" "$DATA_DIR/BepInEx/plugins/ValheimRcon.dll"
       # names and values are bare, which this BepInEx build round-trips itself even
       # though the section "1. Rcon" and key "Whitelist IP mask" hold spaces and a dot.
       rcon_pw=$VALHEIM_RCON_PASSWORD
@@ -101,10 +126,12 @@ pkgs.writeShellApplication {
         > "$DATA_DIR/BepInEx/config/org.tristan.rcon.cfg"
       # umask 077 only bites at creation and the mod rewrites this file, so chmod it.
       chmod 0600 "$DATA_DIR/BepInEx/config/org.tristan.rcon.cfg"
+    else
+      rm -f "$DATA_DIR/BepInEx/config/org.tristan.rcon.cfg"
     fi
 
+    mod "''${VALHEIM_DISCORD_ENABLE:-0}" ${discord} DiscordConnector.dll
     if [ "''${VALHEIM_DISCORD_ENABLE:-0}" = "1" ]; then
-      link_path "${discord}/plugins/DiscordConnector.dll" "$DATA_DIR/BepInEx/plugins/DiscordConnector.dll"
       DC_CFG="$DATA_DIR/BepInEx/config/games.nwest.valheim.discordconnector"
       (
         umask 077
@@ -126,20 +153,27 @@ pkgs.writeShellApplication {
           '[Main Settings]' \
           "Webhook URL = $webhook" \
           > "$DC_CFG/discordconnector.cfg"
+
+        printf '%s\n' \
+          '[Toggles.Messages]' \
+          "Server World Save Notifications = ${if discordWorldSave then "true" else "false"}" \
+          > "$DC_CFG/discordconnector-toggles.cfg"
         chmod 0600 "$DC_CFG/discordconnector.cfg"
-        # the directory needs 0700: the mod writes config-dump.json there with the
-        # webhook in cleartext at the default 0644.
+
+        chmod 0600 "$DC_CFG/discordconnector-toggles.cfg"
+
         chmod 0700 "$DC_CFG"
       )
+    else
+      rm -rf "$DATA_DIR/BepInEx/config/games.nwest.valheim.discordconnector"
     fi
 
-    if [ "''${VALHEIM_WEBMAP_ENABLE:-0}" = "1" ]; then
-      rm -f "$DATA_DIR/BepInEx/config/com.github.h0tw1r3.valheim.webmap.cfg"
-      rm -f "$DATA_DIR/BepInEx/plugins/WebMap.dll"
-      rm -f "$DATA_DIR/BepInEx/plugins/websocket-sharp.dll"
-      rm -rf "$DATA_DIR/BepInEx/plugins/web"
-      rm -rf "$DATA_DIR/BepInEx/plugins/map_data"
+    rm -f "$DATA_DIR/BepInEx/config/com.github.h0tw1r3.valheim.webmap.cfg"
+    rm -f "$DATA_DIR/BepInEx/plugins/WebMap.dll"
+    rm -rf "$DATA_DIR/BepInEx/plugins/web"
+    rm -rf "$DATA_DIR/BepInEx/plugins/map_data"
 
+    if [ "''${VALHEIM_WEBMAP_ENABLE:-0}" = "1" ]; then
       mkdir -p "$DATA_DIR/BepInEx/plugins/WebMap/map_data"
       copy_asset "${webmap}/WebMap/WebMap.dll" "$DATA_DIR/BepInEx/plugins/WebMap/WebMap.dll"
       link_path "${webmap}/WebMap/websocket-sharp.dll" "$DATA_DIR/BepInEx/plugins/WebMap/websocket-sharp.dll"
@@ -158,17 +192,57 @@ pkgs.writeShellApplication {
 
         chmod 0600 "$DATA_DIR/BepInEx/config/com.valheimwebmap.server.cfg"
       )
+    else
+
+      rm -f "$DATA_DIR/BepInEx/config/com.valheimwebmap.server.cfg"
+      rm -rf "$DATA_DIR/BepInEx/plugins/WebMap"
     fi
 
+    mod "''${VALHEIM_QOL_PWONCE:-0}" ${pwonce} ServerPasswordOnce.dll
+    mod "''${VALHEIM_QOL_AUTOSAVE:-0}" ${autosave} AutoSaveInterval.dll
 
-    if [ "''${VALHEIM_QOL_PWONCE:-0}" = "1" ]; then
+    mod "''${VALHEIM_JOTUNN_ENABLE:-0}" ${jotunn} Jotunn
+    mod "''${VALHEIM_JSONDOTNET_ENABLE:-0}" ${jsonDotNet} Newtonsoft.Json.dll NewtonsoftJsonDetector.dll
+    mod "''${VALHEIM_YAMLDOTNET_ENABLE:-0}" ${yamlDotNet} YamlDotNet.dll YamlDotNetDetector.dll
 
-      link_path "${pwonce}/plugins/ServerPasswordOnce.dll" "$DATA_DIR/BepInEx/plugins/ServerPasswordOnce.dll"
+    mod "''${VALHEIM_REEF_ENABLE:-0}" ${reefCharacters} ReefCharacters.dll
+    if [ "''${VALHEIM_REEF_ENABLE:-0}" = "1" ]; then
+      (
+        umask 077
+        printf '%s\n' \
+          '[Server]' \
+          'Backups to keep = 25' \
+          'One character per account = ${if reefOneCharacter then "true" else "false"}' \
+          > "$DATA_DIR/BepInEx/config/reef.characters.cfg"
+        chmod 0600 "$DATA_DIR/BepInEx/config/reef.characters.cfg"
+      )
+    else
+      rm -f "$DATA_DIR/BepInEx/config/reef.characters.cfg"
     fi
 
-    if [ "''${VALHEIM_QOL_AUTOSAVE:-0}" = "1" ]; then
+    mod "''${VALHEIM_EPICLOOT_ENABLE:-0}" ${epicLoot} EpicLoot
 
-      link_path "${autosave}/plugins/AutoSaveInterval.dll" "$DATA_DIR/BepInEx/plugins/AutoSaveInterval.dll"
-    fi
+    mod "''${VALHEIM_PLANT_EVERYTHING_ENABLE:-0}" ${plantEverything} Advize_PlantEverything.dll
+
+    mod "''${VALHEIM_PROTECTIVE_WARDS_ENABLE:-0}" ${protectiveWards} ProtectiveWards.dll
+
+    mod "''${VALHEIM_WEARABLE_TROPHIES_ENABLE:-0}" ${wearableTrophies} WearableTrophies.dll
+
+    mod "''${VALHEIM_EQS_ENABLE:-0}" ${equipmentAndQuickSlots} EquipmentAndQuickSlots.dll
+
+    mod "''${VALHEIM_CRAFT_CHESTS_ENABLE:-0}" ${craftFromChestsPlus} CraftFromChestsPlus.dll
+    mod "''${VALHEIM_FARM_GRID_ENABLE:-0}" ${farmGridRemake} FarmGridRemake.dll
+    mod "''${VALHEIM_ODIN_HORSE_ENABLE:-0}" ${odinHorse} OdinHorse.dll
+    # OdinArchitect loads its localisation json from a folder next to the dll, so the whole
+    # directory has to land in plugins/ and not just the assembly.
+    mod "''${VALHEIM_ODIN_ARCHITECT_ENABLE:-0}" ${odinArchitect} OdinArchitect
+
+    mod "''${VALHEIM_NETWORKING_ENABLE:-0}" ${ghettoNetworking} VAGhettoNetworking.dll
+
+    mod "''${VALHEIM_CONDITIONAL_CONFIG_SYNC_ENABLE:-0}" ${conditionalConfigSync} \
+      ConditionalConfigSync.dll ConditionalConfigSync.Plugin.dll
+    mod "''${VALHEIM_QUICKSTACK_ENABLE:-0}" ${quickStackPlus} QuickStackPlus.dll
+    mod "''${VALHEIM_BUILD_CAMERA_ENABLE:-0}" ${buildCamera} "Build Camera.dll"
+    mod "''${VALHEIM_SPEEDY_PATHS_ENABLE:-0}" ${speedyPaths} SpeedyPaths.dll
   '';
 }

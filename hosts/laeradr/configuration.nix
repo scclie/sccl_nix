@@ -54,15 +54,45 @@
     };
     valheim = {
       enable = true;
-      name = "draumur";
+      name = "ru::draumur::modded";
       world = "Midgard";
+      worldModifiers = {
+        resources = "muchmore";
+        portals = "casual";
+        deathPenalty = "casual";
+      };
       rcon.enable = true;
       discord.enable = true;
       webmap.enable = true;
       qol = {
         passwordOnce = true;
         autoSaveInterval = true;
+        speedyPaths = true;
+        quickStack = true;
+        noStamCosts = true;
       };
+      ui = {
+        azuClock = true;
+        comfyLadders = true;
+        buildCamera = true;
+        terrainer = true;
+      };
+      content = {
+        epicLoot = true;
+        plantEverything = true;
+        protectiveWards = true;
+        wearableTrophies = true;
+        equipmentAndQuickSlots = true;
+        craftFromChestsPlus = true;
+        farmGridRemake = true;
+        gizmo = true;
+        odinHorse = true;
+        odinArchitect = true;
+      };
+      characters.enable = true;
+      networking.enable = true;
+      clientModpack.enable = true;
+      clientModpack.version = "1.0.4";
       discordInvite = "https://discord.gg/MNXnGGG3zt";
       matrixRoom = "https://matrix.to/#/#draumur:pierdol.ing";
     };
@@ -115,11 +145,6 @@
         { name = "alertmanager"; group = "monitoring"; url = "https://alertmanager.sccl.cc/-/healthy"; interval = "5m"; }
         { name = "comments api"; group = "apps"; url = "https://comments.pierdol.ing/health"; interval = "1m"; }
         { name = "searxng"; group = "services"; url = "https://sx.pierdol.ing/healthz"; interval = "5m"; }
-        # name must equal sccl.valheim.statusEndpoint, the landing page links to
-        # https://status.sccl.cc/endpoints/games_valheim. A rename here is a 404.
-        # loopback because Gatus runs on this host. The map itself is not
-        # loopback-bound: websocket-sharp's HttpServer(int) binds every interface,
-        # 3002 is closed only by being absent from allowedTCPPorts.
         { name = "valheim"; group = "games"; url = "http://127.0.0.1:${toString config.sccl.valheim.webmap.port}/"; interval = "1m"; }
       ];
     };
