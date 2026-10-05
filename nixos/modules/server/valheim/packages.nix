@@ -259,6 +259,24 @@ rec {
     files = [ "TerrainTools.dll" ];
   };
 
+  # cjayride ConfigurationManager
+  configurationManager = plugin {
+    name = "configurationmanager";
+    version = "0.6.2";
+    url = "https://thunderstore.io/package/download/cjayride/ConfigurationManager/0.6.2/";
+    hash = "sha256-6JzNMe7cnjOGTW4oN97fr5gz8XaZNJJBwY///7orOhE=";
+    files = [ "ConfigurationManager.dll" ];
+  };
+
+  # MathiasDecrock PlanBuild
+  planBuild = plugin {
+    name = "planbuild";
+    version = "0.20.0";
+    url = "https://thunderstore.io/package/download/MathiasDecrock/PlanBuild/0.20.0/";
+    hash = "sha256-eYWeXzmJ2G4xZWOmUqqBfVghkD/lPKabFPiVY976/90=";
+    copySubdir = "PlanBuild";
+  };
+
   # BasilPanda NoStamCosts - QoL of building
   noStamCosts = plugin {
     name = "nostamcosts";

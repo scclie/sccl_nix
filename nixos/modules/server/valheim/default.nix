@@ -114,6 +114,7 @@ let
     speedyPaths = mods.speedyPaths;
     odinHorse = mods.odinHorse;
     odinArchitect = mods.odinArchitect;
+    planBuild = mods.planBuild;
   };
 
   # The client modpack
@@ -221,6 +222,16 @@ let
       ts = "BasilPanda-NoStamCosts-${mods.noStamCosts.version}";
       on = cfg.qol.noStamCosts;
       pkg = mods.noStamCosts;
+    }
+    {
+      ts = "cjayride-ConfigurationManager-${mods.configurationManager.version}";
+      on = cfg.ui.configurationManager;
+      pkg = mods.configurationManager;
+    }
+    {
+      ts = "MathiasDecrock-PlanBuild-${mods.planBuild.version}";
+      on = cfg.content.planBuild;
+      pkg = mods.planBuild;
     }
     {
       ts = "OdinPlus-OdinArchitect-${mods.odinArchitect.version}";
@@ -485,6 +496,7 @@ in {
       gizmo = lib.mkEnableOption "ComfyMods ComfyGizmo: building rotation hotkeys and snap angles. Client side only, it is in the modpack and never on the server";
       odinArchitect = lib.mkEnableOption "OdinPlus OdinArchitect: 200+ building pieces with elevators, drawbridges, hatches and automated smelters. Adds pieces and recipes, so the server runs it too";
       odinHorse = lib.mkEnableOption "OdinPlus OdinHorse: tameable rideable horse that breeds, carries saddlebags, pulls the horse cart and fights alongside you in the saddle. Adds a creature and items, so the server runs it too";
+      planBuild = lib.mkEnableOption "MathiasDecrock PlanBuild: the plan hammer plans pieces before you gather the materials, the blueprint rune copies, saves and shares builds, plus its own terrain and object tools. Adds items and recipes, so the server runs it too. Its terrain tools overlap Searica AdvancedTerrainModifiers, watch the log after the first start";
     };
 
     # HUD, camera, navigation
@@ -493,6 +505,7 @@ in {
       comfyLadders = lib.mkEnableOption "ComfyMods ComfyLadders: ladders auto-jumpable, the maintained BetterLadders";
       buildCamera = lib.mkEnableOption "Azumatt Build Camera Custom Hammers Edition: detaches the camera from the player while building. Deprecated upstream";
       terrainer = lib.mkEnableOption "Searica AdvancedTerrainModifiers: radius, sharpness and square variants for the hoe and cultivator, plus a shovel and a precision raise tool. Client side only, terrain changes sync through the vanilla system";
+      configurationManager = lib.mkEnableOption "cjayride ConfigurationManager: GUI for editing BepInEx configs in game, so NoStamCosts, Searica and the rest do not need a restart. Client side only, server-synced settings stay admin only";
     };
 
     characters = {
@@ -591,6 +604,7 @@ in {
           (lib.optionalString cfg.qol.speedyPaths "VALHEIM_SPEEDY_PATHS_ENABLE=1")
           (lib.optionalString cfg.content.odinHorse "VALHEIM_ODIN_HORSE_ENABLE=1")
           (lib.optionalString cfg.content.odinArchitect "VALHEIM_ODIN_ARCHITECT_ENABLE=1")
+          (lib.optionalString cfg.content.planBuild "VALHEIM_PLAN_BUILD_ENABLE=1")
         ]);
       };
       script = "${deployScript}/bin/valheim-deploy";

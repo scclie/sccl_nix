@@ -76,6 +76,7 @@
         comfyLadders = true;
         buildCamera = true;
         terrainer = true;
+        configurationManager = true;
       };
       content = {
         epicLoot = true;
@@ -87,12 +88,13 @@
         farmGridRemake = true;
         gizmo = true;
         odinHorse = true;
+        planBuild = true;
         odinArchitect = true;
       };
       characters.enable = true;
       networking.enable = true;
       clientModpack.enable = true;
-      clientModpack.version = "1.0.4";
+      clientModpack.version = "1.0.5";
       discordInvite = "https://discord.gg/MNXnGGG3zt";
       matrixRoom = "https://matrix.to/#/#draumur:pierdol.ing";
     };

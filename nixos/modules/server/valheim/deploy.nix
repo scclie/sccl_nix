@@ -1,4 +1,4 @@
-{ pkgs, dataDir, bepinex, steamEnv, steamcmd, rcon, rconPort, rconCidrs, discord, discordWorldSave, webmap, webmapPort, webmapHost, webmapInvite, pwonce, autosave, jotunn, jsonDotNet, yamlDotNet, reefCharacters, reefOneCharacter, epicLoot, plantEverything, protectiveWards, wearableTrophies, equipmentAndQuickSlots, craftFromChestsPlus, farmGridRemake, ghettoNetworking, quickStackPlus, conditionalConfigSync, buildCamera, speedyPaths, odinHorse, odinArchitect }:
+{ pkgs, dataDir, bepinex, steamEnv, steamcmd, rcon, rconPort, rconCidrs, discord, discordWorldSave, webmap, webmapPort, webmapHost, webmapInvite, pwonce, autosave, jotunn, jsonDotNet, yamlDotNet, reefCharacters, reefOneCharacter, epicLoot, plantEverything, protectiveWards, wearableTrophies, equipmentAndQuickSlots, craftFromChestsPlus, farmGridRemake, ghettoNetworking, quickStackPlus, conditionalConfigSync, buildCamera, speedyPaths, odinHorse, odinArchitect, planBuild }:
 
 pkgs.writeShellApplication {
   name = "valheim-deploy";
@@ -236,6 +236,8 @@ pkgs.writeShellApplication {
     # OdinArchitect loads its localisation json from a folder next to the dll, so the whole
     # directory has to land in plugins/ and not just the assembly.
     mod "''${VALHEIM_ODIN_ARCHITECT_ENABLE:-0}" ${odinArchitect} OdinArchitect
+    # Same for PlanBuild: its Translations/ folder sits next to the assembly.
+    mod "''${VALHEIM_PLAN_BUILD_ENABLE:-0}" ${planBuild} PlanBuild
 
     mod "''${VALHEIM_NETWORKING_ENABLE:-0}" ${ghettoNetworking} VAGhettoNetworking.dll
 
