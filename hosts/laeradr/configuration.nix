@@ -67,6 +67,8 @@
       qol = {
         passwordOnce = true;
         autoSaveInterval = true;
+        idavoll.enable = true;
+        idavoll.automatic = false;
         speedyPaths = true;
         quickStack = true;
         noStamCosts = true;

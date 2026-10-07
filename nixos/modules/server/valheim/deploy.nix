@@ -1,4 +1,4 @@
-{ pkgs, dataDir, bepinex, steamEnv, steamcmd, rcon, rconPort, rconCidrs, discord, discordWorldSave, webmap, webmapPort, webmapHost, webmapInvite, pwonce, autosave, jotunn, jsonDotNet, yamlDotNet, reefCharacters, reefOneCharacter, epicLoot, plantEverything, protectiveWards, wearableTrophies, equipmentAndQuickSlots, craftFromChestsPlus, farmGridRemake, ghettoNetworking, quickStackPlus, conditionalConfigSync, buildCamera, speedyPaths, odinHorse, odinArchitect, planBuild }:
+{ pkgs, dataDir, bepinex, steamEnv, steamcmd, rcon, rconPort, rconCidrs, discord, discordWorldSave, webmap, webmapPort, webmapHost, webmapInvite, pwonce, autosave, idavoll, jotunn, jsonDotNet, yamlDotNet, reefCharacters, reefOneCharacter, epicLoot, plantEverything, protectiveWards, wearableTrophies, equipmentAndQuickSlots, craftFromChestsPlus, farmGridRemake, ghettoNetworking, quickStackPlus, conditionalConfigSync, buildCamera, speedyPaths, odinHorse, odinArchitect, planBuild }:
 
 pkgs.writeShellApplication {
   name = "valheim-deploy";
@@ -200,6 +200,35 @@ pkgs.writeShellApplication {
 
     mod "''${VALHEIM_QOL_PWONCE:-0}" ${pwonce} ServerPasswordOnce.dll
     mod "''${VALHEIM_QOL_AUTOSAVE:-0}" ${autosave} AutoSaveInterval.dll
+    mod "''${VALHEIM_IDAVOLL_ENABLE:-0}" ${idavoll} Idavoll.dll
+    if [ "''${VALHEIM_IDAVOLL_ENABLE:-0}" = "1" ]; then
+      idavoll_automatic=false
+      if [ "''${VALHEIM_IDAVOLL_AUTOMATIC:-0}" = "1" ]; then
+        idavoll_automatic=true
+      fi
+      cat > "$DATA_DIR/BepInEx/config/gbv.valheim.idavoll.json" <<JSON
+{
+  "enabled": $idavoll_automatic,
+  "timeSource": "WallClock",
+  "defaultIntervalHours": 168,
+  "playerClearanceMeters": 150,
+  "maxObjectsPerReset": 5000,
+  "maxResetsPerHour": 4,
+  "protectDroppedItems": true,
+  "skipUniqueLocations": true,
+  "rules": {
+    "*": { "enabled": false, "intervalHours": 0 },
+    "Crypt*": { "enabled": true, "intervalHours": 168 },
+    "TrollCave*": { "enabled": true, "intervalHours": 168 },
+    "SunkenCrypt*": { "enabled": true, "intervalHours": 168 },
+    "MountainCave*": { "enabled": true, "intervalHours": 168 }
+  }
+}
+JSON
+      chmod 0644 "$DATA_DIR/BepInEx/config/gbv.valheim.idavoll.json"
+    else
+      rm -f "$DATA_DIR/BepInEx/config/gbv.valheim.idavoll.json"
+    fi
 
     mod "''${VALHEIM_JOTUNN_ENABLE:-0}" ${jotunn} Jotunn
     mod "''${VALHEIM_JSONDOTNET_ENABLE:-0}" ${jsonDotNet} Newtonsoft.Json.dll NewtonsoftJsonDetector.dll

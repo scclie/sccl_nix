@@ -95,6 +95,7 @@ let
     webmapInvite = cfg.discordInvite;
     pwonce = mods.pwonce;
     autosave = mods.autosave;
+    idavoll = mods.idavoll;
     jotunn = mods.jotunn;
     jsonDotNet = mods.jsonDotNet;
     yamlDotNet = mods.yamlDotNet;
@@ -479,6 +480,10 @@ in {
     qol = {
       passwordOnce = lib.mkEnableOption "DooDesch ServerPasswordOnce (returning players are asked for the password once, not every join)";
       autoSaveInterval = lib.mkEnableOption "Baka_Gaijin AutoSaveInterval (periodic world save, 10 minutes by default)";
+      idavoll = {
+        enable = lib.mkEnableOption "GBV Idavoll server-side dungeon regeneration";
+        automatic = lib.mkEnableOption "automatic Idavoll resets after dry-run validation";
+      };
       speedyPaths = lib.mkEnableOption "Nextek SpeedyPaths: paths and constructions give a speed bonus and cheaper sprinting, stone 1.4x and dirt 1.15x. Server side so its config sync is authoritative";
       quickStack = lib.mkEnableOption "Goneryx QuickStackPlus: quick stack into nearby containers, per-container smart storage, on-demand sorting and a trash mark-and-delete. Server side so the master switch and search radius stay admin controlled, which is what it syncs through ConditionalConfigSync";
       noStamCosts = lib.mkEnableOption "BasilPanda NoStamCosts: hammer, hoe and cultivator cost no stamina, the rest is in Basil_NoStamCosts.cfg where 3 makes everything free. Client side only, it zeroes the value before the stamina RPC, so the server never sees a cost either";
@@ -588,6 +593,8 @@ in {
           (lib.optionalString cfg.webmap.enable "VALHEIM_WEBMAP_ENABLE=1")
           (lib.optionalString cfg.qol.passwordOnce "VALHEIM_QOL_PWONCE=1")
           (lib.optionalString cfg.qol.autoSaveInterval "VALHEIM_QOL_AUTOSAVE=1")
+          (lib.optionalString cfg.qol.idavoll.enable "VALHEIM_IDAVOLL_ENABLE=1")
+          (lib.optionalString cfg.qol.idavoll.automatic "VALHEIM_IDAVOLL_AUTOMATIC=1")
           (lib.optionalString jotunnNeeded "VALHEIM_JOTUNN_ENABLE=1")
           (lib.optionalString cfg.content.epicLoot "VALHEIM_JSONDOTNET_ENABLE=1 VALHEIM_EPICLOOT_ENABLE=1")
           (lib.optionalString cfg.content.protectiveWards "VALHEIM_YAMLDOTNET_ENABLE=1 VALHEIM_PROTECTIVE_WARDS_ENABLE=1")

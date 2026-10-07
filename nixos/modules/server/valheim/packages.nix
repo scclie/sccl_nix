@@ -127,6 +127,15 @@ rec {
     files = [ "AutoSaveInterval.dll" ];
   };
 
+  # GBV Idavoll: server-authoritative timed dungeon regeneration
+  idavoll = plugin {
+    name = "idavoll";
+    version = "0.1.3";
+    url = "https://thunderstore.io/package/download/GBV/Idavoll/0.1.3/";
+    hash = "sha256-0Yn56zhFMnMlH/MtKf8emMbuphwy9IjYanCWj9PoOQo=";
+    files = [ "Idavoll.dll" ];
+  };
+
   # Libraries pulled in by the mods below.
 
   # ValheimModding Jotunn.
