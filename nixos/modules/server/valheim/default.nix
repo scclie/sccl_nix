@@ -55,6 +55,10 @@ let
         name = "DeathPenalty";
         value = cfg.worldModifiers.deathPenalty;
       }
+      {
+        name = "Raids";
+        value = cfg.worldModifiers.raids;
+      }
     ];
 
   # the launch goes through a generated script
@@ -426,6 +430,18 @@ in {
         ]);
         default = null;
         description = "casual keeps equipped gear on the player and drops the rest, with 1% skill loss instead of 5%. hard and hardcore destroy items outright, hardcore deletes the character";
+      };
+
+      raids = lib.mkOption {
+        type = lib.types.nullOr (lib.types.enum [
+          "none"
+          "muchless"
+          "less"
+          "more"
+          "muchmore"
+        ]);
+        default = null;
+        description = "Raid frequency: none disables all raids, including forest raids";
       };
     };
 

@@ -60,6 +60,7 @@
         resources = "muchmore";
         portals = "casual";
         deathPenalty = "casual";
+        raids = "none";
       };
       rcon.enable = true;
       discord.enable = true;
