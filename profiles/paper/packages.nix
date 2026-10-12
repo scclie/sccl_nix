@@ -28,6 +28,8 @@
     python315
     nodejs_24
     kicad
+    esptool
+    platformio
 
     # Gaming
     steam
