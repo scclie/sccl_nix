@@ -31,5 +31,6 @@
     ./comments.nix
     ./sso.nix
     ./macc.nix
+    ./silverbullet.nix
   ];
 }

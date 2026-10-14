@@ -62,6 +62,7 @@ they reach host DBs via the bridge gateway `10.69.0.1`.
 | 8448 | matrix federation (continuwuity) | `0.0.0.0` |
 | 8081, 8082 | sftpgo LAN mirrors (TLS) | `192.168.0.10` |
 | 3001/lo | grafana | `127.0.0.1` |
+| 3003/lo | SilverBullet (`obsi.sccl.cc`) | `127.0.0.1` |
 | 5432 | pgSQL | `10.69.0.0/24` (bridge) |
 | 6379/lo | redis | `127.0.0.1` |
 | 29334/lo | mautrix-discord bridge | `127.0.0.1` |

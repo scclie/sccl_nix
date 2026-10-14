@@ -157,6 +157,7 @@
       enable = true;
       resticRepository = "s3:s3.amazonaws.com/backups-sccl";
     };
+    silverbullet.enable = true;
     proxy = {
       enable = true;
       sites = {
@@ -229,8 +230,7 @@
     };
   };
 
-  # mautrix-discord pulls libolm 3.2.16 (deprecated upstream, no maintained
-  # fix); used only when a bridge session enables E2EE - acceptable here
+  # mautrix-discord pulls libolm 3.2.16
   nixpkgs.config.permittedInsecurePackages = [ "olm-3.2.16" "kanidm-with-secret-provisioning-1.8.6" ];
 
   home-manager = {

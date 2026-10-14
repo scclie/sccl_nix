@@ -24,7 +24,7 @@ in {
       owner = "kanidm";
       group = "kanidm";
     };
-    # matrix (continuwuity) dropped SSO 2026-09-22; client/secret kept commented
+    # matrix (continuwuity) dropped SSO
     # sops.secrets."kanidm/oauth2-continuwuity-secret" = {
     #   sopsFile = ../../../secrets/apps.yaml;
     #   owner = "kanidm";
@@ -70,7 +70,7 @@ in {
       "GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET=${config.sops.placeholder."kanidm/oauth2-grafana-secret"}\n";
 
 
-    # matrix (continuwuity) dropped SSO 2026-09-22
+    # matrix (continuwuity) dropped SSO
     # sops.templates."continuwuity-oidc.env".content =
     #   "CONTINUWUITY_OAUTH__OIDC__CLIENT_SECRET=${config.sops.placeholder."kanidm/oauth2-continuwuity-secret"}\n";
 
@@ -89,7 +89,7 @@ in {
 
         acceptInvalidCerts = true;
         idmAdminPasswordFile = config.sops.secrets."kanidm/admin-password".path;
-        # matrix (continuwuity) dropped SSO 2026-09-22
+        # matrix (continuwuity) dropped SSO
         # systems.oauth2.continuwuity = {
         #   displayName = "Continuwuity";
         #   originUrl = "https://${cfg.domain}/_continuwuity/oidc/complete";
@@ -118,6 +118,7 @@ in {
             "https://prometheus.sccl.cc/oauth2/callback"
             "https://loki.sccl.cc/oauth2/callback"
             "https://alertmanager.sccl.cc/oauth2/callback"
+            "https://obsi.sccl.cc/oauth2/callback"
           ];
           originLanding = "https://prometheus.sccl.cc";
           basicSecretFile = config.sops.secrets."kanidm/oauth2-oauth2proxy-secret".path;
@@ -157,9 +158,7 @@ in {
       };
     };
 
-    # kanidm-provision cannot target the builtin idm_all_persons in scopeMaps,
-    # so set the gif/macc clients' scope maps to it via the CLI: any kanidm
-    # person may sign in (gif.sccl.cc, macc.pierdol.ing)
+    # kanidm-provision cannot target the builtin idm_all_persons in scopeMaps
     systemd.services.kanidm-oauth-scopes = {
       description = "kanidm: allow idm_all_persons to sign in to gif/macc";
 

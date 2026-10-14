@@ -5,7 +5,7 @@ overengineered nixos shit-config for my homelab. flakes + home-manager + disko +
 ![desktop_img](img/niri2.webp)
 
 - repo: [git.sccl.cc/scclie/sccl_nix](https://git.sccl.cc/scclie/sccl_nix),
-  mirrored to [Codeberg](https://codeberg.org/scclie/sccl_nix)
+  mirrored to [codeberg](https://codeberg.org/scclie/sccl_nix)/[github](https://github.com/scclie/sccl_nix)
 - `hosts/<name>/` - machine layer: `sccl.{...}`, hardware, disko, packages, profiles
 - `nixos/modules/` - system modules layer + `nixos/modules/server/`
 - `profiles/` - home-manager layer
@@ -19,7 +19,7 @@ self-gate features
 
 | docs | host | type | role |
 |---|---|---|---|
-| [doc/hosts/laeradr.md](doc/hosts/laeradr.md) · [BIOS/WOL](doc/hosts/laeradr-bios.md) | `laeradr` | SFF AM4 server | git, files, pass, mail, monitoring, all my shi... |
+| [doc/hosts/laeradr.md](doc/hosts/laeradr.md) · [BIOS/WOL](doc/hosts/laeradr-bios.md) | `laeradr` | SFF AM4 server | git, sftpgo, vaultwarden, stalwart, monitoring, all my shi... |
 | [doc/hosts/sacculos.md](doc/hosts/sacculos.md) | `sacculos` | desktop AM4 PC | main workstation |
 | [doc/hosts/aero15laptop.md](doc/hosts/aero15laptop.md) | `aero15laptop` | 15.6" laptop | portable |
 | [doc/router.md](doc/router.md) | - | router | routing :D |
@@ -52,5 +52,7 @@ sccl = {
 ## license
 
 MIT
+
 yoink whatever is useful
-use at your own risk
+
+use at ur own risk

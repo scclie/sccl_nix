@@ -23,6 +23,7 @@
     { name = "gif"; type = "A"; content = serverIp; }
     { name = "murmur"; type = "A"; content = serverIp; }
     { name = "pass"; type = "A"; content = serverIp; }
+    { name = "obsi"; type = "A"; content = serverIp; }
     #{ name = "git"; type = "A"; content = serverIp; }
   ];
 
@@ -36,6 +37,7 @@
     { name = "grafana"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "files"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "pass"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
+    { name = "obsi"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "@"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
     { name = "www"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "xkb"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }

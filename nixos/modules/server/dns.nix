@@ -175,8 +175,6 @@ local-address=127.0.0.1:5300
 
     services.unbound = {
       enable = true;
-      # laeradr itself keeps public DNS (1.1.1.1/8.8.8.8): gatus and friends
-      # must go through the Cloudflare proxy loop, NOT the local zone.
       resolveLocalQueries = false;
       settings = {
         server = {
@@ -212,8 +210,7 @@ local-address=127.0.0.1:5300
       allowedUDPPorts = [ 53 ];
     };
 
-    # Initialize pdns sqlite DB before pdns starts (pdns 5.x refuses to start
-    # against a missing database)
+    # Initialize pdns sqlite DB before pdns starts
     systemd.services.pdns-init = {
       description = "Initialize PowerDNS gsqlite3 database";
       before = [ "pdns.service" ];
@@ -235,6 +232,7 @@ local-address=127.0.0.1:5300
 
     systemd.services.dns-apply = {
       description = "Apply DNS records to PowerDNS";
+      restartTriggers = [ applyScript ];
       after = [ "pdns.service" ];
       wants = [ "pdns.service" ];
       wantedBy = [ "multi-user.target" ];

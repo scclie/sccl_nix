@@ -50,7 +50,7 @@
           };
           data = {
             type = "zfs_fs";
-            # Parent dataset - not mounted, only children are mounted
+            # parent dataset - not mounted, only children are mounted
           };
           "data/sites" = {
             type = "zfs_fs";
@@ -103,6 +103,10 @@
           "data/music" = {
             type = "zfs_fs";
             mountpoint = "/tank/music";
+          };
+          "data/silverbullet" = {
+            type = "zfs_fs";
+            mountpoint = "/tank/silverbullet";
           };
           "data/macc" = {
             type = "zfs_fs";
