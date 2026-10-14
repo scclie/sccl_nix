@@ -20,6 +20,7 @@ in {
 
     sccl.proxy.sites.obsi = {
       upstream = "http://127.0.0.1:3003";
+      rateLimit = "zone=interactive burst=200 nodelay";
       extraConfig = ''
         client_max_body_size 100m;
         auth_request /oauth2/auth;

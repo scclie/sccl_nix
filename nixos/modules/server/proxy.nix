@@ -22,6 +22,11 @@ in {
             default = "";
             description = "Extra nginx server-level config (e.g. static location blocks)";
           };
+          rateLimit = lib.mkOption {
+            type = lib.types.str;
+            default = "zone=general burst=20 nodelay";
+            description = "arguments for nginx limit_req on the proxy location";
+          };
         };
       });
       default = {};
@@ -44,6 +49,7 @@ in {
       appendHttpConfig = ''
         limit_req_zone $binary_remote_addr zone=general:10m rate=10r/s;
         limit_req_zone $binary_remote_addr zone=api:10m rate=30r/s;
+        limit_req_zone $binary_remote_addr zone=interactive:10m rate=100r/s;
         server_names_hash_bucket_size 128;
       '';
     };
@@ -101,7 +107,7 @@ in {
           locations."/" = {
             proxyPass = site.upstream;
             extraConfig = site.extraConfig + ''
-              limit_req zone=general burst=20 nodelay;
+              limit_req ${site.rateLimit};
             '';
           };
         } // lib.optionalAttrs (site.extraServerConfig != "") {

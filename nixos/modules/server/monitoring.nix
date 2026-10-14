@@ -73,13 +73,11 @@ in {
       }
     '';
   in {
-    # Telegram bot token via sops
     sops.secrets."telegram/bot-token" = {
       sopsFile = ../../../secrets/apps.yaml;
     };
     sccl.monitoring.alertmanagerTelegramBotToken = lib.mkDefault config.sops.secrets."telegram/bot-token".path;
 
-    # htpasswd for the monitoring web UIs (create monitoring.htpasswd in apps.yaml)
     sops.secrets."monitoring/htpasswd" = {
       sopsFile = ../../../secrets/apps.yaml;
       owner = "nginx";
@@ -108,10 +106,10 @@ in {
       extraConfig = { whitelist-domain = [ ".sccl.cc" ]; };
     };
 
-    # reachable via nginx with basic auth
     sccl.proxy.sites = {
       grafana = {
         upstream = "http://127.0.0.1:3001";
+        rateLimit = "zone=interactive burst=200 nodelay";
       };
       prometheus = {
         upstream = "http://127.0.0.1:9090";
@@ -130,8 +128,7 @@ in {
       };
     };
 
-    # Exempt the health check paths from basic auth so the public Gatus status
-    # page can probe the CF-proxied domains end-to-end without credentials.
+    # health check
     services.nginx.virtualHosts = {
       "prometheus.${config.sccl.server.domain}" = {
         locations."= /-/healthy" = {
@@ -150,7 +147,6 @@ in {
       };
     };
 
-    # Ensure ZFS datasets exist for persistent state
     system.activationScripts.mon-dirs = lib.mkAfter ''
       mkdir -p /tank/mon/prometheus /tank/mon/grafana /tank/mon/loki
       chown prometheus:prometheus /tank/mon/prometheus
@@ -259,7 +255,6 @@ in {
       ];
     };
 
-    # Prometheus exporters on host (loopback only; scraped by Prometheus on the same machine)
     services.prometheus.exporters.node = {
       enable = true;
       listenAddress = "127.0.0.1";
@@ -296,10 +291,9 @@ in {
         server.http_addr = "127.0.0.1";
         server.http_port = 3001;
         server.root_url = "https://grafana.sccl.cc/";
-        # SSO-only: no local password logins
         "auth.basic".enabled = false;
         security.admin_user = "admin";
-        security.admin_password = "admin"; # change on first login
+        security.admin_password = "admin";
         security.secret_key = "$__file{/etc/grafana/secret_key}";
         "auth.generic_oauth" = lib.mkIf config.sccl.kanidm.enable {
           enabled = true;
@@ -312,7 +306,6 @@ in {
           login_attribute_path = "preferred_username";
           email_attribute_path = "email";
           name_attribute_path = "name";
-          # group must exist in kanidm; non-members fall back to Viewer
           role_attribute_path = "contains(groups[*], 'grafana_admins') && 'Admin' || 'Viewer'";
           allow_sign_up = true;
         };
@@ -387,7 +380,6 @@ in {
       };
     };
 
-    # Alloy replaces deprecated Promtail for log shipping
     environment.etc."alloy/config.alloy".text = ''
       loki.write "default" {
         endpoint {
@@ -410,7 +402,7 @@ in {
       enable = true;
       listenAddress = "127.0.0.1";
       port = 9093;
-      checkConfig = false; # disabled: placeholder tokens fail validation
+      checkConfig = false;
       configuration = {
         global = {
           resolve_timeout = "5m";
