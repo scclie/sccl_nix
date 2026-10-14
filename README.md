@@ -47,6 +47,7 @@ sccl = {
 ## thinking about
 
 - https://linux-audit.com/systemd/how-to-harden-a-systemd-service-unit/
+- https://grahamc.com/blog/nix-and-layered-docker-images/
 
 ## license
 

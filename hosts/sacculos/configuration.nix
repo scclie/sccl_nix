@@ -79,7 +79,9 @@
         }
       '';
       niriBuiltinKbIdentifier = null;
-      niriExtraBinds = "";
+      niriExtraBinds = ''
+        End { spawn "/etc/profiles/per-user/paper/bin/voice-dictate"; }
+      '';
       niriExtraSpawn = "";
     };
     users.paper = import ../../profiles/paper/home.nix;
