@@ -18,6 +18,15 @@ in {
       "d /tank/silverbullet/space 0750 silverbullet silverbullet -"
     ];
 
+    services.nginx.virtualHosts."obsi.${config.sccl.server.domain}".locations = {
+      "= /service_worker.js" = {
+        proxyPass = "http://127.0.0.1:3003";
+      };
+      "^~ /.client/" = {
+        proxyPass = "http://127.0.0.1:3003";
+      };
+    };
+
     sccl.proxy.sites.obsi = {
       upstream = "http://127.0.0.1:3003";
       rateLimit = "zone=interactive burst=200 nodelay";
