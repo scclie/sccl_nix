@@ -103,7 +103,6 @@ in {
   checks.${system} = import ./nixos/modules/server/monitoring/checks.nix {
     inherit pkgs;
     prompp = self.packages.${system}.prompp;
-    dashboards = self.packages.${system}.monitoring-dashboards;
   };
 
   devShells.${system} = shellAttrSet;

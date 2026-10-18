@@ -27,5 +27,7 @@ in runCommand "infrastructure-dashboards" {
   ln -s ${docsonnet} vendor/github.com/jsonnet-libs/docsonnet
   ln -s ${xtd} vendor/github.com/jsonnet-libs/xtd
   jsonnet -J vendor ${./host.jsonnet} > "$out/host.json"
+  jsonnet -J vendor ${./logs.jsonnet} > "$out/logs.json"
   jq -e '.uid == "sccl-host" and (.panels | length > 20)' "$out/host.json" > /dev/null
+  jq -e '.uid == "sccl-logs" and (.panels | length == 2)' "$out/logs.json" > /dev/null
 ''

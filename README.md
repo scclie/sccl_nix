@@ -15,14 +15,15 @@ overengineered nixos shit-config for my homelab. flakes + home-manager + disko +
 the flake auto-discovers hosts and devShells.
 self-gate features
 
-## hosts
+## docs
 
 | docs | host | type | role |
 |---|---|---|---|
-| [doc/hosts/laeradr.md](doc/hosts/laeradr.md) · [BIOS/WOL](doc/hosts/laeradr-bios.md) | `laeradr` | SFF AM4 server | git, sftpgo, vaultwarden, stalwart, monitoring, all my shi... |
+| [doc/hosts/laeradr.md](doc/hosts/laeradr.md) · [BIOS](doc/hosts/laeradr-bios.md) | `laeradr` | SFF AM4 server | all my shi... |
 | [doc/hosts/sacculos.md](doc/hosts/sacculos.md) | `sacculos` | desktop AM4 PC | main workstation |
 | [doc/hosts/aero15laptop.md](doc/hosts/aero15laptop.md) | `aero15laptop` | 15.6" laptop | portable |
 | [doc/router.md](doc/router.md) | - | router | routing :D |
+| [doc/monitoring.md](doc/monitoring.md) | - | monitroing | metrics&logs sources |
 
 ![systemd](https://gif.sccl.cc/api/gif/7jUIClki5yZc-systemd.gif)
 

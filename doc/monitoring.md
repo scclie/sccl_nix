@@ -1,5 +1,7 @@
 # monitoring
 
+## metrics
+
 metrics are scraped every 15 seconds:
 
 | job | source | metrics |
@@ -9,3 +11,13 @@ metrics are scraped every 15 seconds:
 | gif-app | localhost:8083/metrics | gif.sccl.cc app metrics |
 | prometheus | localhost:9090 | prom++ memory, series, ingestion rate and storage size |
 | blackbox-http | localhost:9115/probe | sccl.cc, xkb.sccl.cc, otp-migrate.sccl.cc, git.sccl.cc, gif.sccl.cc |
+
+## logs
+
+journald logs to loki:
+
+| source | logs |
+|---|---|
+| host | host systemd services and kernel |
+| docker | oci containers: gifs, macc, comments |
+| nixos | files-ct, git-ct, mail, matrix-ct, registry-ct, vaultwarden-ct |

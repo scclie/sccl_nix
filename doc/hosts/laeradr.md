@@ -176,4 +176,4 @@ sudo nixos-rebuild switch --flake .#laeradr --target-host root@192.168.0.10
 users & packages for `heimdall` come from [`profiles/server/`](../../profiles/server/).
 
 ## monitoring & alerts
-jobs: [monitoring.md](../monitoring.md).
+metrics and logs: [monitoring.md](../monitoring.md).

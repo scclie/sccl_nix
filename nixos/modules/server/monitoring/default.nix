@@ -1,6 +1,7 @@
 { config, lib, pkgs, ... }:
 let
   cfg = config.sccl.monitoring;
+  containers = builtins.attrNames config.containers;
 in {
   options.sccl.monitoring = {
     enable = lib.mkEnableOption "prom++ + grafana + loki + alertmanager";
@@ -25,6 +26,21 @@ in {
       default = null;
       description = "htpasswd file for monitoring when sso is disabled";
     };
+  };
+
+  options.containers = lib.mkOption {
+    type = lib.types.attrsOf (lib.types.submodule ({ name, ... }: {
+      config = lib.mkIf cfg.enable {
+        bindMounts."/var/log/journal" = {
+          hostPath = "/tank/mon/journal/${name}";
+          isReadOnly = false;
+        };
+        config.services.journald = {
+          storage = "persistent";
+          extraConfig = "SystemMaxUse=256M";
+        };
+      };
+    }));
   };
 
   config = lib.mkIf cfg.enable (let
@@ -240,7 +256,7 @@ in {
 
     systemd.tmpfiles.rules = [
       "d /tank/mon/prometheus/data 0700 prometheus prometheus -"
-    ];
+    ] ++ map (name: "d /tank/mon/journal/${name} 2750 root systemd-journal -") containers;
 
     # metrics live on the dataset
     systemd.services.prometheus = {
@@ -404,21 +420,54 @@ in {
         forward_to = []
         rule {
           source_labels = ["__journal__systemd_unit"]
+          regex = "(.+[.](service|socket|timer))"
           target_label = "unit"
+        }
+        rule {
+          source_labels = ["unit"]
+          regex = "run-.*[.]service"
+          target_label = "unit"
+          replacement = "transient.service"
+        }
+        rule {
+          source_labels = ["__journal__transport"]
+          regex = "kernel"
+          target_label = "unit"
+          replacement = "kernel"
         }
         rule {
           source_labels = ["__journal_priority_keyword"]
           target_label = "level"
         }
+        rule {
+          source_labels = ["__journal_container_name"]
+          regex = "(.+)"
+          target_label = "container"
+        }
+        rule {
+          source_labels = ["__journal_container_name"]
+          regex = ".+"
+          target_label = "source"
+          replacement = "docker"
+        }
       }
 
       loki.source.journal "system" {
+        matches = "_HOSTNAME=${config.networking.hostName}"
         forward_to = [loki.write.default.receiver]
         relabel_rules = loki.relabel.journal.rules
-        labels = {host = "${config.networking.hostName}"}
+        labels = {host = "${config.networking.hostName}", source = "host"}
         max_age = "12h"
       }
-    '';
+    '' + lib.concatMapStrings (name: ''
+      loki.source.journal "container_${lib.replaceStrings [ "-" ] [ "_" ] name}" {
+        path = "/tank/mon/journal/${name}"
+        forward_to = [loki.write.default.receiver]
+        relabel_rules = loki.relabel.journal.rules
+        labels = {host = "${config.networking.hostName}", source = "nixos", container = "${name}"}
+        max_age = "12h"
+      }
+    '') containers;
 
     services.alloy = {
       enable = true;
