@@ -156,6 +156,12 @@ in {
           proxy_set_header Accept-Encoding "";
         '';
         extraServerConfig = ''
+          location ~ ^/direct/(?<share_id>[A-Za-z0-9_-]+)/(?<file_name>[^/\s]+\.[^/\s]+)$ {
+            rewrite ^ /web/client/pubshares/$share_id?compress=false break;
+            proxy_pass http://10.69.0.11:8080;
+            proxy_hide_header Content-Disposition;
+            add_header Content-Disposition "inline; filename=\"$file_name\"" always;
+          }
           location = /assets/css/sftpgo-nord-sccl.css {
             alias ${themeCss};
             add_header Cache-Control "public, max-age=31536000, immutable";
