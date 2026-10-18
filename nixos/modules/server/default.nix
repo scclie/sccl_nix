@@ -16,7 +16,7 @@
     ./webdav.nix
     ./vaultwarden.nix
     ./mail.nix
-    ./monitoring.nix
+    ./monitoring
     ./status
     ./backup.nix
     ./minecraft.nix

@@ -96,6 +96,14 @@
             type = "zfs_fs";
             mountpoint = "/tank/mon";
           };
+          "data/mon/prometheus" = {
+            type = "zfs_fs";
+            mountpoint = "/tank/mon/prometheus";
+            options = {
+              quota = "50000000000";
+              "com.sun:auto-snapshot" = "false";
+            };
+          };
           "data/matrix" = {
             type = "zfs_fs";
             mountpoint = "/tank/matrix";

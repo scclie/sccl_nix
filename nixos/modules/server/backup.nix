@@ -64,6 +64,11 @@ in {
         "tank/data" = {
           useTemplate = [ "default" ];
         };
+        # snapshots inside the quota
+        "tank/data/mon/prometheus" = lib.mkIf config.sccl.monitoring.enable {
+          autosnap = false;
+          autoprune = false;
+        };
       };
     };
 

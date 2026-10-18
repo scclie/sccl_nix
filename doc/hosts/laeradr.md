@@ -176,9 +176,4 @@ sudo nixos-rebuild switch --flake .#laeradr --target-host root@192.168.0.10
 users & packages for `heimdall` come from [`profiles/server/`](../../profiles/server/).
 
 ## monitoring & alerts
-
-- prometheus scrapes node/nginx exporters and blackbox HTTP probes; rules
-  alert on node-down, high CPU/RAM, low disk.
-- am routes to Telegram (bot token + chat id from sops `apps.yaml`).
-- loki collects system journal via Alloy.
-- gatus shows a public status page (`status.sccl.cc`) for the main services.
+jobs: [monitoring.md](../monitoring.md).

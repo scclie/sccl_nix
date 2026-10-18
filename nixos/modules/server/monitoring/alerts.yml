@@ -1,0 +1,78 @@
+groups:
+  - name: host
+    rules:
+      - alert: NodeDown
+        expr: up{job="node"} == 0 or absent(up{job="node"})
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "node exporter down"
+      - alert: HighCpuLoad
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{job="node",mode="idle"}[5m])) * 100) > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "high cpu load on {{ $labels.instance }}"
+      - alert: HighMemoryUsage
+        expr: (1 - node_memory_MemAvailable_bytes{job="node"} / node_memory_MemTotal_bytes{job="node"}) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "high memory usage on {{ $labels.instance }}"
+      - alert: DiskSpaceLow
+        expr: |
+          (
+            node_filesystem_avail_bytes{job="node",fstype!~"tmpfs|ramfs|overlay|squashfs|nsfs|autofs",mountpoint!~"/nix/store|/run(/.*)?|/dev(/.*)?|/sys(/.*)?|/proc(/.*)?"}
+            / node_filesystem_size_bytes{job="node"} < 0.15
+          ) and on(instance, device, mountpoint) (node_filesystem_readonly{job="node"} == 0)
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "disk space low on {{ $labels.instance }}: {{ $labels.mountpoint }}"
+      - alert: DiskSpaceCritical
+        expr: |
+          (
+            node_filesystem_avail_bytes{job="node",fstype!~"tmpfs|ramfs|overlay|squashfs|nsfs|autofs",mountpoint!~"/nix/store|/run(/.*)?|/dev(/.*)?|/sys(/.*)?|/proc(/.*)?"}
+            / node_filesystem_size_bytes{job="node"} < 0.05
+          ) and on(instance, device, mountpoint) (node_filesystem_readonly{job="node"} == 0)
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "disk nearly full on {{ $labels.instance }}: {{ $labels.mountpoint }}"
+      - alert: NodeInodesLow
+        expr: |
+          (
+            node_filesystem_files_free{job="node",fstype=~"ext[234]|xfs|btrfs"}
+            / node_filesystem_files{job="node"} < 0.10
+          ) and on(instance, device, mountpoint) (node_filesystem_readonly{job="node"} == 0)
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "free inodes low on {{ $labels.instance }}: {{ $labels.mountpoint }}"
+      - alert: NodeSystemdServiceFailed
+        expr: node_systemd_unit_state{job="node",state="failed",name=~".+\\.service",name!~"(run-.*|user@.*|user-runtime-dir@.*|session-.*)\\.service"} == 1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "failed systemd service on {{ $labels.instance }}: {{ $labels.name }}"
+      - alert: NodeMemoryPressure
+        expr: rate(node_pressure_memory_waiting_seconds_total{job="node"}[5m]) > 0.2
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "sustained memory pressure on {{ $labels.instance }}"
+      - alert: NodeCollectorFailed
+        expr: node_scrape_collector_success{job="node",collector=~"cpu|meminfo|filesystem|diskstats|netdev|systemd|zfs|hwmon|pressure"} == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "node collector failed on {{ $labels.instance }}: {{ $labels.collector }}"

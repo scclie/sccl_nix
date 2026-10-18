@@ -1,0 +1,175 @@
+rule_files:
+  - alerts.yml
+evaluation_interval: 1m
+tests:
+  - name: dataset low on space
+    interval: 1m
+    input_series:
+      - series: 'node_filesystem_avail_bytes{job="node",instance="localhost:9100",device="tank/data/mon/prometheus",fstype="zfs",mountpoint="/tank/mon/prometheus"}'
+        values: '4000000000+0x20'
+      - series: 'node_filesystem_size_bytes{job="node",instance="localhost:9100",device="tank/data/mon/prometheus",fstype="zfs",mountpoint="/tank/mon/prometheus"}'
+        values: '50000000000+0x20'
+      - series: 'node_filesystem_readonly{job="node",instance="localhost:9100",device="tank/data/mon/prometheus",fstype="zfs",mountpoint="/tank/mon/prometheus"}'
+        values: '0+0x20'
+    alert_rule_test:
+      - eval_time: 9m
+        alertname: DiskSpaceLow
+        exp_alerts: []
+      - eval_time: 11m
+        alertname: DiskSpaceLow
+        exp_alerts:
+          - exp_labels:
+              job: node
+              instance: localhost:9100
+              device: tank/data/mon/prometheus
+              fstype: zfs
+              mountpoint: /tank/mon/prometheus
+              severity: warning
+            exp_annotations:
+              summary: "disk space low on localhost:9100: /tank/mon/prometheus"
+
+  - name: skip pseudo and read-only filesystems
+    interval: 1m
+    input_series:
+      - series: 'node_filesystem_avail_bytes{job="node",instance="host",device="ramfs",fstype="ramfs",mountpoint="/run/secrets.d"}'
+        values: '0+0x20'
+      - series: 'node_filesystem_size_bytes{job="node",instance="host",device="ramfs",fstype="ramfs",mountpoint="/run/secrets.d"}'
+        values: '0+0x20'
+      - series: 'node_filesystem_readonly{job="node",instance="host",device="ramfs",fstype="ramfs",mountpoint="/run/secrets.d"}'
+        values: '0+0x20'
+      - series: 'node_filesystem_avail_bytes{job="node",instance="host",device="tmpfs",fstype="tmpfs",mountpoint="/run"}'
+        values: '1+0x20'
+      - series: 'node_filesystem_size_bytes{job="node",instance="host",device="tmpfs",fstype="tmpfs",mountpoint="/run"}'
+        values: '100+0x20'
+      - series: 'node_filesystem_readonly{job="node",instance="host",device="tmpfs",fstype="tmpfs",mountpoint="/run"}'
+        values: '0+0x20'
+      - series: 'node_filesystem_avail_bytes{job="node",instance="host",device="/dev/sda",fstype="ext4",mountpoint="/"}'
+        values: '1+0x20'
+      - series: 'node_filesystem_size_bytes{job="node",instance="host",device="/dev/sda",fstype="ext4",mountpoint="/"}'
+        values: '100+0x20'
+      - series: 'node_filesystem_readonly{job="node",instance="host",device="/dev/sda",fstype="ext4",mountpoint="/"}'
+        values: '1+0x20'
+      - series: 'node_filesystem_files{job="node",instance="host",device="tank/root",fstype="zfs",mountpoint="/"}'
+        values: '100+0x20'
+      - series: 'node_filesystem_files_free{job="node",instance="host",device="tank/root",fstype="zfs",mountpoint="/"}'
+        values: '0+0x20'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: DiskSpaceLow
+        exp_alerts: []
+      - eval_time: 15m
+        alertname: DiskSpaceCritical
+        exp_alerts: []
+      - eval_time: 15m
+        alertname: NodeInodesLow
+        exp_alerts: []
+
+  - name: failed services without transient units
+    interval: 1m
+    input_series:
+      - series: 'node_systemd_unit_state{job="node",instance="host",name="nginx.service",state="failed",type="simple"}'
+        values: '1+0x10'
+      - series: 'node_systemd_unit_state{job="node",instance="host",name="run-test.service",state="failed",type="simple"}'
+        values: '1+0x10'
+      - series: 'node_systemd_unit_state{job="node",instance="host",name="user@1000.service",state="failed",type="simple"}'
+        values: '1+0x10'
+    alert_rule_test:
+      - eval_time: 4m
+        alertname: NodeSystemdServiceFailed
+        exp_alerts: []
+      - eval_time: 6m
+        alertname: NodeSystemdServiceFailed
+        exp_alerts:
+          - exp_labels:
+              job: node
+              instance: host
+              name: nginx.service
+              state: failed
+              type: simple
+              severity: critical
+            exp_annotations:
+              summary: "failed systemd service on host: nginx.service"
+
+  - name: missing exporter
+    interval: 1m
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: NodeDown
+        exp_alerts:
+          - exp_labels:
+              job: node
+              severity: critical
+            exp_annotations:
+              summary: "node exporter down"
+
+  - name: healthy host
+    interval: 1m
+    input_series:
+      - series: 'up{job="node",instance="host"}'
+        values: '1+0x20'
+      - series: 'node_memory_MemAvailable_bytes{job="node",instance="host"}'
+        values: '40+0x20'
+      - series: 'node_memory_MemTotal_bytes{job="node",instance="host"}'
+        values: '100+0x20'
+      - series: 'node_pressure_memory_waiting_seconds_total{job="node",instance="host"}'
+        values: '0+0x20'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: NodeDown
+        exp_alerts: []
+      - eval_time: 15m
+        alertname: HighMemoryUsage
+        exp_alerts: []
+      - eval_time: 15m
+        alertname: NodeMemoryPressure
+        exp_alerts: []
+
+  - name: sustained memory pressure
+    interval: 1m
+    input_series:
+      - series: 'node_memory_MemAvailable_bytes{job="node",instance="host"}'
+        values: '5+0x20'
+      - series: 'node_memory_MemTotal_bytes{job="node",instance="host"}'
+        values: '100+0x20'
+      - series: 'node_pressure_memory_waiting_seconds_total{job="node",instance="host"}'
+        values: '0+30x20'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: HighMemoryUsage
+        exp_alerts:
+          - exp_labels: { job: node, instance: host, severity: warning }
+            exp_annotations:
+              summary: "high memory usage on host"
+      - eval_time: 15m
+        alertname: NodeMemoryPressure
+        exp_alerts:
+          - exp_labels: { job: node, instance: host, severity: warning }
+            exp_annotations:
+              summary: "sustained memory pressure on host"
+
+  - name: full disk and inodes
+    interval: 1m
+    input_series:
+      - series: 'node_filesystem_avail_bytes{job="node",instance="host",device="/dev/sda",fstype="ext4",mountpoint="/data"}'
+        values: '1+0x20'
+      - series: 'node_filesystem_size_bytes{job="node",instance="host",device="/dev/sda",fstype="ext4",mountpoint="/data"}'
+        values: '100+0x20'
+      - series: 'node_filesystem_readonly{job="node",instance="host",device="/dev/sda",fstype="ext4",mountpoint="/data"}'
+        values: '0+0x20'
+      - series: 'node_filesystem_files{job="node",instance="host",device="/dev/sda",fstype="ext4",mountpoint="/data"}'
+        values: '100+0x20'
+      - series: 'node_filesystem_files_free{job="node",instance="host",device="/dev/sda",fstype="ext4",mountpoint="/data"}'
+        values: '1+0x20'
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: DiskSpaceCritical
+        exp_alerts:
+          - exp_labels: { job: node, instance: host, device: /dev/sda, fstype: ext4, mountpoint: /data, severity: critical }
+            exp_annotations:
+              summary: "disk nearly full on host: /data"
+      - eval_time: 11m
+        alertname: NodeInodesLow
+        exp_alerts:
+          - exp_labels: { job: node, instance: host, device: /dev/sda, fstype: ext4, mountpoint: /data, severity: warning }
+            exp_annotations:
+              summary: "free inodes low on host: /data"

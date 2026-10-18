@@ -3,35 +3,32 @@ let
   cfg = config.sccl.monitoring;
 in {
   options.sccl.monitoring = {
-    enable = lib.mkEnableOption "Monitoring stack (prometheus + grafana + loki + alertmanager)";
+    enable = lib.mkEnableOption "prom++ + grafana + loki + alertmanager";
+
+    telegram.enable = lib.mkEnableOption "telegram alerts";
 
     alertmanagerTelegramBotToken = lib.mkOption {
       type = lib.types.nullOr lib.types.path;
       default = null;
-      description = "Path to Telegram bot token file (from sops secret)";
+      description = "telegram bot token file";
       example = "/run/secrets/telegram/bot-token";
     };
 
     alertmanagerTelegramChatId = lib.mkOption {
       type = lib.types.int;
       default = 0;
-      description = "Telegram chat ID for Alertmanager notifications";
+      description = "telegram chat id";
     };
 
     htpasswdFile = lib.mkOption {
       type = lib.types.nullOr lib.types.path;
       default = null;
-      description = ''
-        htpasswd file protecting the monitoring web UIs (prometheus, loki,
-        alertmanager) served behind nginx basic auth, e.g.
-        /run/secrets/monitoring/htpasswd
-      '';
+      description = "htpasswd file for monitoring when sso is disabled";
     };
   };
 
   config = lib.mkIf cfg.enable (let
-    # Telegram receiver is only valid when a chat id is configured.
-    telegramEnabled = cfg.alertmanagerTelegramChatId != 0;
+    telegramEnabled = cfg.telegram.enable;
     alertReceiver = if telegramEnabled then "telegram" else "null";
     alertReceivers = lib.optional telegramEnabled {
       name = "telegram";
@@ -73,13 +70,19 @@ in {
       }
     '';
   in {
-    sops.secrets."telegram/bot-token" = {
-      sopsFile = ../../../secrets/apps.yaml;
+    assertions = [{
+      assertion = !telegramEnabled || (cfg.alertmanagerTelegramChatId != 0 && cfg.alertmanagerTelegramBotToken != null);
+      message = "telegram alerts need a chat id and token file";
+    }];
+
+    sops.secrets."telegram/bot-token" = lib.mkIf telegramEnabled {
+      sopsFile = ../../../../secrets/apps.yaml;
     };
-    sccl.monitoring.alertmanagerTelegramBotToken = lib.mkDefault config.sops.secrets."telegram/bot-token".path;
+    sccl.monitoring.alertmanagerTelegramBotToken = lib.mkIf telegramEnabled
+      (lib.mkDefault config.sops.secrets."telegram/bot-token".path);
 
     sops.secrets."monitoring/htpasswd" = {
-      sopsFile = ../../../secrets/apps.yaml;
+      sopsFile = ../../../../secrets/apps.yaml;
       owner = "nginx";
       group = "nginx";
       mode = "0440";
@@ -163,7 +166,7 @@ in {
       mkdir -p /tank/mon/grafana/dashboards/gif
       chown grafana:grafana /tank/mon/grafana/dashboards/gif
 
-      # Generate grafana secret key if missing
+      # create grafana key once
       if [ ! -f /etc/grafana/secret_key ]; then
         mkdir -p /etc/grafana
         head -c 32 /dev/urandom | base64 > /etc/grafana/secret_key
@@ -174,12 +177,19 @@ in {
 
     services.prometheus = {
       enable = true;
+      package = pkgs.callPackage ./prompp.nix {};
       listenAddress = "127.0.0.1";
+      retentionTime = "365d";
+      extraFlags = [ "--storage.tsdb.retention.size=40GB" ];
       globalConfig = {
         scrape_interval = "15s";
         evaluation_interval = "15s";
       };
       scrapeConfigs = [
+        {
+          job_name = "prometheus";
+          static_configs = [{ targets = [ "localhost:9090" ]; }];
+        }
         {
           job_name = "node";
           static_configs = [{ targets = [ "localhost:9100" ]; }];
@@ -225,47 +235,36 @@ in {
       alertmanagers = [{
         static_configs = [{ targets = [ "localhost:9093" ]; }];
       }];
-      ruleFiles = [
-        (pkgs.writeText "prometheus-rules.yml" ''
-          groups:
-            - name: host
-              rules:
-                - alert: NodeDown
-                  expr: up{job="node"} == 0
-                  for: 2m
-                  labels:
-                    severity: critical
-                  annotations:
-                    summary: "Node exporter down"
-                - alert: HighCpuLoad
-                  expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
-                  for: 5m
-                  labels:
-                    severity: warning
-                  annotations:
-                    summary: "High CPU load on {{ $labels.instance }}"
-                - alert: HighMemoryUsage
-                  expr: (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 > 90
-                  for: 5m
-                  labels:
-                    severity: warning
-                  annotations:
-                    summary: "High memory usage on {{ $labels.instance }}"
-                - alert: DiskSpaceLow
-                  expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 15
-                  for: 10m
-                  labels:
-                    severity: warning
-                  annotations:
-                    summary: "Disk space low on {{ $labels.instance }}"
-        '')
-      ];
+      ruleFiles = [ ./alerts.yml ];
+    };
+
+    systemd.tmpfiles.rules = [
+      "d /tank/mon/prometheus/data 0700 prometheus prometheus -"
+    ];
+
+    # metrics live on the dataset
+    systemd.services.prometheus = {
+      unitConfig = {
+        RequiresMountsFor = "/tank/mon/prometheus";
+        AssertPathIsMountPoint = "/tank/mon/prometheus";
+      };
+      serviceConfig = {
+        BindPaths = [ "/tank/mon/prometheus/data:/var/lib/${config.services.prometheus.stateDir}/data" ];
+        RestartSec = "10s";
+      };
     };
 
     services.prometheus.exporters.node = {
       enable = true;
       listenAddress = "127.0.0.1";
       port = 9100;
+      enabledCollectors = [ "systemd" "zfs" "hwmon" "pressure" ];
+      extraFlags = [
+        "--collector.systemd.unit-include=.+[.]service"
+        "--collector.systemd.unit-exclude=(run-.*|user@.*|user-runtime-dir@.*|session-.*)[.]service"
+        "--collector.filesystem.mount-points-exclude=^/(dev|proc|sys|run)($|/)|^/nix/store$"
+        "--collector.netdev.device-exclude=^(veth.*|docker.*|br-.*|lo)$"
+      ];
     };
 
     services.prometheus.exporters.nginx = {
@@ -330,6 +329,13 @@ in {
             allowUiUpdates = false;
             updateIntervalSeconds = 10;
             options.path = "/tank/mon/grafana/dashboards/gif";
+          } {
+            name = "infrastructure";
+            orgId = 1;
+            type = "file";
+            disableDeletion = false;
+            allowUiUpdates = false;
+            options.path = pkgs.callPackage ./dashboards {};
           }];
         };
         datasources.settings = {
@@ -394,8 +400,22 @@ in {
         }
       }
 
+      loki.relabel "journal" {
+        forward_to = []
+        rule {
+          source_labels = ["__journal__systemd_unit"]
+          target_label = "unit"
+        }
+        rule {
+          source_labels = ["__journal_priority_keyword"]
+          target_label = "level"
+        }
+      }
+
       loki.source.journal "system" {
         forward_to = [loki.write.default.receiver]
+        relabel_rules = loki.relabel.journal.rules
+        labels = {host = "${config.networking.hostName}"}
         max_age = "12h"
       }
     '';
@@ -409,7 +429,7 @@ in {
       enable = true;
       listenAddress = "127.0.0.1";
       port = 9093;
-      checkConfig = false;
+      checkConfig = !telegramEnabled;
       configuration = {
         global = {
           resolve_timeout = "5m";
