@@ -106,6 +106,13 @@ in {
       extraConfig = { whitelist-domain = [ ".sccl.cc" ]; };
     };
 
+    systemd.services.oauth2-proxy = lib.mkIf oauthOn {
+      after = [ "nginx.service" "kanidm.service" ];
+      wants = [ "nginx.service" "kanidm.service" ];
+      startLimitIntervalSec = 0;
+      serviceConfig.RestartSec = "10s";
+    };
+
     sccl.proxy.sites = {
       grafana = {
         upstream = "http://127.0.0.1:3001";
