@@ -1,13 +1,16 @@
 { config, lib, pkgs, ... }:
 let
   cfg = config.sccl.matrix;
+  videoLimits = ''
+    limit_req zone=pierdol_videos burst=10 nodelay;
+    limit_req_status 429;
+    limit_conn pierdol_video_downloads 4;
+    limit_conn_status 429;
+    error_page 429 = @video_rate_limited;
+  '';
   discordBridgeOn = cfg.discordBridge.enable && config.sccl.discordBridge.enable;
-  # oidc delegated auth to kanidm (id.pierdol.ing); kept for re-enabling oidc,
-  # currently unused (sso dropped for matrix 2026-09-22)
+  # (sso dropped for matrix 2026-09-22)
   # kanidmOn = config.sccl.kanidm.enable;
-  # pinned upstream continuwuity: nixpkgs still ships 0.5.10, which lacks
-  # delegated OIDC
-  # use the project's prebuilt static binary instead
   continuwuity = pkgs.stdenvNoCC.mkDerivation {
     pname = "matrix-continuwuity";
     version = "26.9.0";
@@ -20,8 +23,6 @@ let
     meta.mainProgram = "conduwuit";
   };
   wellKnownServer = pkgs.writeText "matrix-server-wk" ''{"m.server": "pierdol.ing:443"}'';
-  # msc2965 m.authentication (element -> kanidm oauth) removed 2026-09-22:
-  # matrix dropped out of SSO, clients use plain password login again.
   wellKnownClient = pkgs.writeText "matrix-client-wk" (builtins.toJSON {
     "m.homeserver" = { base_url = "https://pierdol.ing"; };
     "org.matrix.msc4143.rtc_foci" = [{ type = "livekit"; livekit_service_url = "https://livekit.pierdol.ing"; }];
@@ -61,11 +62,15 @@ in {
       environmentFile = "/etc/nixos/secrets/cloudflare-acme.env";
     };
 
-    # meme layout deploys from CI via releases symlinks; /videos/ lives
-    # outside the swap on the sites dataset (rsync'ed by hand)
+    # meme page deploys from CI via releases symlink /videos/
     systemd.tmpfiles.rules = [
       "d /tank/sites/pierdol/files/videos 0755 root root -"
     ];
+
+    services.nginx.appendHttpConfig = ''
+      limit_req_zone $binary_remote_addr zone=pierdol_videos:10m rate=2r/s;
+      limit_conn_zone $binary_remote_addr zone=pierdol_video_downloads:10m;
+    '';
 
     services.nginx.virtualHosts = {
       "pierdol.ing" = {
@@ -88,15 +93,31 @@ in {
               add_header Access-Control-Allow-Origin *;
             '';
           };
-          "^~ /videos/" = {
+          "= /videos/" = {
             alias = "/tank/sites/pierdol/files/videos/";
-            extraConfig = ''
+            extraConfig = videoLimits + ''
               autoindex on;
               autoindex_format json;
+              add_header Cache-Control "no-cache";
+            '';
+          };
+          "^~ /videos/" = {
+            alias = "/tank/sites/pierdol/files/videos/";
+            extraConfig = videoLimits + ''
+              autoindex off;
+              add_header Cache-Control "public, max-age=86400";
               types {
-                video/mp4 mp4;
+                video/mp4 mp4 m4v;
                 video/webm webm;
+                video/quicktime mov;
               }
+            '';
+          };
+          "@video_rate_limited" = {
+            extraConfig = ''
+              add_header Retry-After 5 always;
+              add_header Cache-Control "no-store" always;
+              return 429;
             '';
           };
           "/_matrix/" = {
@@ -106,8 +127,7 @@ in {
               proxy_read_timeout 600s;
             '';
           };
-          # OAuth / account endpoints of continuwuity, only relevant with OIDC
-          # (kanidm) wired; disabled since matrix dropped SSO (2026-09-22)
+          # (sso dropped for matrix 2026-09-22)
           # "/_continuwuity/" = lib.mkIf kanidmOn {
           #   proxyPass = "http://10.69.0.19:6167";
           #   extraConfig = ''
@@ -121,9 +141,7 @@ in {
         };
       };
 
-      # federation (server-to-server) listener; same upstream as client api.
-      # ssl cert emitted via extraConfig: with a custom listen list nixos
-      # skips ssl_certificate unless addSSL/forceSSL (and addSSL would also open a 443 listener under the same server_name - collision with apex)
+      # federation server-to-server listener
       "matrix-federation" = {
         serverName = cfg.domain;
         listen = [ { addr = "0.0.0.0"; port = 8448; ssl = true; } ];
@@ -218,7 +236,7 @@ in {
           hostPath = "/etc/resolv.conf.matrix-ct";
           isReadOnly = true;
         };
-      # sops-rendered client secret for OIDC; dead with SSO off (2026-09-22)
+      # (sso dropped for matrix 2026-09-22)
         # } // (lib.optionalAttrs kanidmOn {
         #   "/run/continuwuity-oidc.env" = {
         #     hostPath = config.sops.templates."continuwuity-oidc.env".path;
@@ -251,7 +269,7 @@ in {
               type = "livekit";
               livekit_service_url = "https://livekit.pierdol.ing";
             }];
-          # OIDC delegated auth to kanidm disabled 2026-09-22 (password login):
+          # (sso dropped for matrix 2026-09-22)
             # } // (lib.optionalAttrs kanidmOn {
             #
             #   oauth.oidc = {
@@ -262,9 +280,6 @@ in {
           };
         };
 
-        # bind mount is the sole state dir: dynamic user can't own it (random
-        # uid), so pin a static uid/gid, run as that user and grant perms via
-        # container tmpfiles (Z walks the dataset through the mount)
         users.users.continuwuity = {
           isSystemUser = true;
           uid = 930;
