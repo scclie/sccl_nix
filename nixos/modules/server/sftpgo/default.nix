@@ -11,12 +11,15 @@ in {
     # Declare secrets at host level
     sops.secrets."sftpgo/admin-username" = {
       sopsFile = ../../../../secrets/apps.yaml;
+      restartUnits = [ "container@files-ct.service" ];
     };
     sops.secrets."sftpgo/admin-password" = {
       sopsFile = ../../../../secrets/apps.yaml;
+      restartUnits = [ "container@files-ct.service" ];
     };
     sops.secrets."sftpgo/paper-password" = {
       sopsFile = ../../../../secrets/apps.yaml;
+      restartUnits = [ "container@files-ct.service" ];
     };
 
     # First admin is created by sftpgo itself on first boot when
@@ -42,8 +45,16 @@ in {
           hostPath = "/tank/sftpgo";
           isReadOnly = false;
         };
-        "/run/secrets" = {
-          hostPath = "/run/secrets";
+        "/run/secrets/sftpgo/admin-username" = {
+          hostPath = config.sops.secrets."sftpgo/admin-username".path;
+          isReadOnly = true;
+        };
+        "/run/secrets/sftpgo/admin-password" = {
+          hostPath = config.sops.secrets."sftpgo/admin-password".path;
+          isReadOnly = true;
+        };
+        "/run/secrets/sftpgo/paper-password" = {
+          hostPath = config.sops.secrets."sftpgo/paper-password".path;
           isReadOnly = true;
         };
         "/run/sftpgo-env" = {

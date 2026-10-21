@@ -86,12 +86,12 @@ in {
       mode = "0400";
     };
 
-    # All virtual hosts: default catch-all + site proxies
+    # all virtual hosts: default catch-all + site proxies
     services.nginx.virtualHosts = lib.mkMerge [
       {
         "_${serverCfg.domain}" = {
           default = true;
-          addSSL = true;
+          forceSSL = true;
           sslCertificate = "/var/lib/acme/wildcard.${serverCfg.domain}/fullchain.pem";
           sslCertificateKey = "/var/lib/acme/wildcard.${serverCfg.domain}/key.pem";
           locations."/" = {
@@ -101,7 +101,7 @@ in {
       }
       (lib.mapAttrs' (name: site:
         lib.nameValuePair "${name}.${serverCfg.domain}" ({
-          addSSL = true;
+          forceSSL = true;
           sslCertificate = "/var/lib/acme/wildcard.${serverCfg.domain}/fullchain.pem";
           sslCertificateKey = "/var/lib/acme/wildcard.${serverCfg.domain}/key.pem";
           locations."/" = {

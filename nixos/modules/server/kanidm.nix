@@ -1,9 +1,23 @@
 { config, lib, pkgs, ... }:
 let
   cfg = config.sccl.kanidm;
+  migrationVersions = { "1_9" = "1.9.4"; "1_10" = "1.10.5"; };
+
+  migrationPkgs = import pkgs.path {
+    system = pkgs.stdenv.hostPlatform.system;
+    config.permittedInsecurePackages = [
+      "kanidm-with-secret-provisioning-${migrationVersions.${cfg.release}}"
+    ];
+  };
+  package = (if cfg.release == "1_11" then pkgs else migrationPkgs).${"kanidm_${cfg.release}"}.withSecretProvisioning;
 in {
   options.sccl.kanidm = {
     enable = lib.mkEnableOption "Kanidm IdP (id.pierdol.ing) and OIDC SSO";
+    release = lib.mkOption {
+      type = lib.types.enum [ "1_9" "1_10" "1_11" ];
+      default = "1_11";
+      description = "Kanidm release; older releases are only for sequential database migration.";
+    };
     domain = lib.mkOption {
       type = lib.types.str;
       default = "pierdol.ing";
@@ -12,6 +26,11 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+
+    specialisation = lib.mkIf (cfg.release == "1_11") {
+      kanidm-1-9.configuration.sccl.kanidm.release = lib.mkForce "1_9";
+      kanidm-1-10.configuration.sccl.kanidm.release = lib.mkForce "1_10";
+    };
     users.users.kanidm.extraGroups = [ "acme" ];
 
     networking.hosts."192.168.0.10" = [ "id.${cfg.domain}" ];
@@ -76,7 +95,7 @@ in {
 
     services.kanidm = {
       server.enable = true;
-      package = pkgs.kanidm_1_8.withSecretProvisioning;
+      inherit package;
       server.settings = {
         bindaddress = "127.0.0.1:8443";
         origin = "https://id.${cfg.domain}";
@@ -86,8 +105,8 @@ in {
       };
       provision = {
         enable = true;
-
-        acceptInvalidCerts = true;
+        instanceUrl = "https://id.${cfg.domain}";
+        acceptInvalidCerts = false;
         idmAdminPasswordFile = config.sops.secrets."kanidm/admin-password".path;
         # matrix (continuwuity) dropped SSO
         # systems.oauth2.continuwuity = {
@@ -144,8 +163,13 @@ in {
       };
     };
 
+    systemd.services.kanidm = {
+      after = [ "nginx.service" ];
+      wants = [ "nginx.service" ];
+    };
+
     services.nginx.virtualHosts."id.${cfg.domain}" = {
-      addSSL = true;
+      forceSSL = true;
       sslCertificate = "/var/lib/acme/wildcard.${cfg.domain}/fullchain.pem";
       sslCertificateKey = "/var/lib/acme/wildcard.${cfg.domain}/key.pem";
       locations."/" = {
@@ -165,7 +189,7 @@ in {
       script = ''
         export KANIDM_URL=https://id.${cfg.domain}
         export KANIDM_PASSWORD="$(cat ${config.sops.secrets."kanidm/admin-password".path})"
-        KANIDM=${lib.getExe' pkgs.kanidm_1_8.withSecretProvisioning "kanidm"}
+        KANIDM=${lib.getExe' package "kanidm"}
         "$KANIDM" login --name idm_admin
         "$KANIDM" system oauth2 update-scope-map gif idm_all_persons openid profile email groups
         "$KANIDM" system oauth2 update-scope-map macc idm_all_persons openid profile email groups

@@ -46,7 +46,8 @@ in {
       lib.nameValuePair name ({
         serverName = lib.concatStringsSep " " ([ site.domain ] ++ site.extraDomains);
         root = "/tank/sites/${name}/public";
-        addSSL = true;
+        extraConfig = "disable_symlinks if_not_owner;";
+        forceSSL = true;
         sslCertificate = "/var/lib/acme/wildcard.${serverCfg.domain}/fullchain.pem";
         sslCertificateKey = "/var/lib/acme/wildcard.${serverCfg.domain}/key.pem";
         locations = lib.mkMerge ([

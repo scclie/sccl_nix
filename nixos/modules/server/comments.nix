@@ -49,12 +49,16 @@ in
     virtualisation.oci-containers.containers.comments = {
       image = "10.69.0.17:5000/scclie/comments:main";
       autoStart = true;
+      pull = "never";
       environment = {
         PORT = "3000";
+        BIND_ADDRESS = "0.0.0.0";
+        TRUSTED_PROXY_IP = "172.30.11.1";
       };
       environmentFiles = [ "/etc/nixos/secrets/comments-env" ];
+      user = "20902:20902";
+      ports = [ "127.0.0.1:3000:3000" ];
       extraOptions = [
-        "--network=host"
         "--label=com.docker.compose.project=comments"
       ];
     };
@@ -93,9 +97,6 @@ in
         ${asPostgres} -c "GRANT ALL PRIVILEGES ON DATABASE comments TO comments;"
       '';
     };
-
-    # firewall
-    networking.firewall.allowedTCPPorts = [ 3000 ];
 
     # nginx
     services.nginx.virtualHosts."comments.pierdol.ing" = {

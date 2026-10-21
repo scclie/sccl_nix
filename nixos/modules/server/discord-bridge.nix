@@ -5,8 +5,6 @@ let
   jq = "${pkgs.jq}/bin/jq";
   curl = "${pkgs.curl}/bin/curl";
 
-  # continuwuity has no config-file appservices support: registration must be
-  # pushed as an admin command in the #admins room (persisted in its DB).
   registerScript = pkgs.writeShellScript "discord-bridge-register" ''
     set -euo pipefail
     HS="${cfg.homeserverAddress}"
@@ -24,8 +22,6 @@ let
     ROOM=$(${curl} -sf "$HS/_matrix/client/v3/directory/room/%23admins:${cfg.domain}" \
       -H "Authorization: Bearer $ADMIN_TOKEN" | ${jq} -r .room_id)
 
-    # -r: raw output so real newlines land in the message body (the admin
-    # command parser needs the yaml in a fenced block on its own lines)
     BODY=$(${jq} -rn --arg y "$(cat "$REG")" '"!admin appservices register\n```\n" + $y + "\n```"')
     ${curl} -sf -XPUT "$HS/_matrix/client/v3/rooms/$ROOM/send/m.room.message/$(date +%s%N)" \
       -H "Authorization: Bearer $ADMIN_TOKEN" -H "Content-Type: application/json" \
@@ -47,7 +43,6 @@ let
     AUTH="Authorization: Bearer $ADMIN_TOKEN"
 
     mkdir -p /var/lib/discord-bridge-login
-    # v3: bot tokens need `login-token bot <token>`
     WANT=$( (printf %s "$TOKEN"; printf 'v3') | ${pkgs.coreutils}/bin/sha256sum | cut -d' ' -f1)
     if [ -f "$STATE" ] && [ "$(cut -d' ' -f1 "$STATE")" = "$WANT" ]; then
       exit 0
@@ -61,8 +56,7 @@ let
         | ${jq} -r .room_id)
     fi
 
-    # (re)invite the bot: on the first ever run it may not have been an
-    # appservice user yet, so the invite has to be delivered again
+    # (re)invite the bot: on the first ever run
     ${curl} -sf -XPOST "$HS/_matrix/client/v3/rooms/$ROOM/invite" \
       -H "$AUTH" -H "Content-Type: application/json" \
       -d "$(${jq} -cn --arg b "$BOT" '{user_id:$b}')" >/dev/null || true
@@ -117,6 +111,11 @@ in {
 
     services.mautrix-discord = {
       enable = true;
+
+      package = pkgs.mautrix-discord.overrideAttrs (old: {
+        buildInputs = [];
+        tags = (old.tags or []) ++ [ "nocrypto" ];
+      });
       dataDir = "/tank/discord-bridge";
       settings = {
         homeserver = {
@@ -124,8 +123,7 @@ in {
           address = cfg.homeserverAddress;
         };
         appservice = {
-          # url the homeserver (in matrix-ct) uses to reach the bridge; the
-          # host side of br-svc is 10.69.0.1. must not be loopback.
+
           address = "http://10.69.0.1:29334";
           hostname = "0.0.0.0";
           port = 29334;
@@ -141,8 +139,7 @@ in {
             "${cfg.domain}" = "user";
           };
           public_address = "https://discord-bridge.pierdol.ing";
-          # matrix users without their own discord login are posted through a
-          # webhook with their own name/avatar (seamless relay)
+
           enable_webhook_avatars = true;
           prefix_webhook_messages = false;
           encryption = { allow = false; default = false; };
@@ -154,20 +151,19 @@ in {
       "d /tank/discord-bridge 0750 mautrix-discord mautrix-discord -"
     ];
 
-    # homeserver -> appservice transactions come from matrix-ct over br-svc
     networking.firewall.interfaces.br-svc.allowedTCPPorts = [ 29334 ];
 
     systemd.services.discord-bridge-register = {
       description = "Register mautrix-discord appservice with continuwuity";
       after = [ "mautrix-discord-registration.service" "network-online.target" ];
-      wants = [ "mautrix-discord-registration.service" ];
+      wants = [ "mautrix-discord-registration.service" "network-online.target" ];
       wantedBy = [ "multi-user.target" ];
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
         StateDirectory = "discord-bridge-register";
         ExecStart = registerScript;
-        # homeserver may come up later (container); retry until it answers
+        # container may come up later - retry until it answers
         Restart = "on-failure";
         RestartSec = "15s";
       };
@@ -183,7 +179,7 @@ in {
         RemainAfterExit = true;
         StateDirectory = "discord-bridge-login";
         ExecStart = loginScript;
-        # homeserver may come up later (container); retry until it answers
+        # container may come up later - retry until it answers
         Restart = "on-failure";
         RestartSec = "15s";
       };

@@ -180,7 +180,7 @@ in {
       chown -R loki:loki /tank/mon/loki
 
       mkdir -p /tank/mon/grafana/dashboards/gif
-      chown grafana:grafana /tank/mon/grafana/dashboards/gif
+      chown ${if config.sccl.forgejo.enable then "forgejo-ci:forgejo-ci" else "grafana:grafana"} /tank/mon/grafana/dashboards/gif
 
       # create grafana key once
       if [ ! -f /etc/grafana/secret_key ]; then

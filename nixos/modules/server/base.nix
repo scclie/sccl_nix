@@ -30,6 +30,11 @@ in {
     # Networking
     networking = {
       useDHCP = true;
+      dhcpcd = {
+        persistent = true;
+        wait = "ipv4";
+        allowInterfaces = [ "enp4s0" ];
+      };
       hostId = "1f0b2328"; # from /etc/machine-id on laeradr; ZFS pool import requires this
       nameservers = [ "1.1.1.1" "8.8.8.8" ];
 
@@ -76,10 +81,19 @@ in {
       ];
     };
 
-    # Ensure static addresses (enp4s0, wg0) exist before sshd binds them.
+    # During switch network-online.target can remain active while DHCP restarts.
+    # dhcpcd forks only after the uplink has IPv4, and retains its address on exit.
     systemd.services.sshd = {
-      wants = [ "network-online.target" ];
-      after = [ "network-online.target" ];
+      wants = [ "network-online.target" "dhcpcd.service" ];
+      after = [ "network-online.target" "dhcpcd.service" ]
+        ++ lib.optional config.sccl.wireguard.enable "wireguard-wg0.service";
+      startLimitIntervalSec = 0;
+      serviceConfig.RestartSec = "5s";
+    };
+    systemd.services.nginx = lib.mkIf config.services.nginx.enable {
+      wants = [ "network-online.target" "dhcpcd.service" ];
+      after = [ "network-online.target" "dhcpcd.service" ];
+      startLimitIntervalSec = lib.mkForce 0;
     };
 
     # arm the onboard NIC for wake-on-lan at every boot

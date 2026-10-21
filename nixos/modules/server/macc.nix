@@ -35,6 +35,7 @@ in
     sops.templates."macc-env" = {
       content = ''
         PORT=8787
+        BIND_ADDRESS=0.0.0.0
         HS=http://10.69.0.19:6167
         HS_DOMAIN=${domain}
         WEB_URL=https://chat.${domain}
@@ -64,9 +65,11 @@ in
     virtualisation.oci-containers.containers.macc = {
       image = "10.69.0.17:5000/scclie/macc:main";
       autoStart = true;
+      pull = "never";
+      user = "20900:20900";
+      ports = [ "127.0.0.1:8787:8787" ];
       environmentFiles = [ "/etc/nixos/secrets/macc-env" ];
       extraOptions = [
-        "--network=host"
         "--label=com.docker.compose.project=macc"
         "--volume"
         "/tank/macc:/var/lib/macc"
@@ -78,7 +81,6 @@ in
       serviceConfig = {
         Restart = lib.mkForce "always";
         RestartSec = "5s";
-        ExecStartPre = [ "${pkgs.docker}/bin/docker pull 10.69.0.17:5000/scclie/macc:main" ];
       };
     };
 
@@ -136,14 +138,12 @@ in
             auth_request_set $ls_groups $upstream_http_x_auth_request_groups;
             proxy_set_header X-Auth-Request-Preferred-Username $ls_username;
             proxy_set_header X-Auth-Request-Groups $ls_groups;
-            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Auth-Request-User "";
+            proxy_set_header X-Forwarded-User "";
           '';
         };
         "/oauth2/" = {
           proxyPass = "http://127.0.0.1:4181";
-          extraConfig = ''
-            proxy_set_header X-Real-IP $remote_addr;
-          '';
         };
         "= /oauth2/auth" = {
           proxyPass = "http://127.0.0.1:4181";
@@ -152,7 +152,6 @@ in
             proxy_pass_request_body off;
             proxy_set_header X-Original-URI $request_uri;
             proxy_set_header Content-Length "";
-            proxy_set_header X-Real-IP $remote_addr;
           '';
         };
       };

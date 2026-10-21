@@ -162,7 +162,6 @@
       enable = true;
       sites = {
         git = { upstream = "http://10.69.0.10:3000"; };
-        # pass / pass-api are registered by the vaultwarden module itself
       };
     };
     zapret = {
@@ -209,9 +208,6 @@
           extraConfig = ''
             client_max_body_size 25m;
             proxy_read_timeout 60s;
-            proxy_set_header Host $host;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header CF-Connecting-IP $http_cf_connecting_ip;
           '';
         };
       };
@@ -229,9 +225,6 @@
       enable = true;
     };
   };
-
-  # mautrix-discord pulls libolm 3.2.16
-  nixpkgs.config.permittedInsecurePackages = [ "olm-3.2.16" "kanidm-with-secret-provisioning-1.8.6" ];
 
   home-manager = {
     useGlobalPkgs = true;

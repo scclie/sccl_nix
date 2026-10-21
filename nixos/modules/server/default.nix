@@ -4,6 +4,7 @@
   imports = [
     ./lib.nix
     ./base.nix
+    ./security.nix
     ./wireguard.nix
     ./dns.nix
     ./proxy.nix

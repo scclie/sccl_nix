@@ -275,7 +275,7 @@ local-address=127.0.0.1:5300
     };
 
     system.activationScripts.cfDnsSync = ''
-      if systemctl is-active --quiet network-online.target; then
+      if ${pkgs.systemd}/bin/systemctl is-active --quiet network-online.target; then
         ${cfSyncScript}
       fi
     '';

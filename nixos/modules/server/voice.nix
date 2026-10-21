@@ -71,43 +71,36 @@ in {
       };
     };
 
-    # webrtc media reaches the host directly; router forwards these ports
+    # webrtc media reaches the host directly
     networking.firewall = {
       allowedTCPPorts = [ 7881 ];
       allowedUDPPortRanges = [ { from = 50100; to = 50200; } ];
     };
 
     services.nginx.virtualHosts."livekit.${cfg.domain}" = {
-      addSSL = true;
-      # websocket upgrade does not work over http/2 in nginx; livekit (and
-      # element call) need plain http/1.1 for the wss handshake
+      forceSSL = true;
+
       http2 = false;
       sslCertificate = "/var/lib/acme/wildcard.${cfg.domain}/fullchain.pem";
       sslCertificateKey = "/var/lib/acme/wildcard.${cfg.domain}/key.pem";
       locations = {
         "/sfu/get" = {
           proxyPass = "http://127.0.0.1:8090";
-          # nixos already includes recommended proxy_set_header (Host,
-          # X-Forwarded-*); setting them again duplicates the headers and
-          # go upstreams (livekit/jwt) reject that with 400
+
           extraConfig = ''
             proxy_buffering off;
           '';
         };
         "/healthz" = {
           proxyPass = "http://127.0.0.1:8090";
-          # nixos already includes recommended proxy_set_header (Host,
-          # X-Forwarded-*); setting them again duplicates the headers and
-          # go upstreams (livekit/jwt) reject that with 400
+
           extraConfig = ''
             proxy_buffering off;
           '';
         };
         "/get_token" = {
           proxyPass = "http://127.0.0.1:8090";
-          # nixos already includes recommended proxy_set_header (Host,
-          # X-Forwarded-*); setting them again duplicates the headers and
-          # go upstreams (livekit/jwt) reject that with 400
+
           extraConfig = ''
             proxy_buffering off;
           '';
@@ -115,9 +108,7 @@ in {
         "/" = {
           proxyPass = "http://127.0.0.1:7880";
           proxyWebsockets = true;
-          # nixos already includes recommended proxy_set_header (Host,
-          # X-Forwarded-*); setting them again duplicates the headers and
-          # go upstreams (livekit/jwt) reject that with 400
+
           extraConfig = ''
             proxy_buffering off;
           '';
@@ -126,7 +117,7 @@ in {
     };
 
     services.nginx.virtualHosts."call.${cfg.domain}" = {
-      addSSL = true;
+      forceSSL = true;
       root = "${pkgs.element-call}";
       sslCertificate = "/var/lib/acme/wildcard.${cfg.domain}/fullchain.pem";
       sslCertificateKey = "/var/lib/acme/wildcard.${cfg.domain}/key.pem";

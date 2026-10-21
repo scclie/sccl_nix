@@ -4,6 +4,7 @@ let
   serverCfg = config.sccl.server;
   themeNordCss = ./theme-nord-sccl.css;
 in {
+  imports = [ ./ci.nix ];
   options.sccl.forgejo = {
     enable = lib.mkEnableOption "Forgejo git forge + runner + registry";
   };
@@ -12,6 +13,7 @@ in {
     # Declare secrets at host level (decrypted to /run/secrets/)
     sops.secrets."forgejo/db-password" = {
       sopsFile = ../../../../secrets/db.yaml;
+      restartUnits = [ "container@git-ct.service" ];
     };
 
     # NB: Forgejo's own secrets (SECRET_KEY, INTERNAL_TOKEN, oauth2 JWT, LFS JWT)
@@ -99,54 +101,12 @@ in {
     # runner config is rendered at activation so the token never touches the repo.
     sops.secrets."forgejo/runner-uuid" = {
       sopsFile = ../../../../secrets/apps.yaml;
+      restartUnits = [ "forgejo-runner.service" ];
     };
 
     sops.secrets."forgejo/runner-token" = {
       sopsFile = ../../../../secrets/apps.yaml;
-    };
-
-    sops.templates."forgejo-runner-config" = {
-      content = ''
-        log:
-          level: info
-          job_level: info
-        runner:
-          capacity: 2
-          timeout: 3h
-          fetch_interval: 2s
-          labels:
-            - ubuntu-latest:docker://docker.io/library/node:22-bookworm
-        container:
-          docker_host: automount
-          options: "-v /tank/sites:/tank/sites -v /tank/mon:/tank/mon -v /run/secrets/gif:/run/secrets/gif:ro -v /run/secrets/gif-sccl:/run/secrets/gif-sccl:ro"
-          valid_volumes:
-            - /tank/sites
-            - /tank/mon
-            - /run/secrets/gif
-            - /run/secrets/gif-sccl
-          workdir_parent: /var/lib/forgejo-runner/workspace
-        server:
-          connections:
-            forgejo:
-              url: http://10.69.0.10:3000
-              uuid: ${config.sops.placeholder."forgejo/runner-uuid"}
-              token: ${config.sops.placeholder."forgejo/runner-token"}
-      '';
-      path = "/etc/nixos/secrets/forgejo-runner-config.yaml";
-      mode = "0400";
-    };
-
-    systemd.services.forgejo-runner = {
-      description = "Forgejo Actions runner";
-      after = [ "network-online.target" ];
-      wants = [ "network-online.target" ];
-      wantedBy = [ "multi-user.target" ];
-      serviceConfig = {
-        ExecStart = "${pkgs.forgejo-runner}/bin/forgejo-runner -c /etc/nixos/secrets/forgejo-runner-config.yaml daemon";
-        Restart = "always";
-        RestartSec = 5;
-        StateDirectory = "forgejo-runner";
-      };
+      restartUnits = [ "forgejo-runner.service" ];
     };
 
     # Git container
@@ -163,9 +123,8 @@ in {
           hostPath = "/tank/forgejo";
           isReadOnly = false;
         };
-        # Bind-mount host's decrypted secrets (read-only)
-        "/run/secrets" = {
-          hostPath = "/run/secrets";
+        "/run/secrets/forgejo/db-password" = {
+          hostPath = config.sops.secrets."forgejo/db-password".path;
           isReadOnly = true;
         };
         # оverride with external resolvers so push mirrors work.
@@ -254,9 +213,11 @@ ui = {
           storagePath = "/var/lib/registry";
         };
 
-        networking.firewall = {
-          allowedTCPPorts = [ 5000 ];
-        };
+        # Only host-local production/rootless-CI clients may read or push images.
+        # Other service containers must not be able to replace production tags.
+        networking.firewall.extraCommands = ''
+          iptables -I nixos-fw 1 -s 10.69.0.1/32 -p tcp --dport 5000 -j nixos-fw-accept
+        '';
       };
     };
 

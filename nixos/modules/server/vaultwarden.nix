@@ -41,8 +41,12 @@ in {
           hostPath = "/tank/vw";
           isReadOnly = false;
         };
-        "/run/secrets" = {
-          hostPath = "/run/secrets";
+        "/run/secrets/vaultwarden/admin-token" = {
+          hostPath = config.sops.secrets."vaultwarden/admin-token".path;
+          isReadOnly = true;
+        };
+        "/run/secrets/vaultwarden/db-password" = {
+          hostPath = config.sops.secrets."vaultwarden/db-password".path;
           isReadOnly = true;
         };
       };
@@ -51,7 +55,6 @@ in {
         system.stateVersion = "26.05";
 
         environment.systemPackages = [
-          # Postgres backend requires the 'postgresql' feature build
           (pkgs.vaultwarden.override { dbBackend = "postgresql"; })
         ];
 
@@ -60,8 +63,7 @@ in {
           after = [ "network.target" ];
           wantedBy = [ "multi-user.target" ];
           serviceConfig = {
-            # LoadCredential copies the (0400 root) secrets into /run/credentials/<unit>/,
-            # which is owned by the service user - direct cat of /run/secrets would fail.
+
             LoadCredential = [
               "admin-token:/run/secrets/vaultwarden/admin-token"
               "db-password:/run/secrets/vaultwarden/db-password"
@@ -80,18 +82,13 @@ in {
             DATA_FOLDER = "/var/lib/vaultwarden";
             DOMAIN = cfg.domain;
             WEBSOCKET_ENABLED = "true";
-            # No public self-registration; accounts are created by the owner.
             SIGNUPS_ALLOWED = "false";
-            # Listen on all interfaces so nginx on the host/bridge can reach it
             ROCKET_ADDRESS = "0.0.0.0";
-            # Serve the bundled web vault UI from the package
             WEB_VAULT_FOLDER = "${pkgs.vaultwarden.webvault}/share/vaultwarden/vault";
           };
         };
 
-        # /tank/vw is bind-mounted from the host and owned by root; make the
-        # data dir writable by the service user (vaultwarden needs to create
-        # rsa_key.pem etc. on first start).
+
         systemd.tmpfiles.rules = [
           "Z /var/lib/vaultwarden 0700 vaultwarden vaultwarden -"
         ];
@@ -107,7 +104,7 @@ in {
       };
     };
 
-    # Expose via nginx proxy
+    # nginx proxy
     sccl.proxy.sites.pass = {
       upstream = "http://${containerIp}:${toString cfg.port}";
       extraConfig = ''
@@ -117,7 +114,7 @@ in {
       '';
     };
 
-    # WebSocket support
+    # websocket support
     sccl.proxy.sites."pass-api" = {
       upstream = "http://${containerIp}:${toString cfg.port}/notifications/hub";
       extraConfig = ''
@@ -127,14 +124,18 @@ in {
       '';
     };
 
-    # PostgreSQL database for Vaultwarden
+    # vw pgsql db
     systemd.services.vaultwarden-db = {
       description = "Create Vaultwarden PostgreSQL database";
       after = [ "postgresql.service" ];
+      requires = [ "postgresql.service" ];
       wantedBy = [ "multi-user.target" ];
+      startLimitIntervalSec = 0;
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
+        Restart = "on-failure";
+        RestartSec = "5s";
         LoadCredential = [
           "db-password:/run/secrets/vaultwarden/db-password"
         ];

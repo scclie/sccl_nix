@@ -74,8 +74,9 @@ in {
 
     services.nginx.virtualHosts = {
       "pierdol.ing" = {
-        addSSL = true;
+        forceSSL = true;
         root = "/tank/sites/pierdol/public";
+        extraConfig = "disable_symlinks if_not_owner;";
         sslCertificate = "/var/lib/acme/wildcard.${cfg.domain}/fullchain.pem";
         sslCertificateKey = "/var/lib/acme/wildcard.${cfg.domain}/key.pem";
         locations = {
@@ -160,7 +161,7 @@ in {
 
       # cinny browser matrix client; anyone can log in with any matrix acc
       "chat.${cfg.domain}" = lib.mkIf cfg.web.enable {
-        addSSL = true;
+        forceSSL = true;
         root = "${pkgs.cinny}";
         sslCertificate = "/var/lib/acme/wildcard.${cfg.domain}/fullchain.pem";
         sslCertificateKey = "/var/lib/acme/wildcard.${cfg.domain}/key.pem";
@@ -200,7 +201,7 @@ in {
 
       # mautrix-discord web ui helper, proxied to the host bridge listener
       "discord-bridge.${cfg.domain}" = lib.mkIf discordBridgeOn {
-        addSSL = true;
+        forceSSL = true;
         sslCertificate = "/var/lib/acme/wildcard.${cfg.domain}/fullchain.pem";
         sslCertificateKey = "/var/lib/acme/wildcard.${cfg.domain}/key.pem";
         locations."/" = {
