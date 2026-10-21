@@ -50,12 +50,22 @@ in {
       containers.gifs = {
         image = "10.69.0.17:5000/scclie/gif:main";
         autoStart = true;
-        pull = "always";
+        pull = "never"; # sccl-deploy-images pulls and tags the approved digest
+        user = "20901:20901";
         volumes = [ "/tank/gifs:/var/gifs" ];
-        extraOptions = [ "--network=host" ];
+        ports = [ "127.0.0.1:8083:8083" ];
+        environment = {
+          NODE_OPTIONS = "--use-openssl-ca";
+          TRUSTED_PROXY_IPS = "172.30.10.1";
+        };
         environmentFiles = [ "/etc/nixos/secrets/gif-env" ];
       };
     };
+
+    systemd.tmpfiles.rules = [
+      "d /tank/gifs 0750 20901 20901 -"
+      "Z /tank/gifs - 20901 20901 -"
+    ];
 
     systemd.services."docker-gifs" = {
       after = lib.mkAfter [ "sops-install-secrets.service" ];
