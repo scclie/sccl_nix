@@ -117,6 +117,46 @@ let
             fi
             BASE="https://api.cloudflare.com/client/v4/zones/$ZONE/dns_records"
           ''
+          # TEMP OCTOBER 2026
+          (lib.optionalString (cfg.offlineRedirect != null) ''
+            RULESETS="https://api.cloudflare.com/client/v4/zones/$ZONE/rulesets"
+            RESPONSE=$($CURL -fsS --max-time 20 "$RULESETS" -H "Authorization: Bearer $TOKEN")
+            $JQ -e '.success == true' <<<"$RESPONSE" >/dev/null
+            RULESET=$($JQ -r '.result[] | select(.phase == "http_request_dynamic_redirect" and .kind == "zone") | .id' <<<"$RESPONSE")
+            RULE=$($JQ -nc --arg target ${lib.escapeShellArg cfg.offlineRedirect} \
+              --arg host ${lib.escapeShellArg cfg.offlineRedirectHost} \
+              --arg zone ${lib.escapeShellArg z.name} '{
+                ref: "sccl_temporary_offline",
+                description: "Temporary offline page (NixOS)",
+                enabled: true,
+                expression: ("(http.host eq " + ($zone | tojson) + " or ends_with(http.host, " + ("." + $zone | tojson) + ")) and http.host ne " + ($host | tojson)),
+                action: "redirect",
+                action_parameters: {from_value: {
+                  status_code: 302, target_url: {value: $target}, preserve_query_string: false
+                }}
+              }')
+            if [ -z "$RULESET" ]; then
+              DATA=$($JQ -nc --argjson rule "$RULE" '{name:"Redirect rules",kind:"zone",phase:"http_request_dynamic_redirect",rules:[$rule]}')
+              RESPONSE=$($CURL -fsS --max-time 20 -X POST "$RULESETS" \
+                -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" --data "$DATA")
+            else
+              RESPONSE=$($CURL -fsS --max-time 20 "$RULESETS/$RULESET" -H "Authorization: Bearer $TOKEN")
+              $JQ -e '.success == true' <<<"$RESPONSE" >/dev/null
+              RULE_ID=$($JQ -r '.result.rules[]? | select(.ref == "sccl_temporary_offline") | .id' <<<"$RESPONSE")
+              RULE=$($JQ -c '. + {position:{index:1}}' <<<"$RULE")
+              if [ -n "$RULE_ID" ]; then
+                METHOD=PATCH
+                ENDPOINT="$RULESETS/$RULESET/rules/$RULE_ID"
+              else
+                METHOD=POST
+                ENDPOINT="$RULESETS/$RULESET/rules"
+              fi
+              RESPONSE=$($CURL -fsS --max-time 20 -X "$METHOD" "$ENDPOINT" \
+                -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" --data "$RULE")
+            fi
+            $JQ -e '.success == true' <<<"$RESPONSE" >/dev/null
+            echo "cf-dns-sync: temporary 302 redirect installed for ${z.name}"
+          '')
         ] ++ map (cfSyncOneshot z.name) z.cfRecords) allZones)}
         echo "cf-dns-sync: done at $(date)"
       }
@@ -134,6 +174,17 @@ in {
       type = lib.types.str;
       default = config.sccl.server.hostIp;
       description = "IP that A records point to";
+    };
+     # TEMP OCTOBER 2026
+    offlineRedirect = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "temporary cf 302 destination.";
+    };
+    offlineRedirectHost = lib.mkOption {
+      type = lib.types.str;
+      default = "offline.sccl.cc";
+      description = "hostname exempt from the temporary redirect to prevent a loop.";
     };
     extraZones = lib.mkOption {
       type = lib.types.listOf (lib.types.submodule {

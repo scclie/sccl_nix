@@ -24,10 +24,11 @@
     { name = "murmur"; type = "A"; content = serverIp; }
     { name = "pass"; type = "A"; content = serverIp; }
     { name = "obsi"; type = "A"; content = serverIp; }
-    #{ name = "git"; type = "A"; content = serverIp; }
+    { name = "git"; type = "A"; content = serverIp; }
   ];
 
-  # cloudflare dns
+  # orig public dns
+  /*
   cfRecords = [
     { name = "status"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "git"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
@@ -49,5 +50,17 @@
     { name = "@"; type = "MX"; content = "1 mail.${domain}"; proxied = false; }
     { name = "@"; type = "TXT"; content = "v=spf1 mx include:_spf.google.com -all"; proxied = false; }
     { name = "_dmarc"; type = "TXT"; content = "v=DMARC1; p=quarantine; rua=mailto:dmarc@${domain}"; proxied = false; }
+  ];
+  */
+
+  # temp public dns
+  cfRecords = map (name: {
+    inherit name;
+    type = "A";
+    content = "192.0.2.1";
+    proxied = true;
+  }) [
+    "@" "*" "status" "git" "prometheus" "loki" "alertmanager" "grafana"
+    "files" "pass" "obsi" "www" "xkb" "otp-migrate" "gif" "murmur" "mail" "webmail"
   ];
 }
