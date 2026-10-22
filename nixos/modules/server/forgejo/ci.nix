@@ -69,9 +69,17 @@ in {
       mode = "0400";
     };
 
+    system.activationScripts.sccl-site-symlink-owners = {
+      deps = [ "users" ];
+      text = lib.concatMapStringsSep "\n" (site: ''
+        if [ -L /tank/sites/${site}/public ]; then
+          ${pkgs.coreutils}/bin/chown --no-dereference forgejo-ci:forgejo-ci -- /tank/sites/${site}/public
+        fi
+      '') sites;
+    };
+
     systemd.tmpfiles.rules = [
       "d /tank/ci 0755 root root -"
-      # Root-owned ancestors prevent CI from replacing the requests directory.
       "d ${publish} 0755 root root -"
       "d ${publish}/requests 2770 root forgejo-ci -"
       "d ${dashboards} 0755 forgejo-ci forgejo-ci -"
@@ -140,7 +148,6 @@ in {
           [[ ! -L "$request" ]] || exit 2
           [[ -e "$request" ]] || exit 0
           [[ -f "$request" ]] || exit 2
-          # O_NOFOLLOW protects the leaf even if CI replaces it after the checks.
           digest="$(dd if="$request" iflag=nofollow,nonblock,count_bytes count=73 status=none)" || exit 2
           [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]] || exit 2
           last="$(cat "$STATE_DIRECTORY/digest" 2>/dev/null || true)"
