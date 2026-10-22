@@ -10,7 +10,7 @@
 
   networking.hostName = "aero15laptop";
   services.openssh.enable = true;
-  users.users.root.initialPassword = "root";
+  users.users.root.initialHashedPassword = "!";
 
   sccl = {
     ui.enable = true;
@@ -32,7 +32,7 @@
   security.sudo.extraRules = [{
     users = ["paper"];
     commands = [{
-      command = "/home/paper/.local/bin/toggle-builtin-kb";
+      command = toString config.home-manager.users.paper.home.file.".local/bin/toggle-builtin-kb".source;
       options = ["NOPASSWD"];
     }];
   }];
@@ -44,7 +44,7 @@
         ids = [ "HOLTEK USB-HID Keyboard" ];
         settings = {
           main = {
-            # Number row (DH Wide angle mod)
+            # number row (curl angle wide mods)
             "7" = "backslash";
             "8" = "7";
             "9" = "8";
@@ -53,7 +53,7 @@
             equal = "minus";
             backslash = "equal";
 
-            # Top row
+            # top row
             e = "f";
             r = "p";
             t = "b";
@@ -65,7 +65,7 @@
             leftbrace = "apostrophe";
             rightbrace = "semicolon";
 
-            # Home row
+            # home row
             s = "r";
             d = "s";
             f = "t";
@@ -76,7 +76,7 @@
             semicolon = "i";
             apostrophe = "o";
 
-            # Bottom row (Angle mod)
+            # bottom row (angle mod)
             z = "x";
             x = "c";
             c = "d";
@@ -87,13 +87,12 @@
             period = "comma";
             slash = "period";
 
-            # RCtrl → RWIN for niri XKB toggle + keyd layer toggle
             rightctrl = "rightmeta";
             f12 = "layer(ru)";
           };
 
           ru = {
-            # Russian overrides (Y/H/]/\\ swap for rulemak_caws compatibility)
+            # rus overrides
             y = "leftbrace";
             h = "rightbrace";
             rightbrace = "fk13";

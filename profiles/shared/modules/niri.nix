@@ -11,8 +11,13 @@
 , ... }:
 
 let
+  toggleBuiltinKb = pkgs.writeShellApplication {
+    name = "toggle-builtin-kb";
+    runtimeInputs = [ pkgs.coreutils pkgs.libnotify ];
+    text = lib.removePrefix "#!/usr/bin/env bash\n" (builtins.readFile ../scripts/toggle-builtin-kb.sh);
+  };
   toggleKeybind = if niriBuiltinKbIdentifier != null then ''
-    Mod+Shift+Backspace { spawn "sudo" "${config.home.homeDirectory}/.local/bin/toggle-builtin-kb"; }
+    Mod+Shift+Backspace { spawn "sudo" "${lib.getExe toggleBuiltinKb}"; }
   '' else "";
 in
 {
@@ -504,7 +509,7 @@ in
 
   home.file = lib.mkIf (niriBuiltinKbIdentifier != null) {
     ".local/bin/toggle-builtin-kb" = {
-      source = ../scripts/toggle-builtin-kb.sh;
+      source = "${lib.getExe toggleBuiltinKb}";
       executable = true;
     };
   };

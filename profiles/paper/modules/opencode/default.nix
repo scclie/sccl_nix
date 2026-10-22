@@ -3,8 +3,8 @@ let
   # temp fix
   opencode = pkgs-unstable.opencode.overrideAttrs (old: {
     postPatch = (old.postPatch or "") + ''
-      substituteInPlace packages/opencode/script/build.ts \
-        --replace 'splitting: true,' 'splitting: false,'
+      substituteInPlace packages/cli/script/build.ts \
+        --replace-fail 'splitting: true,' 'splitting: false,'
     '';
   });
 
