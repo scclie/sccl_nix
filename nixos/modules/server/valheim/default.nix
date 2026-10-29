@@ -602,6 +602,7 @@ in {
         Type = "oneshot";
         User = "valheim";
         Group = "valheim";
+        InaccessiblePaths = [ "/nix/var/nix/daemon-socket" ];
         EnvironmentFile = envFile;
         Environment = lib.concatStringsSep " " (lib.filter (s: s != "") [
           (lib.optionalString cfg.rcon.enable "VALHEIM_RCON_ENABLE=1")
@@ -652,6 +653,7 @@ in {
         Type = "simple";
         User = "valheim";
         Group = "valheim";
+        InaccessiblePaths = [ "/nix/var/nix/daemon-socket" ];
         WorkingDirectory = dataDir;
         EnvironmentFile = envFile;
         ExecStart = "${startScript}";

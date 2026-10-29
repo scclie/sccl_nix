@@ -5,6 +5,7 @@
     # Network
     ayugram-desktop
     chromium
+    lagrange
     qbittorrent
     # Crypto
     electrum

@@ -13,10 +13,10 @@ let
   # kanidmOn = config.sccl.kanidm.enable;
   continuwuity = pkgs.stdenvNoCC.mkDerivation {
     pname = "matrix-continuwuity";
-    version = "26.9.0";
+    version = "26.9.1";
     src = pkgs.fetchurl {
-      url = "https://forgejo.ellis.link/continuwuation/continuwuity/releases/download/v26.9.0/conduwuit-linux-static-amd64";
-      hash = "sha256-qQmDzu18G53LTrK/VP5UcS+mGs4F40RRuCRrax3r+k0=";
+      url = "https://forgejo.ellis.link/continuwuation/continuwuity/releases/download/v26.9.1/conduwuit-linux-static-amd64";
+      hash = "sha256-e+/yCEgs+ce7NcSjk8t6ey8kHS4sDH/jwLao1K3Wstc=";
     };
     dontUnpack = true;
     installPhase = "install -Dm755 $src $out/bin/conduwuit";
@@ -248,6 +248,8 @@ in {
 
       config = { config, lib, pkgs, ... }: {
         system.stateVersion = "26.05";
+        # /etc/resolv.conf is supplied by the read-only bind mount above.
+        networking.resolvconf.enable = false;
 
         services.matrix-continuwuity = {
           enable = true;

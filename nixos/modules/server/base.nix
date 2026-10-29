@@ -22,7 +22,6 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    # Headless tuning
     boot.loader.grub.enable = lib.mkForce false;
     boot.loader.systemd-boot.enable = true;
     boot.zfs.forceImportRoot = true; # force import root pool on first boot (new disk)
@@ -48,7 +47,6 @@ in {
       }];
 
       # NAT containers on br-svc (10.69.0.0/24) to reach the internet.
-      # No external SSH port: Forgejo SSH is disabled (access via wg).
       nat = {
         enable = true;
         internalInterfaces = [ "br-svc" ];
@@ -73,15 +71,13 @@ in {
         X11Forwarding = false;
         AllowTcpForwarding = "no";
       };
-      # Bind admin SSH only to LAN + WireGuard. No public SSH: git traffic
-      # goes over WireGuard + HTTPS (Forgejo SSH is disabled).
+      # ssh only to lan + wg
       listenAddresses = [
         { addr = "192.168.0.10"; }
         { addr = "10.100.0.1"; }
       ];
     };
 
-    # During switch network-online.target can remain active while DHCP restarts.
     # dhcpcd forks only after the uplink has IPv4, and retains its address on exit.
     systemd.services.sshd = {
       wants = [ "network-online.target" "dhcpcd.service" ];
@@ -131,9 +127,9 @@ in {
       };
     };
 
-    # Docker on host (for CI artifacts, not playground)
     virtualisation.docker = {
       enable = true;
+      package = pkgs.callPackage ./docker-package.nix {};
       storageDriver = "zfs";
       daemon.settings = {
         log-driver = "json-file";
@@ -144,8 +140,6 @@ in {
         insecure-registries = [ "10.69.0.17:5000" ];
       };
     };
-
-    # Disable desktop things for headless
 
     environment.systemPackages = with pkgs; [
       vim

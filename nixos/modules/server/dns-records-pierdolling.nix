@@ -23,8 +23,7 @@
     { name = "@"; type = "MX"; content = "1 mail.${domain}."; }
   ];
 
-  # orig public records
-  /*
+  # cf public records
   cfRecords = [
     { name = "@"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "id"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
@@ -43,16 +42,15 @@
     { name = "@"; type = "TXT"; content = "v=spf1 mx include:_spf.google.com -all"; proxied = false; }
     { name = "_dmarc"; type = "TXT"; content = "v=DMARC1; p=quarantine; rua=mailto:dmarc@pierdol.ing"; proxied = false; }
   ];
-  */
 
   # temp public dns
-  cfRecords = map (name: {
-    inherit name;
-    type = "A";
-    content = "192.0.2.1";
-    proxied = true;
-  }) [
-    "@" "*" "id" "chat" "discord-bridge" "livekit" "call" "mirror"
-    "comments" "macc" "sx" "valheim" "map-valheim" "mail"
-  ];
+  # cfRecords = map (name: {
+  #   inherit name;
+  #   type = "A";
+  #   content = "192.0.2.1";
+  #   proxied = true;
+  # }) [
+  #   "@" "*" "id" "chat" "discord-bridge" "livekit" "call" "mirror"
+  #   "comments" "macc" "sx" "valheim" "map-valheim" "mail"
+  # ];
 }

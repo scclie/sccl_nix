@@ -23,10 +23,8 @@
     dns = {
       enable = true;
       zone = "sccl.cc";
-      # TEMP OCTOBER 2026
-      offlineRedirect = "https://offline.sccl.cc/";
-      #
-      #
+      # cf-proxied http only
+      # offlineRedirect = "https://offline.sccl.cc/";
       extraZones = [
         (import ../../nixos/modules/server/dns-records-pierdolling.nix {
           domain = "pierdol.ing";

@@ -117,17 +117,18 @@ let
             fi
             BASE="https://api.cloudflare.com/client/v4/zones/$ZONE/dns_records"
           ''
-          # TEMP OCTOBER 2026
-          (lib.optionalString (cfg.offlineRedirect != null) ''
+          ''
             RULESETS="https://api.cloudflare.com/client/v4/zones/$ZONE/rulesets"
             RESPONSE=$($CURL -fsS --max-time 20 "$RULESETS" -H "Authorization: Bearer $TOKEN")
             $JQ -e '.success == true' <<<"$RESPONSE" >/dev/null
             RULESET=$($JQ -r '.result[] | select(.phase == "http_request_dynamic_redirect" and .kind == "zone") | .id' <<<"$RESPONSE")
+          ''
+          (if cfg.offlineRedirect != null then ''
             RULE=$($JQ -nc --arg target ${lib.escapeShellArg cfg.offlineRedirect} \
               --arg host ${lib.escapeShellArg cfg.offlineRedirectHost} \
               --arg zone ${lib.escapeShellArg z.name} '{
                 ref: "sccl_temporary_offline",
-                description: "Temporary offline page (NixOS)",
+                description: "Maintenance page (NixOS)",
                 enabled: true,
                 expression: ("(http.host eq " + ($zone | tojson) + " or ends_with(http.host, " + ("." + $zone | tojson) + ")) and http.host ne " + ($host | tojson)),
                 action: "redirect",
@@ -143,11 +144,11 @@ let
               RESPONSE=$($CURL -fsS --max-time 20 "$RULESETS/$RULESET" -H "Authorization: Bearer $TOKEN")
               $JQ -e '.success == true' <<<"$RESPONSE" >/dev/null
               RULE_ID=$($JQ -r '.result.rules[]? | select(.ref == "sccl_temporary_offline") | .id' <<<"$RESPONSE")
-              RULE=$($JQ -c '. + {position:{index:1}}' <<<"$RULE")
               if [ -n "$RULE_ID" ]; then
                 METHOD=PATCH
                 ENDPOINT="$RULESETS/$RULESET/rules/$RULE_ID"
               else
+                RULE=$($JQ -c '. + {position:{index:1}}' <<<"$RULE")
                 METHOD=POST
                 ENDPOINT="$RULESETS/$RULESET/rules"
               fi
@@ -155,7 +156,19 @@ let
                 -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" --data "$RULE")
             fi
             $JQ -e '.success == true' <<<"$RESPONSE" >/dev/null
-            echo "cf-dns-sync: temporary 302 redirect installed for ${z.name}"
+            echo "cf-dns-sync: maintenance redirect enabled for ${z.name}"
+          '' else ''
+            if [ -n "$RULESET" ]; then
+              RESPONSE=$($CURL -fsS --max-time 20 "$RULESETS/$RULESET" -H "Authorization: Bearer $TOKEN")
+              $JQ -e '.success == true' <<<"$RESPONSE" >/dev/null
+              RULE_IDS=$($JQ -r '.result.rules[]? | select(.ref == "sccl_temporary_offline" and .enabled != false) | .id' <<<"$RESPONSE")
+              for RULE_ID in $RULE_IDS; do
+                RESPONSE=$($CURL -fsS --max-time 20 -X PATCH "$RULESETS/$RULESET/rules/$RULE_ID" \
+                  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" --data '{"enabled":false}')
+                $JQ -e '.success == true' <<<"$RESPONSE" >/dev/null
+                echo "cf-dns-sync: maintenance redirect disabled for ${z.name}"
+              done
+            fi
           '')
         ] ++ map (cfSyncOneshot z.name) z.cfRecords) allZones)}
         echo "cf-dns-sync: done at $(date)"
@@ -175,16 +188,15 @@ in {
       default = config.sccl.server.hostIp;
       description = "IP that A records point to";
     };
-     # TEMP OCTOBER 2026
     offlineRedirect = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
       default = null;
-      description = "temporary cf 302 destination.";
+      description = "Maintenance redirect for Cloudflare-proxied HTTP; null disables the managed rule.";
     };
     offlineRedirectHost = lib.mkOption {
       type = lib.types.str;
       default = "offline.sccl.cc";
-      description = "hostname exempt from the temporary redirect to prevent a loop.";
+      description = "Hostname exempt from the maintenance redirect to avoid a loop.";
     };
     extraZones = lib.mkOption {
       type = lib.types.listOf (lib.types.submodule {
@@ -261,7 +273,7 @@ local-address=127.0.0.1:5300
       allowedUDPPorts = [ 53 ];
     };
 
-    # Initialize pdns sqlite DB before pdns starts
+    # initialize pdns sqlite DB before pdns starts
     systemd.services.pdns-init = {
       description = "Initialize PowerDNS gsqlite3 database";
       before = [ "pdns.service" ];

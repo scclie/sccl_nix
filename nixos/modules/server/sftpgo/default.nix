@@ -71,6 +71,22 @@ in {
 
         services.sftpgo = {
           enable = true;
+          # Stable still carries 2.7.5, affected by CVE-2026-103028.
+          package = (pkgs.sftpgo.override {
+            buildGoModule = pkgs.buildGoModule.override {
+              go = pkgs.callPackage ../go.nix {};
+            };
+          }).overrideAttrs (final: prev: {
+            version = "2.7.6";
+            vendorHash = "sha256-iIpYKuHkLB7wzpTIgz9W2L7bnVHvs21ich8omsc0J+c=";
+            src = pkgs.fetchFromGitHub {
+              owner = "drakkan";
+              repo = "sftpgo";
+              tag = "v${final.version}";
+              hash = "sha256-BuCKn6Y0ORBKPYPqf8gCOr9/i+f2wv0/SnnumP6XpBs=";
+            };
+            ldflags = map (lib.replaceStrings [ prev.src.rev ] [ final.src.rev ]) prev.ldflags;
+          });
           dataDir = "/var/lib/sftpgo/data";
           settings = {
             httpd.bindings = [
