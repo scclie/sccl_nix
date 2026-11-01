@@ -1,4 +1,4 @@
-# sccl_nix
+# # sccl_nix
 
 overengineered nixos shit-config for my homelab. flakes + home-manager + disko + sops-nix.
 
@@ -15,7 +15,7 @@ overengineered nixos shit-config for my homelab. flakes + home-manager + disko +
 the flake auto-discovers hosts and devShells.
 self-gate features
 
-## docs
+## ## docs
 
 | docs | host | type | role |
 |---|---|---|---|
@@ -27,7 +27,7 @@ self-gate features
 
 ![systemd](https://gif.sccl.cc/api/gif/7jUIClki5yZc-systemd.gif)
 
-## options
+## ## options
 all features(modules), etc. r optional for the profiles, they configured as `sccl.*`
 ```nix
 # hosts/laeradr/configuration.nix
@@ -40,17 +40,17 @@ sccl = {
 };
 ```
 
-## inspiration
+## ## inspiration
 
 - https://gitlab.com/Zaney/zaneyos - sccl.* options
 - https://lgug2z.com/articles/handling-secrets-in-nixos-an-overview/ - sops-nix secrets overview that shaped the secrets/ scoping.
 
-## thinking about
+## ## thinking about
 
 - https://linux-audit.com/systemd/how-to-harden-a-systemd-service-unit/
 - https://grahamc.com/blog/nix-and-layered-docker-images/
 
-## license
+## ## license
 
 MIT
 

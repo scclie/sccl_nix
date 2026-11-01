@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 
 {
   home.packages = with pkgs; [
@@ -31,6 +31,7 @@
     kicad
     esptool
     platformio
+    usbutils
 
     # Gaming
     steam

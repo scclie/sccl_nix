@@ -88,7 +88,11 @@ let
 
     cfSyncScript = pkgs.writeShellScript "cf-dns-sync" ''
       set -euo pipefail
-      CURL='${pkgs.curl}/bin/curl'
+      # keep tls 1.3 + cert verif
+      cf_curl() {
+        ${pkgs.curl}/bin/curl --curves X25519 --show-error "$@"
+      }
+      CURL=cf_curl
       JQ='${pkgs.jq}/bin/jq'
       TOKEN_FILE=/etc/nixos/secrets/cloudflare-api-token.env
       if [ ! -f "$TOKEN_FILE" ]; then

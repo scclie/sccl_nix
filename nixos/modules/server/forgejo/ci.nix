@@ -56,8 +56,8 @@ in {
         container:
           docker_host: automount
           force_pull: true
-          options: "${siteMounts} -v ${dashboards}:${dashboards} -v ${publish}/requests:/publish/requests -v ${config.security.pki.caBundle}:/etc/sccl-ca-bundle.crt:ro -e SSL_CERT_FILE=/etc/sccl-ca-bundle.crt -e CURL_CA_BUNDLE=/etc/sccl-ca-bundle.crt -e GIT_SSL_CAINFO=/etc/sccl-ca-bundle.crt -e NODE_OPTIONS=--use-openssl-ca"
-          valid_volumes: []
+          options: "${siteMounts} -v ${dashboards}:${dashboards} -v ${publish}/requests:/publish/requests -v ${config.security.pki.caBundle}:/etc/sccl-ca-bundle.crt -e SSL_CERT_FILE=/etc/sccl-ca-bundle.crt -e CURL_CA_BUNDLE=/etc/sccl-ca-bundle.crt -e GIT_SSL_CAINFO=/etc/sccl-ca-bundle.crt -e NODE_OPTIONS=--use-openssl-ca"
+          valid_volumes: ${builtins.toJSON (siteDirs ++ [ dashboards "${publish}/requests" config.security.pki.caBundle ])}
         server:
           connections:
             forgejo:
@@ -97,6 +97,7 @@ in {
         after = [ "network-online.target" "user@${toString ciUid}.service" ];
         wants = [ "network-online.target" "user@${toString ciUid}.service" ];
         wantedBy = [ "multi-user.target" ];
+        restartTriggers = [ config.sops.templates."forgejo-runner-config".content ];
         environment = {
           HOME = "/var/lib/forgejo-ci";
           XDG_RUNTIME_DIR = "/run/user/${toString ciUid}";
@@ -112,6 +113,8 @@ in {
           RestartSec = 10;
           NoNewPrivileges = true;
           ProtectSystem = "strict";
+          # act stages job files in /tmp
+          PrivateTmp = true;
           ReadWritePaths = [ "/var/lib/forgejo-ci" "${publish}/requests" "/run/user/${toString ciUid}" dashboards ] ++ siteDirs;
           InaccessiblePaths = [ "/var/run/docker.sock" "/tank/db" "/tank/vw" ];
         };
