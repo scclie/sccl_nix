@@ -197,7 +197,7 @@ in
     text = ''
       default partial alphanumeric_keys
       xkb_symbols "basic" {
-        name[Group1]= "English (Colemak-CAWS)";
+        name[Group1]= "colemak-dh";
 
         key <TLDE> { [     grave,    asciitilde   ] };
         key <AE01> { [         1,      exclam     ] };
@@ -261,7 +261,7 @@ in
     text = ''
       default partial alphanumeric_keys
       xkb_symbols "basic" {
-        name[Group1]= "Russian (Rulemak, phonetic QWERTY)";
+        name[Group1]= "rulemak-dh(phonetic qwerty)";
 
         key <TLDE> { [     Cyrillic_io,     Cyrillic_IO ] };
         key <AE01> { [               1,          exclam ] };
@@ -322,6 +322,30 @@ in
     '';
   };
 
+  # Make the custom symbols discoverable by libxkbregistry (including Waybar).
+  xdg.configFile."xkb/rules/evdev.xml".text = ''
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE xkbConfigRegistry SYSTEM "xkb.dtd">
+    <xkbConfigRegistry version="1.1">
+      <layoutList>
+        <layout>
+          <configItem>
+            <name>colemak_caws</name>
+            <shortDescription>en</shortDescription>
+            <description>colemak-dh</description>
+          </configItem>
+        </layout>
+        <layout>
+          <configItem>
+            <name>rulemak_caws</name>
+            <shortDescription>ru</shortDescription>
+            <description>rulemak-dh(phonetic qwerty)</description>
+          </configItem>
+        </layout>
+      </layoutList>
+    </xkbConfigRegistry>
+  '';
+
   xdg.configFile."niri/config.kdl" = {
     enable = true;
     text = ''
@@ -347,16 +371,18 @@ in
       ${niriOutput}
 
       layout {
-          gaps 10
+          gaps 1
           center-focused-column "never"
 
           border {
+              on
               width 1
               active-color "#81a1c1"
               inactive-color "#4c566a"
           }
 
           focus-ring {
+              on
               width 1
               active-color "#81a1c1"
               inactive-color "#4c566a"
@@ -365,7 +391,7 @@ in
 
       window-rule {
           clip-to-geometry true
-          geometry-corner-radius 12
+          geometry-corner-radius 0
       }
 
       prefer-no-csd
