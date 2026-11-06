@@ -34,6 +34,8 @@ in
     wl-clipboard
   ];
 
+  programs.swaylock.enable = true;
+
   systemd.user.services.cliphist = {
     Unit = {
       Description = "Clipboard history manager";
@@ -406,6 +408,7 @@ in
           Mod+A { spawn "fuzzel"; }
           Mod+D { spawn "thunar"; }
           Mod+Tab { toggle-overview; }
+          Mod+L { spawn "${lib.getExe config.programs.swaylock.package}" "-f"; }
 
           Mod+Q { close-window; }
           Mod+Shift+Q { close-window; }

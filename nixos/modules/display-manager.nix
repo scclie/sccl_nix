@@ -1,6 +1,8 @@
 { config, lib, pkgs, ... }:
 
 lib.mkIf config.sccl.ui.enable {
+  security.pam.services.swaylock = {};
+
   services.greetd = {
     enable = true;
     settings = {
