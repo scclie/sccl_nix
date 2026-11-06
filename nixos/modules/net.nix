@@ -10,12 +10,10 @@ lib.mkIf config.sccl.net.enable {
   boot.kernel.sysctl."net.ipv4.ip_default_ttl" = 65;
 
   networking = {
-    # Proxy is now handled by mihomo TUN at network level.
-    # No HTTP proxy env vars needed.
 
     networkmanager = {
       enable = true;
-      wifi.powersave = false; # stable connection > battery
+      wifi.powersave = false;
       dns = "none";           # mihomo serves DNS on 127.0.0.1:53
     };
 

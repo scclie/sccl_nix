@@ -8,7 +8,6 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    # Declare secrets at host level
     sops.secrets."sftpgo/admin-username" = {
       sopsFile = ../../../../secrets/apps.yaml;
       restartUnits = [ "container@files-ct.service" ];
@@ -22,9 +21,6 @@ in {
       restartUnits = [ "container@files-ct.service" ];
     };
 
-    # First admin is created by sftpgo itself on first boot when
-    # data_provider.create_default_admin is enabled; feed it the credentials
-    # via an EnvironmentFile rendered from sops into the container.
     sops.templates."sftpgo-env" = {
       content = ''
         SFTPGO_DEFAULT_ADMIN_USERNAME=${config.sops.placeholder."sftpgo/admin-username"}

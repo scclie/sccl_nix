@@ -4,6 +4,8 @@ overengineered nixos shit-config for my homelab. flakes + home-manager + disko +
 
 ![desktop_img](img/niri2.webp)
 
+## ## notes
+
 - repo: [git.sccl.cc/scclie/sccl_nix](https://git.sccl.cc/scclie/sccl_nix),
   mirrored to [codeberg](https://codeberg.org/scclie/sccl_nix)/[github](https://github.com/scclie/sccl_nix)
 - `hosts/<name>/` - machine layer: `sccl.{...}`, hardware, disko, packages, profiles
@@ -11,34 +13,19 @@ overengineered nixos shit-config for my homelab. flakes + home-manager + disko +
 - `profiles/` - home-manager layer
 - `secrets/` - scopes sops-nix
 - `doc/` - infra notes
+- `flake.nix` auto-discovers hosts
+- all features(modules) are optional for the profiles/hosts, they configured as `sccl.*` in `hosts/.../configuration.nix`
 
-the flake auto-discovers hosts and devShells.
-self-gate features
-
-## ## docs
 
 | docs | host | type | role |
 |---|---|---|---|
-| [doc/hosts/laeradr.md](doc/hosts/laeradr.md) · [BIOS](doc/hosts/laeradr-bios.md) | `laeradr` | SFF AM4 server | all my shi... |
+| [doc/hosts/laeradr.md](doc/hosts/laeradr.md); [BIOS](doc/hosts/laeradr-bios.md) | `laeradr` | SFF AM4 server | all my shi... |
 | [doc/hosts/sacculos.md](doc/hosts/sacculos.md) | `sacculos` | desktop AM4 PC | main workstation |
 | [doc/hosts/aero15laptop.md](doc/hosts/aero15laptop.md) | `aero15laptop` | 15.6" laptop | portable |
 | [doc/router.md](doc/router.md) | - | router | routing :D |
 | [doc/monitoring.md](doc/monitoring.md) | - | monitroing | metrics&logs sources |
 
 ![systemd](https://gif.sccl.cc/api/gif/7jUIClki5yZc-systemd.gif)
-
-## ## options
-all features(modules), etc. r optional for the profiles, they configured as `sccl.*`
-```nix
-# hosts/laeradr/configuration.nix
-sccl = {
-  server.enable = true;
-  dns.enable = true;
-  mail.enable = true;
-  monitoring.enable = true;
-  backup.enable = true;
-};
-```
 
 ## ## inspiration
 

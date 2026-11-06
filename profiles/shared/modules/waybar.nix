@@ -17,7 +17,7 @@
         modules-center = [ "clock" ];
         modules-right = [
           "niri/language"
-          "pulseaudio"
+          "wireplumber"
           "network"
           "cpu"
           "memory"
@@ -108,21 +108,12 @@
           on-click = "nmtui";
         };
 
-        pulseaudio = {
+        wireplumber = {
           scroll-step = 2.5;
           format = "{volume}%";
           format-muted = " muted";
-          format-icons = {
-            headphone = "";
-            hands-free = "";
-            headset = "";
-            phone = "";
-            portable = "";
-            car = "";
-            default = ["" " " " "];
-          };
           on-click = "pavucontrol";
-          tooltip-format = "{desc}\n{volume}%";
+          tooltip-format = "{node_name}\n{volume}%";
           min-length = 5;
         };
 
@@ -232,7 +223,7 @@
       }
 
       #language,
-      #pulseaudio,
+      #wireplumber,
       #network,
       #cpu,
       #memory,
@@ -249,7 +240,7 @@
         color: #8fbcbb;
       }
 
-      #pulseaudio {
+      #wireplumber {
         color: #88c0d0;
       }
 

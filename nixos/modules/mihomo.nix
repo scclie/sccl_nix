@@ -24,7 +24,7 @@ let
       nameserver-policy:
         "sccl.cc": ${cfg.lanDns}
         "*.sccl.cc": ${cfg.lanDns}
-        "git.sccl.cc": [ "1.1.1.1" ] #${cfg.lanDns}
+        "git.sccl.cc": ${cfg.lanDns}
         "pierdol.ing": ${cfg.lanDns}
         "*.pierdol.ing": ${cfg.lanDns}
     tun:
