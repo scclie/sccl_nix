@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ./helix.nix
     ./opencode
     ./voice-dictation.nix
     ./playground.nix
