@@ -1,6 +1,10 @@
 # # sccl_nix
 
-overengineered nixos shit-config for my homelab. flakes + home-manager + disko + sops-nix.
+le govno coded
+
+overengineered nixos shit-config for my homelab. 
+
+flakes + home-manager + disko + sops-nix.
 
 ![desktop_img](img/niri2.webp)
 

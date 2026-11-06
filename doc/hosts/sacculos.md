@@ -1,44 +1,41 @@
-# sacculos - desktop workstation
+# # sacculos - desktop workstation
 
 main desktop work-gaming machine.
 
 - hostname: `sacculos`
-- lan: `192.168.0.20/24` (`enp5s0`) - briefly used `.11` during a fail2ban
-  incident (see `doc/router.md`)
-- gpu: amd (see `hosts/sacculos/gpu.nix`)
-- users: `paper` (main, home-manager), `paper-dis` (second profile)
-- layout: `colemak_dh,rulemak` (vial), Niri compositor
+- role: main workstation
+- user: `paper` (home-manager)
 
-## enabled features (`sccl.*`)
+features, overrides: [`hosts/sacculos/configuration.nix`](../../hosts/sacculos/configuration.nix).
 
-- `ui` - Niri/stylix/greetd, Nord theme
-- `audio`, `bluetooth`, `net` - pipewire, bluetooth, networkmanager
-- `zapret` - DPI bypass
-- `mihomo` - TUN proxy (`fakeHwid = "B8A7E6D5C4B3"`), bypass for games
-  (steam, cs2, wine, reaper, ...)
-- `secrets` - sops scope `personal`
-- `playground` - Docker + dev tools
-- `nix-ld` - proprietary binaries
-- `automount` - USB auto-mount (udisks2 + polkit)
-- `files.webdav` - mounts `https://files-lan.sccl.cc:8081/` (SFTPGo WebDAV) at
-  `/home/paper/Files`
+## ## hardware & os
 
-## dns / proxy notes
+| item | value |
+|---|---|
+| board | asrock ab350m pro4 |
+| bios | p7.40 (uefi) |
+| cpu | amd ryzen 5 5500x3d (6c/12t) |
+| gpu | amd radeon rx 6750 xt |
+| ram | 16 gib |
+| disks | xpg gammix s11 pro 512 gb (nvme), r5sl240g 240 gb (sata ssd) |
+| display | msi mag 272q x50, 27", 2560×1440, 500 hz |
+| fs | ext4 `/` and `/home`, 16 gib swap |
+| boot | systemd-boot (uefi), cachy kernel |
+| os / desktop | nixos 26.05, niri (wayland), nord |
+| lan | `192.168.0.20/24`, `enp5s0` |
 
-- `mihomo` resolves `*.sccl.cc` through LAN Unbound (`192.168.0.10`) so
-  subdomains hit the server directly (no Cloudflare loop).
-- Exception: `git.sccl.cc` is forced to resolve **publicly** (`1.1.1.1`).
-  This fixed `git push` (hairpin SSL Error 19 / the `*.sccl.cc` LAN policy rule
-  wasn't matching the auth flow). Keep the `nameserver-policy` override in
-  [`nixos/modules/mihomo.nix`](../../nixos/modules/mihomo.nix).
+## ## config
 
-## deploy
+- [disk layout](../../hosts/sacculos/disko.nix)
+- [gpu](../../hosts/sacculos/gpu.nix)
+- [desktop & keybinds](../../profiles/shared/modules/niri.nix), [bar](../../profiles/shared/modules/waybar.nix)
+- [home-manager](../../profiles/paper/home.nix)
 
-i usually put everything right on the machine
+## ## deploy
 
 ```bash
 sudo nixos-rebuild switch --flake .#sacculos
-
-# or via fish alias (see 'profiles/shared/modules/fish.nix')
-rebuild sacculos
 ```
+
+or via fish alias 
+[`rebuild` / `rebuild-home`](../../profiles/shared/modules/fish.nix).

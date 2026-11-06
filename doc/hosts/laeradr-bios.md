@@ -1,16 +1,13 @@
-# laeradr - bios settings (AC-loss auto power-on & Wake-on-LAN)
+# # laeradr - bios settings
 
-why this was done: `laeradr` runs headless (no monitor, gpu (i cant setup gpu in my sff case lmao)), and the board would
-not come back up after a power cut. Frst the machine was never booted
-automatically after AC restore; by default AMI has `Restore On AC Power Loss =
-Disabled`. Since there's no monitor to enter the BIOS menus, the hidden AMI
-settings had to be changed from OS using AMISCE/SCELNX.
+why this was done: `laeradr` runs headless (no monitor, gpu (i cant setup gpu in my sff case lmao)), and the board would 
+not come back up after a power cut. Frst the machine was never booted automatically after AC restore; by default AMI has `Restore On AC Power Loss = Disabled`. 
+since there's no monitor to enter the BIOS menus, the hidden AMI settings had to be changed from OS using AMISCE/SCELNX.
 
-## ingredients
+## ## ingredients
 
 AMI UEFI AMISCE tool (`sceelnx64`) + helper scripts from
-  [/scclie/scelinux](https://git.sccl.cc/scclie/scelinux).
-on NixOS the binary cant run out of the box (stub-ld + missing libstdc++).
+  [/scclie/scelinux](https://git.sccl.cc/scclie/scelinux)
 
 fix one-time:
 
@@ -21,8 +18,7 @@ fix one-time:
     ./sceelnx64'
   ```
 
-the tool writes NVRAM via SMI from the running OS; a full power cycle
-  (not reboot) is required for changes to take effect.
+the tool writes NVRAM via SMI from the running OS, full power cycle (not reboot) is required for changes to take effect.
 
 
 workflow: `./backup.sh before` -> `./export.sh nvram.txt` -> move the `*` on the
@@ -44,7 +40,7 @@ notes:
 - settings live in flash NVRAM, not CMOS - a dead CR2032 does not wipe them
   (verified: values survived full unplugs; RTC kept correct time, battery fine).
 
-## verif
+## ## verif
 
 ```bash
 # after a power cycle, re-export and check the two working tokens:
@@ -60,7 +56,7 @@ behavior after the change:
 - **soft shutdown then outage** (`shutdown -h now`, then power cut): stays off;
   the firmware only honors auto-power-on from a running (S0) state.
 
-## wake-on-lan
+## ## wake-on-lan
 
 - NIC: `enp4s0`.
 - arming is done at every boot by the `wol-arm` systemd service

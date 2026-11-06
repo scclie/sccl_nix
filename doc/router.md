@@ -1,27 +1,29 @@
-# home router
+# # home router
 
-## lan basics
+## ## lan basics
 
 | item | value |
 |---|---|
 | subnet | `192.168.0.0/24` |
 | gateway | `192.168.0.1` |
 | public ip | static from provider |
-| LAN DNS | `192.168.0.10` (Unbound on laeradr) |
+| dns | `192.168.0.10` (unbound on laeradr) |
 
-## DHCP reservations
+## ## dhcp reservations
 
 | host | ip | reason |
 |---|---|---|
 | laeradr | `192.168.0.10` | server |
 | sacculos | `192.168.0.20` | desktop |
 
-## port forwarding (WAN -> laeradr)
+## ## port forwarding (wan -> laeradr)
 
 | port | proto | purpose |
 |---|---|---|
-| 25 | TCP | smtp (MX for sccl.cc, pierdol.ing) |
-| 443 | TCP | https origin for cf |
-| 64738 | TCP+UDP| murmur (mumble voice server) |
-| 2456 | UDP | valheim game |
-| 2457 | UDP | valheim query, port+1 |
+| 25 | tcp | smtp (sccl.cc, pierdol.ing) |
+| 443 | tcp | https |
+| 64738 | tcp+udp | mumble |
+| 2456-2457 | udp | valheim |
+
+server firewall: [base.nix](../nixos/modules/server/base.nix),
+service ports: [server modules](../nixos/modules/server/).
