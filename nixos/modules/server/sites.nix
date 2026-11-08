@@ -17,6 +17,11 @@ in {
             default = [];
             description = "Additional hostnames serving the same root";
           };
+          assetCacheControl = lib.mkOption {
+            type = lib.types.str;
+            default = "public, max-age=31536000, immutable";
+            description = "Cache-Control for static assets; use no-cache for unversioned asset URLs";
+          };
           facade = lib.mkOption {
             type = lib.types.nullOr (lib.types.submodule {
               options = {
@@ -61,7 +66,7 @@ in {
             "~* \.(?:css|js|woff2?|ttf|png|jpg|jpeg|gif|svg|webp|avif|ico)$" = {
               tryFiles = "$uri =404";
               extraConfig = ''
-                add_header Cache-Control "public, max-age=31536000, immutable";
+                add_header Cache-Control "${site.assetCacheControl}";
               '';
             };
           }

@@ -3,11 +3,13 @@
 {
   # local powerdns
   records = [
-    { name = "@"; type = "SOA"; content = "ns1.${domain}. hostmaster.${domain}. 2026090301 3600 900 604800 300"; }
+    { name = "@"; type = "SOA"; content = "ns1.${domain}. hostmaster.${domain}. 2026110901 3600 900 604800 300"; }
     { name = "@"; type = "NS"; content = "ns1.${domain}."; }
     { name = "@"; type = "A"; content = serverIp; }
     { name = "ns1"; type = "A"; content = serverIp; }
     { name = "www"; type = "CNAME"; content = "${domain}."; }
+    { name = "bred"; type = "A"; content = serverIp; }
+    { name = "shiza"; type = "A"; content = serverIp; }
     { name = "mail"; type = "A"; content = serverIp; }
     { name = "webmail"; type = "A"; content = serverIp; }
     { name = "@"; type = "MX"; content = "1 mail.${domain}."; }
@@ -40,6 +42,8 @@
     { name = "obsi"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "@"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
     { name = "www"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
+    { name = "bred"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
+    { name = "shiza"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "xkb"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
     { name = "otp-migrate"; type = "A"; content = "$PUBLIC_IP"; proxied = true; }
     { name = "gif"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
@@ -48,7 +52,7 @@
     { name = "webmail"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "@"; type = "MX"; content = "1 mail.${domain}"; proxied = false; }
     { name = "@"; type = "TXT"; content = "v=spf1 mx include:_spf.google.com -all"; proxied = false; }
-    { name = "_dmarc"; type = "TXT"; content = "v=DMARC1; p=quarantine; rua=mailto:dmarc@${domain}"; proxied = false; }
+    #{ name = "_dmarc"; type = "TXT"; content = "v=DMARC1; p=quarantine; rua=mailto:dmarc@${domain}"; proxied = false; }
   ];
 
 

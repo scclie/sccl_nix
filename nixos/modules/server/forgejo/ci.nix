@@ -2,7 +2,7 @@
 let
   ciUid = 23000;
   publish = "/tank/ci/publish";
-  sites = [ "sccl.cc" "xkb.sccl" "otp-migrate" "gif.sccl" "pierdol" ];
+  sites = [ "sccl.cc" "bred.sccl" "xkb.sccl" "otp-migrate" "gif.sccl" "pierdol" ];
   siteDirs = map (site: "/tank/sites/${site}") sites;
   dashboards = "/tank/mon/grafana/dashboards/gif";
   siteMounts = lib.concatMapStringsSep " " (dir: "-v ${dir}:${dir}") siteDirs;

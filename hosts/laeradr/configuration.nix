@@ -196,6 +196,11 @@
         domain = "sccl.cc";
         extraDomains = [ "www.sccl.cc" ];
       };
+      sites."bred.sccl" = {
+        domain = "bred.sccl.cc";
+        extraDomains = [ "shiza.sccl.cc" ];
+        assetCacheControl = "no-cache";
+      };
       sites."xkb.sccl" = {
         domain = "xkb.sccl.cc";
       };
