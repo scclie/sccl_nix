@@ -7,15 +7,17 @@
     chromium
     lagrange
     qbittorrent
-    # Crypto
-    electrum
-    electrum-ltc
-    vesktop
+    discordo
+    #vesktop
     mumble
     fluffychat
     cinny
     #nheko
     #commet-chat
+
+    # Crypto
+    electrum
+    electrum-ltc
 
     # Development
     lmstudio
@@ -24,7 +26,6 @@
     cargo
     gcc
     obsidian
-    kiro
     vial
     python315
     nodejs_24

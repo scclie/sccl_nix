@@ -38,7 +38,7 @@
         };
 
         "niri/language" = {
-          format = "{long}";
+          format = "finger cult: {long}";
           min-length = 5;
           tooltip = true;
         };
@@ -65,14 +65,14 @@
 
         cpu = {
           interval = 2;
-          format = "{usage}%";
+          format = "goblin activity: {usage}%";
           tooltip = true;
           min-length = 5;
         };
 
         memory = {
           interval = 2;
-          format = "{used:0.1f}G";
+          format = "slop pile: {used:0.1f}G";
           tooltip-format = "RAM: {used:0.1f}G / {total:0.1f}G";
           min-length = 5;
         };
@@ -81,8 +81,7 @@
           interval = 2;
           hwmon-path = "/sys/class/hwmon/hwmon2/temp1_input";
           critical-threshold = 80;
-          format = "{temperatureC}°";
-          format-icons = ["" "" "" "" ""];
+          format = "tea: {temperatureC}°";
           tooltip = true;
         };
 
@@ -92,17 +91,16 @@
             warning = 30;
             critical = 15;
           };
-          format = "{icon} {capacity}%";
+          format = "survival probability: {capacity}%";
           format-charging = " {capacity}%";
           format-plugged = " {capacity}%";
-          format-icons = ["" "" "" "" ""];
           tooltip-format = "{timeTo}\n{power}W";
         };
 
         network = {
           interval = 2;
-          format-wifi = "{signalStrength}%"; # 
-          format-ethernet = "{ipaddr}"; # 󰩟
+          format-wifi = "alien contact: {signalStrength}%"; # 
+          format-ethernet = "fbi endpoint: {ipaddr}"; # 󰩟
           format-disconnected = "disconnected"; # 
           tooltip-format = "{essid}\n{ipaddr}/{cidr}\n {bandwidthDownBits}  {bandwidthUpBits}";
           on-click = "nmtui";
@@ -110,7 +108,7 @@
 
         wireplumber = {
           scroll-step = 2.5;
-          format = "{volume}%";
+          format = "auditory violence: {volume}%";
           format-muted = " muted";
           on-click = "pavucontrol";
           tooltip-format = "{node_name}\n{volume}%";
