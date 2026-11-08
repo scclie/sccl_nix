@@ -48,6 +48,20 @@
 
       # FZF
       fzf --fish | source
+
+      # fzf shortcuts
+      for mode in default insert
+        bind --erase -M $mode \ec
+        bind --erase -M $mode \cr
+        bind -M $mode \ed fzf-cd-widget           # ctlr + x
+        bind -M $mode \cx fzf-history-widget      # alt + d
+      end
+
+      # delete words (left-right)
+      for mode in default insert
+        bind -M $mode \en backward-kill-word      # alt + n
+        bind -M $mode \ei kill-word               # alt + i
+      end
     '';
   };
 }
