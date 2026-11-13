@@ -29,6 +29,39 @@
     nix-ld.enable = true;
   };
 
+  ###########################  ###########################  ###########################  ###########################  ###########################
+  # WIREGUARD
+  sops.secrets = lib.genAttrs [
+    "wireguard/laeradr-endpoint"
+    "wireguard/laeradr-public-key"
+    "wireguard/aero15-private-key"
+  ] (_: {
+    sopsFile = ../../secrets/personal.yaml;
+    mode = "0400";
+  });
+
+  sops.templates."wireguard-laeradr.conf" = {
+    mode = "0400";
+    content = ''
+      [Interface]
+      Address = 10.100.0.2/32
+      PrivateKey = ${config.sops.placeholder."wireguard/aero15-private-key"}
+
+      [Peer]
+      PublicKey = ${config.sops.placeholder."wireguard/laeradr-public-key"}
+      Endpoint = ${config.sops.placeholder."wireguard/laeradr-endpoint"}
+      AllowedIPs = 10.100.0.1/32
+      PersistentKeepalive = 25
+    '';
+  };
+
+  networking.wg-quick.interfaces.laeradr = {
+    autostart = false;
+    configFile = config.sops.templates."wireguard-laeradr.conf".path;
+  };
+
+  ###########################  ###########################  ###########################  ###########################  ###########################
+
   security.sudo.extraRules = [{
     users = ["paper"];
     commands = [{

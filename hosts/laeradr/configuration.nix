@@ -36,6 +36,7 @@
       enable = true;
       peers = [
         # { publicKey = "..."; allowedIPs = [ "10.100.0.2/32" ]; }
+        { publicKey = "1OocjDwhGOeZrr2/OI+AMvq2nfuxwDYJoxbdBt6tdmc="; allowedIPs = [ "10.100.0.2/32" ]; } # aero15laptop
       ];
     };
     databases = {
