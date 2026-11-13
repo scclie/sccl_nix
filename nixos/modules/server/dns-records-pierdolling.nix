@@ -15,6 +15,7 @@
     { name = "call"; type = "A"; content = serverIp; }
     { name = "mirror"; type = "A"; content = serverIp; }
     { name = "comments"; type = "A"; content = serverIp; }
+    { name = "mine"; type = "A"; content = serverIp; }
     { name = "macc"; type = "A"; content = serverIp; }
     { name = "sx"; type = "A"; content = serverIp; }
     { name = "valheim"; type = "A"; content = serverIp; }
@@ -33,6 +34,7 @@
     { name = "call"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "mirror"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "comments"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
+    { name = "mine"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "macc"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "sx"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }
     { name = "valheim"; type = "A"; content = "$PUBLIC_IP"; proxied = false; }

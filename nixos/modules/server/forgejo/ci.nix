@@ -2,7 +2,7 @@
 let
   ciUid = 23000;
   publish = "/tank/ci/publish";
-  sites = [ "sccl.cc" "bred.sccl" "xkb.sccl" "otp-migrate" "gif.sccl" "pierdol" ];
+  sites = [ "sccl.cc" "bred.sccl" "xkb.sccl" "otp-migrate" "gif.sccl" "pierdol" "mine" ];
   siteDirs = map (site: "/tank/sites/${site}") sites;
   dashboards = "/tank/mon/grafana/dashboards/gif";
   siteMounts = lib.concatMapStringsSep " " (dir: "-v ${dir}:${dir}") siteDirs;
@@ -10,6 +10,7 @@ let
     gifs = { enable = config.sccl.gifs.enable; repository = "gif"; };
     comments = { enable = config.sccl.comments.enable; repository = "comments"; };
     macc = { enable = config.sccl.macc.enable; repository = "macc"; };
+    mine-platform = { enable = config.sccl.minePlatform.enable; repository = "mine-platform"; };
   };
 in {
   config = lib.mkIf config.sccl.forgejo.enable {
@@ -158,6 +159,7 @@ in {
           image=10.69.0.17:5000/scclie/${app.repository}
           docker pull "$image@$digest"
           docker tag "$image@$digest" "$image:main"
+          ${lib.optionalString (name == "mine-platform") "systemctl restart mine-platform-migrate.service"}
           systemctl restart docker-${name}.service
           printf '%s\n' "$digest" > "$STATE_DIRECTORY/digest"
         '';

@@ -10,6 +10,8 @@ let
     gifs = { subnet = "172.30.10.0/24"; ip = "172.30.10.2"; };
     comments = { subnet = "172.30.11.0/24"; ip = "172.30.11.2"; };
     macc = { subnet = "172.30.12.0/24"; ip = "172.30.12.2"; };
+  } // lib.optionalAttrs config.sccl.minePlatform.enable {
+    mine-platform = { subnet = "172.30.13.0/24"; ip = "172.30.13.2"; bridge = "br-mine"; };
   };
 in {
   options.containers = lib.mkOption {
@@ -62,15 +64,15 @@ in {
       lib.nameValuePair "sccl-network-${name}" {
         requires = [ "docker.service" ];
         after = [ "docker.service" ];
-        before = [ "docker-${name}.service" ];
-        requiredBy = [ "docker-${name}.service" ];
+        before = [ "docker-${name}.service" ] ++ lib.optional (name == "mine-platform") "mine-platform-migrate.service";
+        requiredBy = [ "docker-${name}.service" ] ++ lib.optional (name == "mine-platform") "mine-platform-migrate.service";
         serviceConfig = { Type = "oneshot"; RemainAfterExit = true; };
         script = ''
           ${pkgs.docker}/bin/docker network inspect sccl-${name} >/dev/null 2>&1 || \
             ${pkgs.docker}/bin/docker network create \
-              --subnet ${app.subnet} --opt com.docker.network.bridge.name=br-${name} sccl-${name}
-          ${pkgs.iptables}/bin/iptables -C DOCKER-USER -i br-${name} -d 10.69.0.17/32 -p tcp --dport 5000 -j REJECT 2>/dev/null || \
-            ${pkgs.iptables}/bin/iptables -I DOCKER-USER 1 -i br-${name} -d 10.69.0.17/32 -p tcp --dport 5000 -j REJECT
+              --subnet ${app.subnet} --opt com.docker.network.bridge.name=${app.bridge or "br-${name}"} sccl-${name}
+          ${pkgs.iptables}/bin/iptables -C DOCKER-USER -i ${app.bridge or "br-${name}"} -d 10.69.0.17/32 -p tcp --dport 5000 -j REJECT 2>/dev/null || \
+            ${pkgs.iptables}/bin/iptables -I DOCKER-USER 1 -i ${app.bridge or "br-${name}"} -d 10.69.0.17/32 -p tcp --dport 5000 -j REJECT
         '';
       }
     ) apps;
@@ -78,6 +80,8 @@ in {
     networking.firewall.interfaces = {
       br-gifs.allowedTCPPorts = [ 5432 ];
       br-comments.allowedTCPPorts = [ 5432 ];
+    } // lib.optionalAttrs config.sccl.minePlatform.enable {
+      br-mine.allowedTCPPorts = [ 5432 ];
     };
     services.postgresql.authentication = lib.mkAfter ''
       host gif gif 172.30.10.2/32 scram-sha-256

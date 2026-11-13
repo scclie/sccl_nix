@@ -12,6 +12,7 @@
     ./discord-bridge.nix
     ./forgejo
     ./gifs.nix
+    ./mine-platform.nix
     ./murmur.nix
     ./sftpgo
     ./webdav.nix

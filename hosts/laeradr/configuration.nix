@@ -50,12 +50,24 @@
     gifs = {
       enable = true;
     };
+    # minePlatform.enable = false;
+    minePlatform = {
+      enable = true;
+      sitePath = "/tank/sites/mine/public";
+
+      adminDiscordIds = [
+        "392014895429844993"
+      ];
+
+      moderatorDiscordIds = [ ];
+    };
+
     murmur = {
       enable = true;
       channels = [ "Lounge" "Room 1" "Room 2" "Room 3" "Afk" ];
     };
     valheim = {
-      enable = true;
+      enable = false;
       name = "ru::draumur::modded";
       world = "Midgard";
       worldModifiers = {
@@ -145,7 +157,7 @@
         { name = "sftpgo"; group = "services"; url = "https://files.sccl.cc"; interval = "5m"; }
         { name = "forgejo"; group = "services"; url = "https://git.sccl.cc"; interval = "5m"; }
         { name = "vaultwarden"; group = "services"; url = "https://pass.sccl.cc"; interval = "5m"; }
-        { name = "stalwart"; group = "services"; url = "https://mail.sccl.cc"; interval = "5m"; }
+        { name = "stalwart"; group = "services"; url = "https://webmail.sccl.cc"; interval = "5m"; }
         { name = "prometheus"; group = "monitoring"; url = "https://prometheus.sccl.cc/-/healthy"; interval = "5m"; }
         { name = "grafana"; group = "monitoring"; url = "https://grafana.sccl.cc/api/health"; interval = "5m"; }
         { name = "loki"; group = "monitoring"; url = "https://loki.sccl.cc/ready"; interval = "5m"; }
@@ -153,6 +165,7 @@
         { name = "comments api"; group = "apps"; url = "https://comments.pierdol.ing/health"; interval = "1m"; }
         { name = "searxng"; group = "services"; url = "https://sx.pierdol.ing/healthz"; interval = "5m"; }
         { name = "valheim"; group = "games"; url = "http://127.0.0.1:${toString config.sccl.valheim.webmap.port}/"; interval = "1m"; }
+        { name = "mine.pierdol.ing core"; group = "games"; url = "https://mine.pierdol.ing/api/v1/healthz "; interval = "5m"; }
       ];
     };
     backup = {
