@@ -8,6 +8,13 @@
 
   networking.hostName = "laeradr";
 
+  services.nginx.virtualHosts."invite.pierdol.ing" = {
+    forceSSL = true;
+    sslCertificate = "/var/lib/acme/wildcard.pierdol.ing/fullchain.pem";
+    sslCertificateKey = "/var/lib/acme/wildcard.pierdol.ing/key.pem";
+    locations."/".return = "302 https://discord.gg/MNXnGGG3zt";
+  };
+
   sccl = {
     boot.cachyos = false;
     secrets = {
