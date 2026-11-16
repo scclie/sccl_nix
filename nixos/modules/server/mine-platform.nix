@@ -3,6 +3,7 @@ let
   cfg = config.sccl.minePlatform;
   secretNames = map (name: "mine-platform/${name}") [
     "db-password" "discord-client-id" "discord-client-secret" "session-signing-key"
+    "game-auth-server-credentials"
   ];
   secrets = map (name: config.sops.secrets.${name} or null) secretNames;
   configuredSecrets = builtins.all (s: s != null && s.key != "" && s.mode == "0400"
@@ -59,9 +60,9 @@ in {
         message = "sccl.minePlatform.enable requires nonempty adminDiscordIds; configure an administrator explicitly."; }
       { assertion = builtins.all validId allIds && lib.length (lib.unique allIds) == lib.length allIds;
         message = "sccl.minePlatform Discord IDs must be canonical unsigned 64-bit decimal strings, unique and non-overlapping."; }
-      { assertion = configuredSecrets && lib.length (lib.unique (map (s: "${toString s.sopsFile}:${s.key}") secrets)) == 4
-          && lib.length (lib.unique (map (s: s.path) secrets)) == 4;
-        message = "sccl.minePlatform requires four separate configured root-only 0400 sops secrets: db-password, discord-client-id, discord-client-secret, session-signing-key."; }
+      { assertion = configuredSecrets && lib.length (lib.unique (map (s: "${toString s.sopsFile}:${s.key}") secrets)) == 5
+          && lib.length (lib.unique (map (s: s.path) secrets)) == 5;
+        message = "sccl.minePlatform requires five separate configured root-only 0400 sops secrets: db-password, discord-client-id, discord-client-secret, session-signing-key, game-auth-server-credentials."; }
       { assertion = config.services.postgresql.enable;
         message = "sccl.minePlatform requires services.postgresql.enable."; }
       { assertion = config.services.postgresql.enableTCPIP && config.services.postgresql.settings.port == 5432;
@@ -90,6 +91,11 @@ in {
       mode = "0400";
       owner = "root";
     };
+    sops.secrets."mine-platform/game-auth-server-credentials" = {
+      sopsFile = ../../../secrets/apps.yaml;
+      mode = "0400";
+      owner = "root";
+    };
 
     sops.templates."mine-platform-env" = {
       path = environmentFile;
@@ -103,6 +109,7 @@ in {
         DISCORD_CLIENT_SECRET=${config.sops.placeholder."mine-platform/discord-client-secret"}
         DISCORD_REDIRECT_URI=https://mine.pierdol.ing/api/v1/auth/discord/callback
         SESSION_SIGNING_KEY=${config.sops.placeholder."mine-platform/session-signing-key"}
+        GAME_AUTH_SERVER_CREDENTIALS=${config.sops.placeholder."mine-platform/game-auth-server-credentials"}
         ADMIN_DISCORD_IDS=${lib.concatStringsSep "," cfg.adminDiscordIds}
         MODERATOR_DISCORD_IDS=${lib.concatStringsSep "," cfg.moderatorDiscordIds}
       '';
