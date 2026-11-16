@@ -60,6 +60,7 @@ in {
       wants = [ "network-online.target" "docker-mine-platform.service" "sops-install-secrets.service" ];
       path = [ pkgs.coreutils ];
       preStart = ''
+        set +x
         set -euo pipefail
         if ! test -f ${lib.escapeShellArg cfg.paperJar}; then
           echo ${lib.escapeShellArg "skyblock-paper: missing regular file ${cfg.paperJar}"} >&2
@@ -69,14 +70,40 @@ in {
           echo ${lib.escapeShellArg "skyblock-paper: missing regular file ${cfg.pluginJar}"} >&2
           exit 1
         fi
-        if ! test -r "$CREDENTIALS_DIRECTORY/pierdolauth-api-token"; then
+        if ! test -r "$CREDENTIALS_DIRECTORY/pierdolauth-server-credential"; then
           echo "skyblock-paper: required credential is not readable" >&2
           exit 1
         fi
 
         # run as skyblock:skyblock
         temporary=""
-        trap 'if [ -n "$temporary" ]; then rm -f -- "$temporary"; fi' EXIT
+        trap 'unset server_credential api_token; if [ -n "$temporary" ]; then rm -f -- "$temporary"; fi' EXIT
+
+        unset server_credential api_token
+        server_credential=""
+        if IFS= read -r -d "" server_credential < "$CREDENTIALS_DIRECTORY/pierdolauth-server-credential"; then
+          unset server_credential
+          exit 1
+        fi
+        case "$server_credential" in
+          skyblock:?*) ;;
+          *) unset server_credential; exit 1 ;;
+        esac
+        api_token="''${server_credential#skyblock:}"
+        unset server_credential
+        case "$api_token" in
+          *:*|*$'\n'*|*$'\r'*) unset api_token; exit 1 ;;
+        esac
+        temporary="$(mktemp "$RUNTIME_DIRECTORY/pierdolauth-api-token.XXXXXX")"
+        if ! printf '%s' "$api_token" > "$temporary"; then
+          unset api_token
+          exit 1
+        fi
+        unset api_token
+        chmod 0400 "$temporary"
+        mv -f -- "$temporary" "$RUNTIME_DIRECTORY/pierdolauth-api-token"
+        temporary=""
+
         temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/eula.txt.XXXXXX"})"
         install -m 0640 ${eula} "$temporary"
         mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/eula.txt"}
@@ -91,7 +118,7 @@ in {
         cat > "$temporary" <<EOF
         server-id: skyblock
         api-base-url: http://127.0.0.1:8088/internal/game-auth/v1
-        credential-file: $CREDENTIALS_DIRECTORY/pierdolauth-api-token
+        credential-file: $RUNTIME_DIRECTORY/pierdolauth-api-token
         whitelist-sync-seconds: 60
         session-lease-seconds: 120
         login-command: login
@@ -103,7 +130,10 @@ in {
         WorkingDirectory = cfg.dataDir;
         User = "skyblock";
         Group = "skyblock";
-        LoadCredential = [ "pierdolauth-api-token:${config.sops.secrets."mine-platform/game-auth-server-credentials".path}" ];
+        LoadCredential = [ "pierdolauth-server-credential:${config.sops.secrets."mine-platform/game-auth-server-credentials".path}" ];
+        RuntimeDirectory = "skyblock-paper";
+        RuntimeDirectoryMode = "0700";
+        RuntimeDirectoryPreserve = false;
         ExecStart = "${pkgs.jdk25}/bin/java -Xms1G -Xmx2G -jar ${cfg.paperJar} --nogui";
         Restart = "on-failure";
         RestartSec = "10s";
