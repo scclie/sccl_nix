@@ -58,6 +58,7 @@
     gifs = {
       enable = true;
     };
+    minecraft.enable = true;
     # minePlatform.enable = false;
     minePlatform = {
       enable = true;
