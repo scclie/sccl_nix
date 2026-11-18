@@ -106,3 +106,12 @@ usual remote from another machine with the ssh key
 ```bash
 sudo nixos-rebuild switch --flake .#laeradr --target-host root@192.168.0.10
 ```
+
+### nginx2root cleanup
+
+once nixpkgs ships fixed nginx (1.30.7+ stable / 1.31.9+ mainline): remove the nginx pin from [local-packages.nix](../../hosts/laeradr/local-packages.nix), rebuild, then remove on laeradr:
+- `/etc/systemd/system.control/nginx.service.d/90-nginx2root-security.conf`
+- `/etc/modprobe.d/90-nginx2root-sctp.conf`
+
+`systemctl daemon-reload && systemctl restart nginx`; check version/sites, then remove
+`/nix/var/nix/gcroots/nginx2root-{security,config}`. keep the SCTP block in nix.
