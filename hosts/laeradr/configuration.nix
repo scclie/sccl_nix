@@ -58,7 +58,21 @@
     gifs = {
       enable = true;
     };
-    minecraft.enable = true;
+    minecraft = {
+      enable = true;
+      pierdolAuth = {
+        version = "0.1.4";
+        hash = "sha256-YYGC2CH3LxKznczsOHtjKcSVkq8jGnU1YX/XIinSSYQ=";
+      };
+      protocolLib = {
+        version = "dev-build-2026-11-04";
+        hash = "sha256-Tu1/czegIbj51qsReQumfBVluVEy2SSnx27v3hre03k=";
+      };
+      fastLogin = {
+        version = "1.21.11-26.20";
+        hash = "sha256-sxVoz7e4gVCQ2ewDT5z315oue5HPZlAFy7/G7XCEDOs=";
+      };
+    };
     # minePlatform.enable = false;
     minePlatform = {
       enable = true;
@@ -174,7 +188,7 @@
         { name = "comments api"; group = "apps"; url = "https://comments.pierdol.ing/health"; interval = "1m"; }
         { name = "searxng"; group = "services"; url = "https://sx.pierdol.ing/healthz"; interval = "5m"; }
         { name = "valheim"; group = "games"; url = "http://127.0.0.1:${toString config.sccl.valheim.webmap.port}/"; interval = "1m"; }
-        { name = "mine.pierdol.ing core"; group = "games"; url = "https://mine.pierdol.ing/api/v1/healthz "; interval = "5m"; }
+        { name = "mine.pierdol.ing core"; group = "games"; url = "https://mine.pierdol.ing/api/v1/healthz"; interval = "5m"; }
       ];
     };
     backup = {

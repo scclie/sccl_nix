@@ -1,13 +1,85 @@
 { config, lib, pkgs, ... }:
 let
   cfg = config.sccl.minecraft;
+  pierdolauthReleaseJar = pkgs.fetchurl {
+    name = "pierdol-auth-paper-${cfg.pierdolAuth.version}.jar";
+    url = "https://git.sccl.cc/scclie/pierdol-auth-paper/releases/download/v${cfg.pierdolAuth.version}/pierdol-auth-paper-${cfg.pierdolAuth.version}.jar";
+    hash = cfg.pierdolAuth.hash;
+  };
+  protocolLibReleaseJar = pkgs.fetchurl {
+    name = "ProtocolLib-${cfg.protocolLib.version}.jar";
+    url = "https://github.com/dmulloy2/ProtocolLib/releases/download/dev-build/ProtocolLib.jar";
+    hash = cfg.protocolLib.hash;
+  };
+
+  # fucking dpi keeps screwing up plugin downloads from spiget.org
+  # couldn't fix this shit with zapret, and i don't wanna run a full vpn just yet
+  # so i came up with this janky-ass workaround THAT ACTUALLY FUCKING WORKS
+  # basically, it downloads files in parallel 8kb chunks,
+  # stitches them back together, then checks the hash 🤯
+  fastLoginReleaseJar = pkgs.runCommand "FastLogin-${cfg.fastLogin.version}.jar" {
+    url = "https://api.spiget.org/v2/resources/134322/download?version=636152";
+    nativeBuildInputs = [ pkgs.curl pkgs.coreutils pkgs.gnugrep pkgs.gnused ];
+    CURL_CA_BUNDLE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+    impureEnvVars = lib.fetchers.proxyImpureEnvVars;
+    outputHash = cfg.fastLogin.hash;
+    outputHashAlgo = "sha256";
+    outputHashMode = "flat";
+    preferLocalBuild = true;
+  } ''
+    set -euo pipefail
+    curl --disable --fail --silent --show-error --location --head \
+      --connect-timeout 5 --max-time 15 --retry 2 --retry-delay 1 --retry-all-errors \
+      "$url" | tr -d '\r' > headers
+    size=$(sed -n 's/^[Cc]ontent-[Ll]ength: *\([0-9]*\).*/\1/p' headers | tail -n 1)
+    if [[ ! $size =~ ^[0-9]+$ ]] || (( size <= 0 || size > 20971520 )); then
+      echo "FastLogin: missing or invalid CDN content length" >&2
+      exit 1
+    fi
+
+    echo "FastLogin: downloading $size bytes in 8192-byte ranges"
+    mkdir parts
+    export size url
+    seq 0 $(((size - 1) / 8192)) | xargs -P 4 -n 1 bash -c '
+      set -euo pipefail
+      index=$1
+      start=$((index * 8192))
+      end=$((start + 8191))
+      if (( end >= size )); then end=$((size - 1)); fi
+      printf -v part "%06d" "$index"
+
+      code=$(curl --disable --fail --silent --show-error --location \
+        --connect-timeout 5 --max-time 10 --retry 2 --retry-delay 1 --retry-all-errors \
+        --max-filesize 8192 --range "$start-$end" \
+        --dump-header "parts/$part.headers" --output "parts/$part.part" \
+        --write-out "%{http_code}" "$url")
+      [[ $code == 206 ]]
+      range=$(tr -d "\r" < "parts/$part.headers" | grep -i "^content-range:" | tail -n 1)
+      printf "%s\n" "$range" | grep -Fxiq "Content-Range: bytes $start-$end/$size"
+      [[ $(stat -c %s "parts/$part.part") -eq $((end - start + 1)) ]]
+    ' _
+
+    cat parts/*.part > "$out"
+    [[ $(stat -c %s "$out") -eq $size ]]
+
+  '';
+  fastLoginConfig = pkgs.writeText "skyblock-fastlogin-config.yml" ''
+    premiumUuid: true
+    autoRegister: false
+    nameChangeCheck: false
+    autoLogin: true
+    secondAttemptCracked: false
+    switchMode: false
+  '';
+  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
   eula = pkgs.writeText "skyblock-eula.txt" "eula=true\n";
   serverProperties = pkgs.writeText "skyblock-server.properties" ''
     server-port=${toString cfg.port}
     online-mode=false
     white-list=true
     enforce-whitelist=true
-    motd=Skyblock (closed test)
+    motd=\u00A7bskyblock\u00A76::\u00A73pierdol.ing \u00A74(closed test)
   '';
 in {
   options.sccl.minecraft = {
@@ -27,6 +99,37 @@ in {
     pluginJar = lib.mkOption {
       type = lib.types.str;
       default = "${cfg.dataDir}/plugins/Pierdolauth.jar";
+    };
+    pierdolAuth = {
+      version = lib.mkOption {
+        type = lib.types.strMatching "[0-9]+\\.[0-9]+\\.[0-9]+";
+        description = "pinned PierdolAuth Forgejo release version without the v prefix.";
+      };
+      hash = lib.mkOption {
+        type = lib.types.strMatching "sha256-[A-Za-z0-9+/]{43}=";
+        #              сри ща
+        description = "sri sha-256 hash of the pinned PierdolAuth release jar.";
+      };
+    };
+    protocolLib = {
+      version = lib.mkOption {
+        type = lib.types.str;
+        description = "pinned ProtocolLib release version label.";
+      };
+      hash = lib.mkOption {
+        type = lib.types.strMatching "sha256-[A-Za-z0-9+/]{43}=";
+        description = "sri sha-256 hash of the pinned ProtocolLib release jar.";
+      };
+    };
+    fastLogin = {
+      version = lib.mkOption {
+        type = lib.types.str;
+        description = "pinned FastLogin release version label.";
+      };
+      hash = lib.mkOption {
+        type = lib.types.strMatching "sha256-[A-Za-z0-9+/]{43}=";
+        description = "sri sha-256 hash of the pinned FastLogin release jar.";
+      };
     };
   };
 
@@ -66,6 +169,33 @@ in {
           echo ${lib.escapeShellArg "skyblock-paper: missing regular file ${cfg.paperJar}"} >&2
           exit 1
         fi
+
+        # run as skyblock:skyblock
+        temporary=""
+        trap 'unset server_credential api_token; if [ -n "$temporary" ]; then rm -f -- "$temporary"; fi' EXIT
+
+        plugin_jar_directory="$(dirname -- ${lib.escapeShellArg cfg.pluginJar})"
+        temporary="$(mktemp "$plugin_jar_directory/.Pierdolauth.jar.XXXXXX")"
+        install -m 0640 ${lib.escapeShellArg pierdolauthReleaseJar} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg cfg.pluginJar}
+        temporary=""
+
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/.ProtocolLib.jar.XXXXXX"})"
+        install -m 0640 ${lib.escapeShellArg protocolLibReleaseJar} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/ProtocolLib.jar"}
+        temporary=""
+
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/.FastLogin.jar.XXXXXX"})"
+        install -m 0640 ${lib.escapeShellArg fastLoginReleaseJar} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/FastLogin.jar"}
+        temporary=""
+
+        install -d -m 0750 ${lib.escapeShellArg "${cfg.dataDir}/plugins/FastLogin"}
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/FastLogin/config.yml.XXXXXX"})"
+        install -m 0640 ${fastLoginConfig} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/FastLogin/config.yml"}
+        temporary=""
+
         if ! test -f ${lib.escapeShellArg cfg.pluginJar}; then
           echo ${lib.escapeShellArg "skyblock-paper: missing regular file ${cfg.pluginJar}"} >&2
           exit 1
@@ -74,10 +204,6 @@ in {
           echo "skyblock-paper: required credential is not readable" >&2
           exit 1
         fi
-
-        # run as skyblock:skyblock
-        temporary=""
-        trap 'unset server_credential api_token; if [ -n "$temporary" ]; then rm -f -- "$temporary"; fi' EXIT
 
         unset server_credential api_token
         server_credential=""
@@ -120,12 +246,13 @@ in {
         api-base-url: http://127.0.0.1:8088/internal/game-auth/v1
         credential-file: $RUNTIME_DIRECTORY/pierdolauth-api-token
         whitelist-sync-seconds: 60
-        session-lease-seconds: 120
+        session-lease-seconds: 60
         login-command: login
         EOF
         mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/PierdolAuth/config.yml"}
         temporary=""
       '';
+      restartTriggers = [ pierdolauthReleaseJar protocolLibReleaseJar fastLoginReleaseJar ];
       serviceConfig = {
         WorkingDirectory = cfg.dataDir;
         User = "skyblock";
