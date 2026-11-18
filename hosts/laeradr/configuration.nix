@@ -190,6 +190,13 @@
     };
     zapret = {
       enable = true;
+      tcpStrategy = [
+        "--dpi-desync=fake"
+        "--dpi-desync-fooling=badseq"
+        "--dpi-desync-repeats=6"
+        # pin the tested fake SNI
+        "--dpi-desync-fake-tls-mod=rnd,dupsid,sni=qn9zubc2cj3zz.biz"
+      ];
       hosts = [
         "discord.com"
         "discord.gg"
@@ -199,6 +206,7 @@
         "cdn.discordapp.com"
         "discord.media"
         "discordvoice.com"
+        "api.cloudflare.com"
         "ziglang.org" # putin blocks ziglang :D
         "docker.io"
         "registry-1.docker.io"

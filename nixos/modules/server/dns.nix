@@ -322,9 +322,12 @@ local-address=127.0.0.1:5300
 
     systemd.services.cf-dns-sync = {
       description = "Sync declarative DNS records to Cloudflare";
-      after = [ "network-online.target" "sops-install-secrets.service" ];
-      wants = [ "network-online.target" ];
+      after = [ "network-online.target" "sops-install-secrets.service" ]
+        ++ lib.optional config.sccl.zapret.enable "zapret.service";
+      wants = [ "network-online.target" ]
+        ++ lib.optional config.sccl.zapret.enable "zapret.service";
       wantedBy = [ "multi-user.target" ];
+      restartTriggers = [ cfSyncScript ];
       serviceConfig = {
         Type = "oneshot"; # cu
         ExecStart = "${cfSyncScript}";
@@ -341,10 +344,5 @@ local-address=127.0.0.1:5300
       };
     };
 
-    system.activationScripts.cfDnsSync = ''
-      if ${pkgs.systemd}/bin/systemctl is-active --quiet network-online.target; then
-        ${cfSyncScript}
-      fi
-    '';
   };
 }

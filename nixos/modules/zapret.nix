@@ -2,6 +2,7 @@
 
 let
   cfg = config.sccl.zapret;
+  mihomoEnabled = config.sccl.mihomo.enable or false;
 
   defaultHosts = [
     "discord.com"
@@ -30,6 +31,14 @@ let
   hostListExclude = pkgs.writeText "zapret-hosts-user-exclude.txt" (lib.concatMapStringsSep "\n" (h: h) cfg.excludes + "\n");
 in {
   options.sccl.zapret = {
+    tcpStrategy = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [
+        "--dpi-desync=multisplit"
+        "--dpi-desync-split-pos=1"
+      ];
+      description = "nfqws TCP desync arguments; can be overridden per host.";
+    };
     hosts = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = defaultHosts;
@@ -82,7 +91,8 @@ in {
       wants = [ "network.target" ];
       wantedBy = [ "multi-user.target" ];
 
-      path = [ pkgs.zapret pkgs.ipset pkgs.iptables pkgs.coreutils pkgs.kmod ];
+      path = [ pkgs.zapret pkgs.ipset pkgs.iptables pkgs.coreutils pkgs.kmod ]
+        ++ lib.optional mihomoEnabled pkgs.iproute2;
 
       preStart = ''
         ${pkgs.kmod}/bin/modprobe xt_NFQUEUE 2>/dev/null || true
@@ -98,6 +108,12 @@ in {
         cp ${hostListGeneral} /var/lib/zapret/ipset/zapret-hosts-user.txt
         cp ${hostListExclude} /var/lib/zapret/ipset/zapret-hosts-user-exclude.txt
 
+        ${lib.optionalString mihomoEnabled ''
+          # route nfqws-generated packets directly, before Mihomo TUN rules (9000+).
+          ${pkgs.iproute2}/bin/ip -4 rule del pref 8999 fwmark 0x40000000/0x40000000 lookup main 2>/dev/null || true
+          ${pkgs.iproute2}/bin/ip -4 rule add pref 8999 fwmark 0x40000000/0x40000000 lookup main
+        ''}
+
         ${pkgs.iptables}/bin/iptables -t mangle -D PREROUTING -j ZAPRET 2>/dev/null || true
         ${pkgs.iptables}/bin/iptables -t mangle -D OUTPUT -j ZAPRET 2>/dev/null || true
         ${pkgs.iptables}/bin/iptables -t mangle -F ZAPRET 2>/dev/null || true
@@ -105,6 +121,10 @@ in {
 
         ${pkgs.iptables}/bin/iptables -t mangle -N ZAPRET
         ${pkgs.iptables}/bin/iptables -t mangle -A ZAPRET -m mark --mark 0x40000000/0x40000000 -j RETURN
+        ${lib.optionalString mihomoEnabled ''
+          # let mihomo handle the TUN leg
+          ${pkgs.iptables}/bin/iptables -t mangle -A ZAPRET -o Meta -j RETURN
+        ''}
         ${pkgs.iptables}/bin/iptables -t mangle -A ZAPRET -m set --match-set nozapret dst -j RETURN
         ${pkgs.iptables}/bin/iptables -t mangle -A ZAPRET -p tcp --dport 80 -j NFQUEUE --queue-num 200 --queue-bypass
         ${pkgs.iptables}/bin/iptables -t mangle -A ZAPRET -p tcp --dport 443 -j NFQUEUE --queue-num 200 --queue-bypass
@@ -119,11 +139,7 @@ in {
           --filter-tcp=80,443 \
           --hostlist=/var/lib/zapret/ipset/zapret-hosts-user.txt \
           --hostlist-exclude=/var/lib/zapret/ipset/zapret-hosts-user-exclude.txt \
-          --dpi-desync=fake,fakedsplit \
-          --dpi-desync-repeats=6 \
-          --dpi-desync-fooling=ts \
-          --dpi-desync-fakedsplit-pattern=0x00 \
-          --dpi-desync-fake-tls=${pkgs.zapret}/usr/share/zapret/files/fake/tls_clienthello_www_google_com.bin \
+          ${lib.escapeShellArgs cfg.tcpStrategy} \
           --new \
           --filter-udp=443 \
           --hostlist=/var/lib/zapret/ipset/zapret-hosts-user.txt \
@@ -146,6 +162,9 @@ in {
       '';
 
       postStop = ''
+        ${lib.optionalString mihomoEnabled ''
+          ${pkgs.iproute2}/bin/ip -4 rule del pref 8999 fwmark 0x40000000/0x40000000 lookup main 2>/dev/null || true
+        ''}
         ${pkgs.iptables}/bin/iptables -t mangle -D PREROUTING -j ZAPRET 2>/dev/null || true
         ${pkgs.iptables}/bin/iptables -t mangle -D OUTPUT -j ZAPRET 2>/dev/null || true
         ${pkgs.iptables}/bin/iptables -t mangle -F ZAPRET 2>/dev/null || true
