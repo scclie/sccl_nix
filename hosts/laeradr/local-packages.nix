@@ -3,6 +3,11 @@
 {
   # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   # NGINX2Root: pinned until nixos-26.05 ships nginx >= 1.30.7.
+  #
+  # stable, yeah fucking right. so stable it needs yet another security override.
+  # gonna pin nginx to this version until the channel catches up.
+  # and it's the same fucking shit every time i need to update to a newer
+  # version asap — another override that'll just sit there until i eventually have to clean it up.
   services.nginx.package = pkgs.nginxStable.overrideAttrs (_: {
     version = "1.30.7";
     nginxVersion = "1.30.7";

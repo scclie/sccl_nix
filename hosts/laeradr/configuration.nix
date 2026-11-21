@@ -199,7 +199,12 @@
     proxy = {
       enable = true;
       sites = {
-        git = { upstream = "http://10.69.0.10:3000"; };
+        git = {
+          upstream = "http://10.69.0.10:3000";
+          extraConfig = ''
+            client_max_body_size 200m;
+          '';
+        };
       };
     };
     zapret = {

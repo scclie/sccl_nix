@@ -30,19 +30,18 @@ in {
 
     sops = {
       age = {
-        # Auto-detect age key from SSH host key (article recommendation)
+        # auto-detect age key from SSH host key
         sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
-        # Fallback to explicit key file
+        # fallback to explicit key file
         keyFile = toString cfg.ageKeyFile;
       };
-      # Service containers bind-mount /run/secrets. sops-nix otherwise bumps the
-      # generation dir on every activation and prunes the previous one, leaving
-      # running containers pointing at a deleted path. Keep old generations so
-      # those mounts stay valid; secret updates are applied explicitly through
-      # sops.secrets.*.restartUnits.
+      # sops rotates secret generations; bind mounts keep holding the old fucking path.
+      # prune that generation and the container gets a secret-shaped hole.
+      # keep the old generations and restart consumers explicitly.
+      # declarative secrets, archaeological mounts.
       keepGenerations = 0;
     } // lib.optionalAttrs (lib.elem "personal" config.sccl.secrets.scopes) {
-      # Personal-only secrets (SSH keys, GPG). Server must NOT see these -
+
       # personal.yaml is encrypted under the personal age key only.
       defaultSopsFile = ../../secrets/personal.yaml;
       secrets = {

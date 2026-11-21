@@ -108,6 +108,9 @@ in {
         cp ${hostListGeneral} /var/lib/zapret/ipset/zapret-hosts-user.txt
         cp ${hostListExclude} /var/lib/zapret/ipset/zapret-hosts-user-exclude.txt
 
+        # keep nfqws-generated packets out of mihomo's fucking tunnel
+        # the dpi workaround now needs a workaround for the other dpi workaround
+        # i just wanted working internet ;k
         ${lib.optionalString mihomoEnabled ''
           # route nfqws-generated packets directly, before Mihomo TUN rules (9000+).
           ${pkgs.iproute2}/bin/ip -4 rule del pref 8999 fwmark 0x40000000/0x40000000 lookup main 2>/dev/null || true
