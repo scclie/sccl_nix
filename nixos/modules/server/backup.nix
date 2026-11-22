@@ -64,6 +64,9 @@ in {
         "tank/data" = {
           useTemplate = [ "default" ];
         };
+        "tank/data/minecraft" = {
+          useTemplate = [ "default" ];
+        };
         # snapshots inside the quota
         "tank/data/mon/prometheus" = lib.mkIf config.sccl.monitoring.enable {
           autosnap = false;

@@ -61,8 +61,8 @@
     minecraft = {
       enable = true;
       pierdolAuth = {
-        version = "0.1.4";
-        hash = "sha256-YYGC2CH3LxKznczsOHtjKcSVkq8jGnU1YX/XIinSSYQ=";
+        version = "0.1.6";
+        hash = "sha256-7x0TBeHO/7Z3ntbI4IWWvb36iBJjBtMxNLK3F7ZFsVc=";
       };
       protocolLib = {
         version = "dev-build-2026-11-04";
@@ -72,6 +72,18 @@
         version = "1.21.11-26.20";
         hash = "sha256-sxVoz7e4gVCQ2ewDT5z315oue5HPZlAFy7/G7XCEDOs=";
       };
+      invSee = {
+        version = "0.31.22";
+        hash = "sha256-AfPgU6gU921GUT6/ZaOHR98R34HFd9Er7RCLNT13dfk=";
+      };
+      operators = [
+        {
+          uuid = "4af7fe6c-cb9e-4012-bef8-adf078f34694";
+          name = "paper_sacculos";
+          level = 4;
+          bypassesPlayerLimit = true;
+        }
+      ];
     };
     # minePlatform.enable = false;
     minePlatform = {

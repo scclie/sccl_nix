@@ -1,6 +1,10 @@
 { config, lib, pkgs, ... }:
 let
   cfg = config.sccl.minecraft;
+  canonicalUuid = value: builtins.match "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}" value != null;
+  minecraftName = value: builtins.match "[A-Za-z0-9_]{3,16}" value != null;
+  normalizedNames = map (operator: lib.toLower operator.name) cfg.operators;
+  operatorUuids = map (operator: operator.uuid) cfg.operators;
   pierdolauthReleaseJar = pkgs.fetchurl {
     name = "pierdol-auth-paper-${cfg.pierdolAuth.version}.jar";
     url = "https://git.sccl.cc/scclie/pierdol-auth-paper/releases/download/v${cfg.pierdolAuth.version}/pierdol-auth-paper-${cfg.pierdolAuth.version}.jar";
@@ -10,6 +14,11 @@ let
     name = "ProtocolLib-${cfg.protocolLib.version}.jar";
     url = "https://github.com/dmulloy2/ProtocolLib/releases/download/dev-build/ProtocolLib.jar";
     hash = cfg.protocolLib.hash;
+  };
+  invSeeReleaseJar = pkgs.fetchurl {
+    name = "InvSee++-${cfg.invSee.version}.jar";
+    url = "https://cdn.modrinth.com/data/bYazc7fd/versions/LmdQx1rG/InvSee%2B%2B.jar";
+    hash = cfg.invSee.hash;
   };
 
   # fucking dpi keeps screwing up plugin downloads from spiget.org
@@ -79,8 +88,9 @@ let
     online-mode=false
     white-list=true
     enforce-whitelist=true
-    motd=\u00A7bskyblock\u00A76::\u00A73pierdol.ing \u00A74(closed test)
+    motd=\u00A7bskyblock\u00A76::\u00A73draumur \u00A74(closed test)
   '';
+  operatorsJson = pkgs.writeText "skyblock-ops.json" (builtins.toJSON cfg.operators);
 in {
   options.sccl.minecraft = {
     enable = lib.mkEnableOption "Skyblock Paper server";
@@ -131,6 +141,28 @@ in {
         description = "sri sha-256 hash of the pinned FastLogin release jar.";
       };
     };
+    invSee = {
+      version = lib.mkOption {
+        type = lib.types.strMatching "[0-9]+\\.[0-9]+\\.[0-9]+";
+        description = "pinned InvSee++ release version label.";
+      };
+      hash = lib.mkOption {
+        type = lib.types.strMatching "sha256-[A-Za-z0-9+/]{43}=";
+        description = "sri sha-256 hash of the pinned InvSee++ release jar.";
+      };
+    };
+    operators = lib.mkOption {
+      type = lib.types.listOf (lib.types.submodule {
+        options = {
+          uuid = lib.mkOption { type = lib.types.str; };
+          name = lib.mkOption { type = lib.types.str; };
+          level = lib.mkOption { type = lib.types.ints.between 1 4; default = 4; };
+          bypassesPlayerLimit = lib.mkOption { type = lib.types.bool; default = true; };
+        };
+      });
+      default = [];
+      description = "Authoritative licensed Minecraft Paper operator records.";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -141,7 +173,17 @@ in {
         message = "sccl.minecraft.dataDir must be /tank/minecraft/skyblock."; }
       { assertion = cfg.port == 25565;
         message = "sccl.minecraft.port must be 25565."; }
+      { assertion = builtins.all (operator: canonicalUuid operator.uuid) cfg.operators;
+        message = "sccl.minecraft.operators UUIDs must use canonical lowercase hyphenated Mojang UUID format."; }
+      { assertion = builtins.all (operator: minecraftName operator.name) cfg.operators;
+        message = "sccl.minecraft.operators names must be 3-16 ASCII letters, digits, or underscores."; }
+      { assertion = lib.length (lib.unique operatorUuids) == lib.length operatorUuids;
+        message = "sccl.minecraft.operators UUIDs must be unique."; }
+      { assertion = lib.length (lib.unique normalizedNames) == lib.length normalizedNames;
+        message = "sccl.minecraft.operators names must be unique case-insensitively."; }
     ];
+
+    networking.firewall.allowedTCPPorts = [ cfg.port ];
 
     users.groups.skyblock = { };
     users.users.skyblock = {
@@ -189,6 +231,20 @@ in {
         install -m 0640 ${lib.escapeShellArg fastLoginReleaseJar} "$temporary"
         mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/FastLogin.jar"}
         temporary=""
+
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/.InvSee++.jar.XXXXXX"})"
+        install -m 0640 ${lib.escapeShellArg invSeeReleaseJar} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/InvSee++.jar"}
+        temporary=""
+
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/.ops.json.XXXXXX"})"
+        install -m 0640 ${operatorsJson} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/ops.json"}
+        temporary=""
+
+        #
+        # core protect later
+        #
 
         install -d -m 0750 ${lib.escapeShellArg "${cfg.dataDir}/plugins/FastLogin"}
         temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/FastLogin/config.yml.XXXXXX"})"
@@ -252,7 +308,7 @@ in {
         mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/PierdolAuth/config.yml"}
         temporary=""
       '';
-      restartTriggers = [ pierdolauthReleaseJar protocolLibReleaseJar fastLoginReleaseJar ];
+      restartTriggers = [ pierdolauthReleaseJar protocolLibReleaseJar fastLoginReleaseJar invSeeReleaseJar operatorsJson ];
       serviceConfig = {
         WorkingDirectory = cfg.dataDir;
         User = "skyblock";
@@ -268,6 +324,15 @@ in {
         UMask = "0077";
         NoNewPrivileges = true;
         PrivateTmp = true;
+        PrivateDevices = true;
+        ProtectKernelTunables = true;
+        ProtectKernelModules = true;
+        ProtectControlGroups = true;
+        RestrictSUIDSGID = true;
+        LockPersonality = true;
+        RestrictRealtime = true;
+        RemoveIPC = true;
+        SystemCallArchitectures = "native";
         ProtectHome = true;
         ProtectSystem = "strict";
         ReadWritePaths = [ cfg.dataDir ];

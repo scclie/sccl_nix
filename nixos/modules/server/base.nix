@@ -57,8 +57,6 @@ in {
         enable = true;
         allowedTCPPorts = [ 22 80 443 25 465 587 993 8448 ];
         allowedUDPPorts = [ 51820 ];
-        allowedTCPPortRanges = [ { from = 25565; to = 25590; } ];
-        allowedUDPPortRanges = [ { from = 25565; to = 25590; } ];
       };
     };
 
