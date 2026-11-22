@@ -10,6 +10,16 @@ let
     url = "https://git.sccl.cc/scclie/pierdol-auth-paper/releases/download/v${cfg.pierdolAuth.version}/pierdol-auth-paper-${cfg.pierdolAuth.version}.jar";
     hash = cfg.pierdolAuth.hash;
   };
+  pierdolChatReleaseJar = pkgs.fetchurl {
+    name = "PierdolChat-${cfg.pierdolChat.version}.jar";
+    url = "https://git.sccl.cc/scclie/pierdol-chat-paper/releases/download/v${cfg.pierdolChat.version}/pierdol-chat-paper-${cfg.pierdolChat.version}.jar";
+    hash = cfg.pierdolChat.hash;
+  };
+  pierdolChatConfig = pkgs.writeText "skyblock-pierdolchat-config.yml" ''
+    global-prefix: '<dark_green>[G]</dark_green>'
+    local-prefix: '<gold>[L]</gold>'
+    local-radius: 100
+  '';
   protocolLibReleaseJar = pkgs.fetchurl {
     name = "ProtocolLib-${cfg.protocolLib.version}.jar";
     url = "https://github.com/dmulloy2/ProtocolLib/releases/download/dev-build/ProtocolLib.jar";
@@ -20,6 +30,90 @@ let
     url = "https://cdn.modrinth.com/data/bYazc7fd/versions/LmdQx1rG/InvSee%2B%2B.jar";
     hash = cfg.invSee.hash;
   };
+  tabReleaseJar = pkgs.fetchurl {
+    name = "TAB-${cfg.tab.version}.jar";
+    url = "https://cdn.modrinth.com/data/gG7VFbG0/versions/HlsRTW5F/TAB%20v6.2.1.jar";
+    hash = cfg.tab.hash;
+  };
+  simpleAutoRestartReleaseJar = pkgs.fetchurl {
+    name = "SimpleAutoRestart-${cfg.simpleAutoRestart.version}.jar";
+    url = "https://cdn.modrinth.com/data/6lYow9VP/versions/h6nbB8OX/SimpleAutoRestart-${cfg.simpleAutoRestart.version}.jar";
+    hash = cfg.simpleAutoRestart.hash;
+  };
+  simpleAutoRestartConfig = pkgs.writeText "skyblock-simpleautorestart-config.yml" ''
+    restartTime:
+      - "Daily;05:00"
+    messages:
+      "300": "<yellow>Daily restart in 5 minutes."
+      "180": "<yellow>Daily restart in 3 minutes."
+      "120": "<yellow>Daily restart in 2 minutes."
+      "60": "<yellow>Daily restart in 1 minute."
+      "30": "<yellow>Daily restart in 30 seconds."
+      "10": "<red>Daily restart in 10 seconds."
+      "5": "<red>Daily restart in 5 seconds."
+      "4": "<red>4"
+      "3": "<red>3"
+      "2": "<red>2"
+      "1": "<red>1"
+      "0": "<red>Restarting now; please reconnect shortly."
+    titles:
+      "300": "<bold><dark_red>Scheduled restart"
+      "3": "<bold><dark_red>Restarting"
+    subtitles:
+      "300": "<gold>In 5 minutes"
+      "3": "<gold>Please reconnect shortly"
+    commands:
+      - "minecraft:stop"
+  '';
+  tabConfig = pkgs.writeText "skyblock-tab-config.yml" ''
+    header-footer:
+      enabled: true
+      designs:
+        default:
+          header:
+            - "<#81a1c1>draumur</#b48ead>"
+            - ""
+          footer:
+            - ""
+            - "<#d8dee9>mine.pierdol.ing"
+            - "<#d8dee9>online: %online%/20    ping: %ping%ms    tps: %tps%"
+    tablist-name-formatting:
+      enabled: false
+    scoreboard-teams:
+      enabled: false
+    playerlist-objective:
+      enabled: false
+    belowname-objective:
+      enabled: false
+    prevent-spectator-effect:
+      enabled: false
+    bossbar:
+      enabled: false
+    scoreboard:
+      enabled: false
+    layout:
+      enabled: false
+    ping-spoof:
+      enabled: false
+    global-playerlist:
+      enabled: false
+    per-world-playerlist:
+      enabled: false
+    proxy-support:
+      enabled: false
+    mysql:
+      enabled: false
+    placeholders:
+      register-tab-expansion: false
+    components:
+      minimessage-support: true
+      disable-shadow-for-heads: false
+    assign-groups-by-permissions: false
+    use-bukkit-permissions-manager: false
+    compensate-for-packetevents-bug: false
+    debug: false
+    config-version: 7
+  '';
 
   # fucking dpi keeps screwing up plugin downloads from spiget.org
   # couldn't fix this shit with zapret, and i don't wanna run a full vpn just yet
@@ -85,10 +179,11 @@ let
   eula = pkgs.writeText "skyblock-eula.txt" "eula=true\n";
   serverProperties = pkgs.writeText "skyblock-server.properties" ''
     server-port=${toString cfg.port}
+    view-distance=16
     online-mode=false
     white-list=true
     enforce-whitelist=true
-    motd=\u00A7bskyblock\u00A76::\u00A73draumur \u00A74(closed test)
+    motd=\u00A7bskyblock\u00A76::\u00A73draumur
   '';
   operatorsJson = pkgs.writeText "skyblock-ops.json" (builtins.toJSON cfg.operators);
 in {
@@ -121,6 +216,16 @@ in {
         description = "sri sha-256 hash of the pinned PierdolAuth release jar.";
       };
     };
+    pierdolChat = {
+      version = lib.mkOption {
+        type = lib.types.strMatching "[0-9]+\\.[0-9]+\\.[0-9]+";
+        description = "pinned PierdolChat Forgejo release version without the v prefix.";
+      };
+      hash = lib.mkOption {
+        type = lib.types.strMatching "sha256-[A-Za-z0-9+/]{43}=";
+        description = "sri sha-256 hash of the pinned PierdolChat release jar.";
+      };
+    };
     protocolLib = {
       version = lib.mkOption {
         type = lib.types.str;
@@ -149,6 +254,26 @@ in {
       hash = lib.mkOption {
         type = lib.types.strMatching "sha256-[A-Za-z0-9+/]{43}=";
         description = "sri sha-256 hash of the pinned InvSee++ release jar.";
+      };
+    };
+    tab = {
+      version = lib.mkOption {
+        type = lib.types.strMatching "[0-9]+\\.[0-9]+\\.[0-9]+";
+        description = "pinned TAB release version label.";
+      };
+      hash = lib.mkOption {
+        type = lib.types.strMatching "sha256-[A-Za-z0-9+/]{43}=";
+        description = "sri sha-256 hash of the pinned TAB release jar.";
+      };
+    };
+    simpleAutoRestart = {
+      version = lib.mkOption {
+        type = lib.types.strMatching "2\\.11\\.6";
+        description = "pinned Simple Auto Restart version for Modrinth release h6nbB8OX.";
+      };
+      hash = lib.mkOption {
+        type = lib.types.strMatching "sha256-[A-Za-z0-9+/]{43}=";
+        description = "sri sha-256 hash of the pinned Simple Auto Restart release jar.";
       };
     };
     operators = lib.mkOption {
@@ -222,6 +347,17 @@ in {
         mv -f -- "$temporary" ${lib.escapeShellArg cfg.pluginJar}
         temporary=""
 
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/.PierdolChat.jar.XXXXXX"})"
+        install -m 0640 ${lib.escapeShellArg pierdolChatReleaseJar} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/PierdolChat.jar"}
+        temporary=""
+
+        install -d -m 0750 ${lib.escapeShellArg "${cfg.dataDir}/plugins/PierdolChat"}
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/PierdolChat/config.yml.XXXXXX"})"
+        install -m 0640 ${pierdolChatConfig} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/PierdolChat/config.yml"}
+        temporary=""
+
         temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/.ProtocolLib.jar.XXXXXX"})"
         install -m 0640 ${lib.escapeShellArg protocolLibReleaseJar} "$temporary"
         mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/ProtocolLib.jar"}
@@ -235,6 +371,28 @@ in {
         temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/.InvSee++.jar.XXXXXX"})"
         install -m 0640 ${lib.escapeShellArg invSeeReleaseJar} "$temporary"
         mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/InvSee++.jar"}
+        temporary=""
+
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/.TAB.jar.XXXXXX"})"
+        install -m 0640 ${lib.escapeShellArg tabReleaseJar} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/TAB.jar"}
+        temporary=""
+
+        install -d -m 0750 ${lib.escapeShellArg "${cfg.dataDir}/plugins/TAB"}
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/TAB/config.yml.XXXXXX"})"
+        install -m 0640 ${tabConfig} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/TAB/config.yml"}
+        temporary=""
+
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/.SimpleAutoRestart.jar.XXXXXX"})"
+        install -m 0640 ${lib.escapeShellArg simpleAutoRestartReleaseJar} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/SimpleAutoRestart.jar"}
+        temporary=""
+
+        install -d -m 0750 ${lib.escapeShellArg "${cfg.dataDir}/plugins/SimpleAutoRestart"}
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/SimpleAutoRestart/config.yml.XXXXXX"})"
+        install -m 0640 ${simpleAutoRestartConfig} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/SimpleAutoRestart/config.yml"}
         temporary=""
 
         temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/.ops.json.XXXXXX"})"
@@ -308,7 +466,7 @@ in {
         mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/PierdolAuth/config.yml"}
         temporary=""
       '';
-      restartTriggers = [ pierdolauthReleaseJar protocolLibReleaseJar fastLoginReleaseJar invSeeReleaseJar operatorsJson ];
+      restartTriggers = [ pierdolauthReleaseJar pierdolChatReleaseJar pierdolChatConfig protocolLibReleaseJar fastLoginReleaseJar invSeeReleaseJar tabReleaseJar tabConfig simpleAutoRestartReleaseJar simpleAutoRestartConfig operatorsJson ];
       serviceConfig = {
         WorkingDirectory = cfg.dataDir;
         User = "skyblock";
@@ -317,8 +475,8 @@ in {
         RuntimeDirectory = "skyblock-paper";
         RuntimeDirectoryMode = "0700";
         RuntimeDirectoryPreserve = false;
-        ExecStart = "${pkgs.jdk25}/bin/java -Xms1G -Xmx2G -jar ${cfg.paperJar} --nogui";
-        Restart = "on-failure";
+        ExecStart = "${pkgs.jdk25}/bin/java -Xms1G -Xmx2G -Duser.timezone=Europe/Moscow -jar ${cfg.paperJar} --nogui";
+        Restart = "always";
         RestartSec = "10s";
         TimeoutStopSec = "60s";
         UMask = "0077";

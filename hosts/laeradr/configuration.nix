@@ -64,6 +64,10 @@
         version = "0.1.6";
         hash = "sha256-7x0TBeHO/7Z3ntbI4IWWvb36iBJjBtMxNLK3F7ZFsVc=";
       };
+      pierdolChat = {
+        version = "0.1.0";
+        hash = "sha256-qse1y8KNuEbBs+9Ba+uygMNKtonCPz5R4zyWYHdD710=";
+      };
       protocolLib = {
         version = "dev-build-2026-11-04";
         hash = "sha256-Tu1/czegIbj51qsReQumfBVluVEy2SSnx27v3hre03k=";
@@ -75,6 +79,14 @@
       invSee = {
         version = "0.31.22";
         hash = "sha256-AfPgU6gU921GUT6/ZaOHR98R34HFd9Er7RCLNT13dfk=";
+      };
+      tab = {
+        version = "6.2.1";
+        hash = "sha256-C2ohr2/TsRPAWCHartAP+SI0qEypSymzrsDvG9MTuKk=";
+      };
+      simpleAutoRestart = {
+        version = "2.11.6";
+        hash = "sha256-QJ5xiKfMxTflKpllC2Zs6RqTWxhPrps4/3InjF6m580=";
       };
       operators = [
         {
