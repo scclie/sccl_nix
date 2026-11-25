@@ -105,6 +105,11 @@ in {
         DATABASE_URL=postgresql://mine_platform:${config.sops.placeholder."mine-platform/db-password"}@10.69.0.1:5432/mine_platform
         HTTP_LISTEN_ADDRESS=0.0.0.0:8088
         PUBLIC_ORIGIN=https://mine.pierdol.ing
+        ONE_ISLAND_STATUS_ADDRESS=172.30.13.1
+        ONE_ISLAND_STATUS_PORT=25565
+        ONE_ISLAND_WIPE_UNIX_SECONDS=1795608000
+        ONE_ISLAND_GATUS_UPTIME_URL=https://status.sccl.cc/api/v1/endpoints/games_mine-skyblock-server/uptimes/7d
+        ONE_ISLAND_DISCORD_INVITE_URL=https://discord.com/api/v10/invites/MNXnGGG3zt?with_counts=true
         DISCORD_CLIENT_ID=${config.sops.placeholder."mine-platform/discord-client-id"}
         DISCORD_CLIENT_SECRET=${config.sops.placeholder."mine-platform/discord-client-secret"}
         DISCORD_REDIRECT_URI=https://mine.pierdol.ing/api/v1/auth/discord/callback

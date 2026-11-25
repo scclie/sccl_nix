@@ -13,14 +13,14 @@ local target(expr, legend='') =
   + g.query.prometheus.withLegendFormat(legend)
   + g.query.prometheus.withRefId('A');
 
-local ts(id, title, expr, unit, legend, x, y, w=12, description='') =
+local ts(id, title, expr, unit, legend, x, y, w=12, description='', h=8) =
   g.panel.timeSeries.new(title)
   + g.panel.timeSeries.queryOptions.withTargets([target(expr, legend)])
   + g.panel.timeSeries.standardOptions.withUnit(unit)
   + g.panel.timeSeries.gridPos.withX(x)
   + g.panel.timeSeries.gridPos.withY(y)
   + g.panel.timeSeries.gridPos.withW(w)
-  + g.panel.timeSeries.gridPos.withH(8)
+  + g.panel.timeSeries.gridPos.withH(h)
   + { id: id, description: description };
 
 local stat(id, title, expr, unit, x, w=4, legend='') =
@@ -65,11 +65,12 @@ g.dashboard.new('host overview')
 ])
 + g.dashboard.withPanels([
   stat(1, 'host', 'node_uname_info' + node, 'none', 0, legend='{{nodename}}') + { options+: { textMode: 'name' } },
-  stat(2, 'exporter up', 'up' + node, 'none', 4)
+  stat(2, 'exporter up', 'up' + node, 'none', 4, w=2)
     + { fieldConfig+: { defaults+: { min: 0, max: 1, thresholds: { mode: 'absolute', steps: [{ color: 'red', value: null }, { color: 'green', value: 1 }] } } } },
-  stat(3, 'uptime', 'time() - node_boot_time_seconds' + node, 's', 8),
-  stat(4, 'cpu cores', 'count(node_cpu_seconds_total' + selected('mode="idle"') + ')', 'short', 12),
-  stat(5, 'memory', 'node_memory_MemTotal_bytes' + node, 'bytes', 16),
+  stat(3, 'uptime', 'time() - node_boot_time_seconds' + node, 's', 6, w=3),
+  ts(44, 'uptime', 'time() - node_boot_time_seconds' + node, 's', 'uptime', 9, 0, w=6, h=4),
+  stat(4, 'cpu cores', 'count(node_cpu_seconds_total' + selected('mode="idle"') + ')', 'short', 15, w=2),
+  stat(5, 'memory', 'node_memory_MemTotal_bytes' + node, 'bytes', 17, w=3),
   stat(6, 'failed services', 'sum(node_systemd_unit_state' + selected('state="failed"') + ')', 'short', 20),
 
   ts(10, 'cpu utilization by mode', 'sum by(mode) (' + rate('node_cpu_seconds_total', selected('mode!~"idle|guest|guest_nice"')) + ') / scalar(count(node_cpu_seconds_total' + selected('mode="idle"') + '))', 'percentunit', '{{mode}}', 0, 4, w=8),
@@ -84,8 +85,11 @@ g.dashboard.new('host overview')
   ts(15, 'swap activity', rate('node_vmstat_pswpin'), 'ops', 'pages in/s', 12, 20)
     + { targets: [target(rate('node_vmstat_pswpin'), 'pages in/s'), target(rate('node_vmstat_pswpout'), 'pages out/s') + { refId: 'B' }] },
 
-  ts(20, 'filesystem utilization', '1 - node_filesystem_avail_bytes' + fs + ' / node_filesystem_size_bytes' + fs, 'percentunit', '{{mountpoint}}', 0, 28),
-  ts(21, 'filesystem free space', 'node_filesystem_avail_bytes' + fs, 'bytes', '{{mountpoint}}', 12, 28),
+  ts(26, 'filesystem used space', 'node_filesystem_size_bytes' + fs + ' - node_filesystem_free_bytes' + fs, 'bytes', '{{mountpoint}}', 0, 28, w=8,
+     description='occupied space per mounted filesystem (size minus free); not ZFS dataset used or total pool allocation, and not a complete accounting of snapshots or child datasets'),
+  ts(20, 'filesystem utilization', '1 - node_filesystem_avail_bytes' + fs + ' / node_filesystem_size_bytes' + fs, 'percentunit', '{{mountpoint}}', 8, 28, w=8,
+     description='filesystem-relative utilization, including space unavailable to unprivileged users; ZFS datasets share available pool capacity, so this is not pool utilization'),
+  ts(21, 'filesystem free space', 'node_filesystem_avail_bytes' + fs, 'bytes', '{{mountpoint}}', 16, 28, w=8),
   ts(22, 'disk throughput', rate('node_disk_read_bytes_total', disks), 'Bps', '{{device}} read', 0, 36)
     + { targets: [target(rate('node_disk_read_bytes_total', disks), '{{device}} read'), target(rate('node_disk_written_bytes_total', disks), '{{device}} write') + { refId: 'B' }] },
   ts(23, 'disk iops', rate('node_disk_reads_completed_total', disks), 'iops', '{{device}} read', 12, 36)
@@ -123,5 +127,4 @@ g.dashboard.new('host overview')
   ts(42, 'ingestion samples per second', rate('prometheus_tsdb_head_samples_appended_total', backend), 'ops', 'samples/s', 0, 84),
   ts(43, 'historical tsdb blocks', 'prometheus_tsdb_storage_blocks_bytes' + backend, 'bytes', 'blocks', 12, 84,
      description='blocks only; excludes wal, head and snapshots'),
-  ts(44, 'uptime', 'time() - node_boot_time_seconds' + node, 's', 'uptime', 0, 92, w=24),
 ], setPanelIDs=false)

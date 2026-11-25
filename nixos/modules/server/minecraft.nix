@@ -15,10 +15,19 @@ let
     url = "https://git.sccl.cc/scclie/pierdol-chat-paper/releases/download/v${cfg.pierdolChat.version}/pierdol-chat-paper-${cfg.pierdolChat.version}.jar";
     hash = cfg.pierdolChat.hash;
   };
+  pierdolPlaytimeReleaseJar = pkgs.fetchurl {
+    name = "PierdolPlaytime-${cfg.pierdolPlaytime.version}.jar";
+    url = "https://git.sccl.cc/scclie/pierdol-playtime-paper/releases/download/v${cfg.pierdolPlaytime.version}/pierdol-playtime-paper-${cfg.pierdolPlaytime.version}.jar";
+    hash = cfg.pierdolPlaytime.hash;
+  };
   pierdolChatConfig = pkgs.writeText "skyblock-pierdolchat-config.yml" ''
     global-prefix: '<dark_green>[G]</dark_green>'
     local-prefix: '<gold>[L]</gold>'
     local-radius: 100
+    name-formats:
+      overworld: '<gradient:#88c0d0:#a3be8c><name></gradient>'
+      nether: '<gradient:#d08770:#ebcb8b><name></gradient>'
+      end: '<gradient:#b48ead:#81a1c1><name></gradient>'
   '';
   protocolLibReleaseJar = pkgs.fetchurl {
     name = "ProtocolLib-${cfg.protocolLib.version}.jar";
@@ -40,6 +49,168 @@ let
     url = "https://cdn.modrinth.com/data/6lYow9VP/versions/h6nbB8OX/SimpleAutoRestart-${cfg.simpleAutoRestart.version}.jar";
     hash = cfg.simpleAutoRestart.hash;
   };
+  worldEditReleaseJar = pkgs.fetchurl {
+    name = "worldedit-bukkit-${cfg.worldEdit.version}.jar";
+    url = cfg.worldEdit.url;
+    hash = cfg.worldEdit.hash;
+  };
+  addHeadsReleaseJar = pkgs.fetchurl {
+    name = "AddHeads-${cfg.addHeads.version}.jar";
+    url = cfg.addHeads.url;
+    hash = cfg.addHeads.hash;
+  };
+  addHeadsConfig = pkgs.writeText "skyblock-addheads-config.yml" ''
+    tab:
+      enabled: false
+  '';
+  skinsRestorerReleaseJar = pkgs.fetchurl {
+    name = "SkinsRestorer-${cfg.skinsRestorer.version}.jar";
+    url = cfg.skinsRestorer.url;
+    hash = cfg.skinsRestorer.hash;
+  };
+  gsitReleaseJar = pkgs.fetchurl {
+    name = "GSit-${cfg.gsit.version}.jar";
+    url = cfg.gsit.url;
+    hash = cfg.gsit.hash;
+  };
+  inventoryRollbackPlusReleaseJar = pkgs.fetchurl {
+    name = "InventoryRollbackPlus-${cfg.inventoryRollbackPlus.version}.jar";
+    url = cfg.inventoryRollbackPlus.url;
+    hash = cfg.inventoryRollbackPlus.hash;
+  };
+  inventoryRollbackPlusJar = pkgs.runCommand "InventoryRollbackPlus-${cfg.inventoryRollbackPlus.version}-op-only.jar" {
+    nativeBuildInputs = [ pkgs.python3 ];
+  } ''
+    python3 - ${inventoryRollbackPlusReleaseJar} "$out" <<'PY'
+    import re
+    import sys
+    import zipfile
+
+    with zipfile.ZipFile(sys.argv[1]) as source, zipfile.ZipFile(sys.argv[2], 'w') as target:
+        for entry in source.infolist():
+            data = source.read(entry.filename)
+            if entry.filename == 'plugin.yml':
+                text = data.decode('utf-8')
+                command = '  inventoryrollbackplus:\n'
+                if text.count(command) != 1:
+                    raise RuntimeError('InventoryRollbackPlus command metadata changed')
+                text = text.replace(command, command + '    permission: inventoryrollbackplus.cmd\n', 1)
+                for node in ('cmd', 'help', 'version'):
+                    pattern = r'(?m)(^  inventoryrollbackplus\.' + node + r':\n(?:    .*\n)*?    default: )true$'
+                    text, count = re.subn(pattern, r'\1op', text)
+                    if count != 1:
+                        raise RuntimeError('InventoryRollbackPlus permission metadata changed: ' + node)
+                data = text.encode('utf-8')
+            target.writestr(entry, data)
+    PY
+  '';
+  serverRulesPack = pkgs.linkFarm "skyblock-server-rules-datapack" [
+    {
+      name = "pack.mcmeta";
+      path = pkgs.writeText "skyblock-server-rules-pack.mcmeta" (builtins.toJSON {
+        pack = { description = "Declarative server gamerules"; min_format = 121; max_format = 121; };
+      });
+    }
+    {
+      name = "data/minecraft/tags/function/load.json";
+      path = pkgs.writeText "skyblock-server-rules-load.json" (builtins.toJSON {
+        values = [ "sccl:server_rules" ];
+      });
+    }
+    {
+      name = "data/sccl/function/server_rules.mcfunction";
+      path = pkgs.writeText "skyblock-server-rules.mcfunction" ''
+        gamerule minecraft:players_sleeping_percentage ${toString cfg.playersSleepingPercentage}
+      '';
+    }
+  ];
+  craftableInvFramesReleaseJar = pkgs.fetchurl {
+    name = "craftableinvframes-${cfg.craftableInvFrames.version}.jar";
+    url = cfg.craftableInvFrames.url;
+    hash = cfg.craftableInvFrames.hash;
+  };
+  craftableInvFramesConfig = pkgs.writeText "skyblock-craftableinvframes-config.yml" ''
+    item-frames-glow: true
+    recipe:
+      ==: org.bukkit.inventory.ItemStack
+      DataVersion: 5023
+      id: minecraft:${lib.toLower cfg.craftableInvFrames.recipeIngredient}
+      count: 1
+      schema_version: 1
+  '';
+  simpleVoiceChatReleaseJar = pkgs.fetchurl {
+    name = "voicechat-bukkit-${cfg.simpleVoiceChat.version}.jar";
+    url = cfg.simpleVoiceChat.url;
+    hash = cfg.simpleVoiceChat.hash;
+  };
+  discordSrvReleaseJar = pkgs.fetchurl {
+    name = "DiscordSRV-${cfg.discordSrv.version}.jar";
+    url = cfg.discordSrv.url;
+    hash = cfg.discordSrv.hash;
+  };
+  discordSrvConfig = pkgs.writeText "skyblock-discordsrv-config.yml" ''
+    ConfigVersion: ${cfg.discordSrv.version}
+    BotToken: ""
+    Channels: ${builtins.toJSON (lib.optionalAttrs (cfg.discordSrv.channelId != null) { global = cfg.discordSrv.channelId; })}
+    DiscordConsoleChannelId: ""
+    UseModernPaperChatEvent: true
+    Experiment_WebhookChatMessageDelivery: true
+    Experiment_WebhookChatMessageUsernameFormat: "%username%"
+    Experiment_WebhookChatMessageFormat: "%message%"
+    Experiment_WebhookChatMessageUsernameFromDiscord: false
+    Experiment_WebhookChatMessageAvatarFromDiscord: false
+    DiscordChatChannelDiscordToMinecraft: true
+    DiscordChatChannelMinecraftToDiscord: true
+    DiscordChatChannelPrefixRequiredToProcessMessage: ""
+    DiscordChatChannelPrefixActsAsBlacklist: false
+    DiscordChatChannelRequireLinkedAccount: false
+    DiscordChatChannelBlockBots: true
+    DiscordChatChannelBlockWebhooks: true
+    DiscordChatChannelBlockedIds: []
+    DiscordChatChannelBlockedRolesIds: []
+    DiscordChatChannelTranslateMentions: false
+    DiscordChatChannelAllowedMentions: []
+    DiscordChatChannelRolesAllowedToUseColorCodesInChat: []
+    DiscordChatChannelBroadcastDiscordMessagesToConsole: false
+    DiscordChatChannelConsoleCommandEnabled: false
+    DiscordChatChannelListCommandEnabled: false
+    DiscordCannedResponses: {}
+    MinecraftDiscordAccountLinkedRoleNameToAddUserTo: ""
+    MinecraftDiscordAccountLinkedConsoleCommands: []
+    MinecraftDiscordAccountUnlinkedConsoleCommands: []
+    ServerWatchdogEnabled: false
+    ChannelTopicUpdaterChannelTopicsAtShutdownEnabled: false
+    ChannelTopicUpdaterRateInMinutes: 0
+    ChannelUpdater: []
+    Debug: []
+  '';
+  discordSrvMessages = pkgs.writeText "skyblock-discordsrv-messages.yml" ''
+    MinecraftPlayerJoinMessage:
+      Enabled: true
+    MinecraftPlayerFirstJoinMessage:
+      Enabled: false
+    MinecraftPlayerLeaveMessage:
+      Enabled: true
+    MinecraftPlayerDeathMessage:
+      Enabled: true
+    MinecraftPlayerAchievementMessage:
+      Enabled: false
+    DiscordChatChannelServerStartupMessage: ""
+    DiscordChatChannelServerShutdownMessage: ""
+    ChannelTopicUpdaterChatChannelTopicFormat: ""
+    ChannelTopicUpdaterConsoleChannelTopicFormat: ""
+  '';
+  discordSrvSynchronization = pkgs.writeText "skyblock-discordsrv-synchronization.yml" ''
+    NicknameSynchronizationEnabled: false
+    GroupRoleSynchronizationGroupsAndRolesToSync: {}
+    BanSynchronizationDiscordToMinecraft: false
+    BanSynchronizationMinecraftToDiscord: false
+  '';
+  simpleVoiceChatConfig = pkgs.writeText "skyblock-voicechat-server.properties" ''
+    port=24454
+    voice_host=
+    check_for_updates=false
+  '';
   simpleAutoRestartConfig = pkgs.writeText "skyblock-simpleautorestart-config.yml" ''
     restartTime:
       - "Daily;05:00"
@@ -179,7 +350,9 @@ let
   eula = pkgs.writeText "skyblock-eula.txt" "eula=true\n";
   serverProperties = pkgs.writeText "skyblock-server.properties" ''
     server-port=${toString cfg.port}
+    allow-flight=true
     view-distance=16
+    spawn-protection=0
     online-mode=false
     white-list=true
     enforce-whitelist=true
@@ -205,6 +378,39 @@ in {
       type = lib.types.str;
       default = "${cfg.dataDir}/plugins/Pierdolauth.jar";
     };
+    playersSleepingPercentage = lib.mkOption {
+      type = lib.types.ints.between 0 100;
+      default = 100;
+      description = "Percentage of players required to sleep, applied by a world-load datapack.";
+    };
+    gsit = {
+      version = lib.mkOption {
+        type = lib.types.str;
+        description = "pinned GSit release version.";
+      };
+      url = lib.mkOption {
+        type = lib.types.str;
+        description = "artifact URL of the pinned GSit release jar.";
+      };
+      hash = lib.mkOption {
+        type = lib.types.strMatching "sha256-[A-Za-z0-9+/]{43}=";
+        description = "sri sha-256 hash of the pinned GSit release jar.";
+      };
+    };
+    inventoryRollbackPlus = {
+      version = lib.mkOption {
+        type = lib.types.str;
+        description = "pinned InventoryRollbackPlus release version.";
+      };
+      url = lib.mkOption {
+        type = lib.types.str;
+        description = "artifact URL of the pinned InventoryRollbackPlus release jar.";
+      };
+      hash = lib.mkOption {
+        type = lib.types.strMatching "sha256-[A-Za-z0-9+/]{43}=";
+        description = "sri sha-256 hash of the upstream InventoryRollbackPlus release jar, before the OP-only metadata patch.";
+      };
+    };
     pierdolAuth = {
       version = lib.mkOption {
         type = lib.types.strMatching "[0-9]+\\.[0-9]+\\.[0-9]+";
@@ -224,6 +430,16 @@ in {
       hash = lib.mkOption {
         type = lib.types.strMatching "sha256-[A-Za-z0-9+/]{43}=";
         description = "sri sha-256 hash of the pinned PierdolChat release jar.";
+      };
+    };
+    pierdolPlaytime = {
+      version = lib.mkOption {
+        type = lib.types.strMatching "[0-9]+\\.[0-9]+\\.[0-9]+";
+        description = "pinned PierdolPlaytime Forgejo release version without the v prefix.";
+      };
+      hash = lib.mkOption {
+        type = lib.types.strMatching "sha256-[A-Za-z0-9+/]{43}=";
+        description = "sri sha-256 hash of the pinned PierdolPlaytime release jar.";
       };
     };
     protocolLib = {
@@ -276,6 +492,100 @@ in {
         description = "sri sha-256 hash of the pinned Simple Auto Restart release jar.";
       };
     };
+    simpleVoiceChat = {
+      version = lib.mkOption {
+        type = lib.types.str;
+        description = "pinned Simple Voice Chat release version label.";
+      };
+      url = lib.mkOption {
+        type = lib.types.str;
+        description = "artifact URL of the pinned Simple Voice Chat release jar.";
+      };
+      hash = lib.mkOption {
+        type = lib.types.strMatching "sha256-[A-Za-z0-9+/]{43}=";
+        description = "sri sha-256 hash of the pinned Simple Voice Chat release jar.";
+      };
+    };
+    discordSrv = {
+      channelId = lib.mkOption {
+        type = lib.types.nullOr (lib.types.strMatching "[0-9]{17,20}");
+        default = null;
+        description = "Discord text channel snowflake ID; null leaves chat routing unconfigured.";
+      };
+      version = lib.mkOption {
+        type = lib.types.str;
+        description = "pinned DiscordSRV release version label.";
+      };
+      url = lib.mkOption {
+        type = lib.types.str;
+        description = "artifact URL of the pinned DiscordSRV release jar.";
+      };
+      hash = lib.mkOption {
+        type = lib.types.strMatching "sha256-[A-Za-z0-9+/]{43}=";
+        description = "sri sha-256 hash of the pinned DiscordSRV release jar.";
+      };
+    };
+    worldEdit = {
+      version = lib.mkOption {
+        type = lib.types.str;
+        description = "pinned WorldEdit release version label.";
+      };
+      url = lib.mkOption {
+        type = lib.types.str;
+        description = "artifact URL of the pinned WorldEdit release jar.";
+      };
+      hash = lib.mkOption {
+        type = lib.types.strMatching "sha256-[A-Za-z0-9+/]{43}=";
+        description = "sri sha-256 hash of the pinned WorldEdit release jar.";
+      };
+    };
+    addHeads = {
+      version = lib.mkOption {
+        type = lib.types.str;
+        description = "pinned AddHeads release version label.";
+      };
+      url = lib.mkOption {
+        type = lib.types.str;
+        description = "artifact URL of the pinned official AddHeads Paper release jar.";
+      };
+      hash = lib.mkOption {
+        type = lib.types.strMatching "sha256-[A-Za-z0-9+/]{43}=";
+        description = "sri sha-256 hash of the pinned AddHeads release jar.";
+      };
+    };
+    craftableInvFrames = {
+      version = lib.mkOption {
+        type = lib.types.str;
+        description = "pinned CraftableInvFrames release version.";
+      };
+      url = lib.mkOption {
+        type = lib.types.str;
+        description = "artifact URL of the pinned CraftableInvFrames release jar.";
+      };
+      hash = lib.mkOption {
+        type = lib.types.strMatching "sha256-[A-Za-z0-9+/]{43}=";
+        description = "sri sha-256 hash of the pinned CraftableInvFrames release jar.";
+      };
+      recipeIngredient = lib.mkOption {
+        type = lib.types.strMatching "[A-Z][A-Z0-9_]*";
+        default = "GLOW_INK_SAC";
+        description = "Bukkit material for the center ingredient surrounded by eight item frames.";
+      };
+    };
+    skinsRestorer = {
+      version = lib.mkOption {
+        type = lib.types.str;
+        description = "pinned SkinsRestorer release version label.";
+      };
+      url = lib.mkOption {
+        type = lib.types.str;
+        description = "artifact URL of the pinned SkinsRestorer Paper/Bukkit release jar.";
+      };
+      hash = lib.mkOption {
+        type = lib.types.strMatching "sha256-[A-Za-z0-9+/]{43}=";
+        description = "sri sha-256 hash of the pinned SkinsRestorer release jar.";
+      };
+    };
     operators = lib.mkOption {
       type = lib.types.listOf (lib.types.submodule {
         options = {
@@ -309,8 +619,14 @@ in {
     ];
 
     networking.firewall.allowedTCPPorts = [ cfg.port ];
+    networking.firewall.allowedUDPPorts = [ 24454 ];
 
     users.groups.skyblock = { };
+    sops.secrets."mine-platform/discord-bot-token" = {
+      sopsFile = ../../../secrets/apps.yaml;
+      mode = "0400";
+      owner = "root";
+    };
     users.users.skyblock = {
       isSystemUser = true;
       group = "skyblock";
@@ -325,6 +641,7 @@ in {
 
     systemd.services.skyblock-paper = {
       description = "Skyblock Paper 26.3 server (closed test)";
+      restartIfChanged = false;
       wantedBy = [ "multi-user.target" ];
       after = [ "network-online.target" "docker-mine-platform.service" "sops-install-secrets.service" ];
       wants = [ "network-online.target" "docker-mine-platform.service" "sops-install-secrets.service" ];
@@ -341,6 +658,28 @@ in {
         temporary=""
         trap 'unset server_credential api_token; if [ -n "$temporary" ]; then rm -f -- "$temporary"; fi' EXIT
 
+        # Paper 26.3 uses data pack format 121 and namespaced snake_case gamerules.
+        # Manage only our own datapack; leave existing worlds and packs untouched.
+        rules_directory=${lib.escapeShellArg "${cfg.dataDir}/world/datapacks/sccl-server-rules"}
+        for relative in pack.mcmeta data/minecraft/tags/function/load.json data/sccl/function/server_rules.mcfunction; do
+          target="$rules_directory/$relative"
+          install -d -m 0750 "$(dirname -- "$target")"
+          temporary="$(mktemp "$target.XXXXXX")"
+          install -m 0640 ${serverRulesPack}/"$relative" "$temporary"
+          mv -f -- "$temporary" "$target"
+          temporary=""
+        done
+
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/.GSit.jar.XXXXXX"})"
+        install -m 0640 ${lib.escapeShellArg gsitReleaseJar} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/GSit.jar"}
+        temporary=""
+
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/.InventoryRollbackPlus.jar.XXXXXX"})"
+        install -m 0640 ${lib.escapeShellArg inventoryRollbackPlusJar} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/InventoryRollbackPlus.jar"}
+        temporary=""
+
         plugin_jar_directory="$(dirname -- ${lib.escapeShellArg cfg.pluginJar})"
         temporary="$(mktemp "$plugin_jar_directory/.Pierdolauth.jar.XXXXXX")"
         install -m 0640 ${lib.escapeShellArg pierdolauthReleaseJar} "$temporary"
@@ -350,6 +689,11 @@ in {
         temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/.PierdolChat.jar.XXXXXX"})"
         install -m 0640 ${lib.escapeShellArg pierdolChatReleaseJar} "$temporary"
         mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/PierdolChat.jar"}
+        temporary=""
+
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/.PierdolPlaytime.jar.XXXXXX"})"
+        install -m 0640 ${lib.escapeShellArg pierdolPlaytimeReleaseJar} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/PierdolPlaytime.jar"}
         temporary=""
 
         install -d -m 0750 ${lib.escapeShellArg "${cfg.dataDir}/plugins/PierdolChat"}
@@ -393,6 +737,75 @@ in {
         temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/SimpleAutoRestart/config.yml.XXXXXX"})"
         install -m 0640 ${simpleAutoRestartConfig} "$temporary"
         mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/SimpleAutoRestart/config.yml"}
+        temporary=""
+
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/.WorldEdit.jar.XXXXXX"})"
+        install -m 0640 ${lib.escapeShellArg worldEditReleaseJar} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/WorldEdit.jar"}
+        temporary=""
+
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/.AddHeads.jar.XXXXXX"})"
+        install -m 0640 ${lib.escapeShellArg addHeadsReleaseJar} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/AddHeads.jar"}
+        temporary=""
+
+        install -d -m 0750 ${lib.escapeShellArg "${cfg.dataDir}/plugins/AddHeads"}
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/AddHeads/config.yml.XXXXXX"})"
+        install -m 0640 ${addHeadsConfig} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/AddHeads/config.yml"}
+        temporary=""
+
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/.CraftableInvFrames.jar.XXXXXX"})"
+        install -m 0640 ${lib.escapeShellArg craftableInvFramesReleaseJar} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/CraftableInvFrames.jar"}
+        temporary=""
+
+        install -d -m 0750 ${lib.escapeShellArg "${cfg.dataDir}/plugins/craftableinvframes"}
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/craftableinvframes/config.yml.XXXXXX"})"
+        install -m 0640 ${craftableInvFramesConfig} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/craftableinvframes/config.yml"}
+        temporary=""
+
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/.SkinsRestorer.jar.XXXXXX"})"
+        install -m 0640 ${lib.escapeShellArg skinsRestorerReleaseJar} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/SkinsRestorer.jar"}
+        temporary=""
+
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/.voicechat.jar.XXXXXX"})"
+        install -m 0640 ${lib.escapeShellArg simpleVoiceChatReleaseJar} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/voicechat.jar"}
+        temporary=""
+
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/.DiscordSRV.jar.XXXXXX"})"
+        install -m 0640 ${lib.escapeShellArg discordSrvReleaseJar} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/DiscordSRV.jar"}
+        temporary=""
+
+        install -d -m 0750 ${lib.escapeShellArg "${cfg.dataDir}/plugins/DiscordSRV"}
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/DiscordSRV/.token.XXXXXX"})"
+        install -m 0400 "$CREDENTIALS_DIRECTORY/discord-bot-token" "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/DiscordSRV/.token"}
+        temporary=""
+
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/DiscordSRV/config.yml.XXXXXX"})"
+        install -m 0640 ${discordSrvConfig} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/DiscordSRV/config.yml"}
+        temporary=""
+
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/DiscordSRV/messages.yml.XXXXXX"})"
+        install -m 0640 ${discordSrvMessages} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/DiscordSRV/messages.yml"}
+        temporary=""
+
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/DiscordSRV/synchronization.yml.XXXXXX"})"
+        install -m 0640 ${discordSrvSynchronization} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/DiscordSRV/synchronization.yml"}
+        temporary=""
+
+        install -d -m 0750 ${lib.escapeShellArg "${cfg.dataDir}/plugins/voicechat"}
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/voicechat/voicechat-server.properties.XXXXXX"})"
+        install -m 0640 ${simpleVoiceChatConfig} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/voicechat/voicechat-server.properties"}
         temporary=""
 
         temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/.ops.json.XXXXXX"})"
@@ -466,12 +879,14 @@ in {
         mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/PierdolAuth/config.yml"}
         temporary=""
       '';
-      restartTriggers = [ pierdolauthReleaseJar pierdolChatReleaseJar pierdolChatConfig protocolLibReleaseJar fastLoginReleaseJar invSeeReleaseJar tabReleaseJar tabConfig simpleAutoRestartReleaseJar simpleAutoRestartConfig operatorsJson ];
       serviceConfig = {
         WorkingDirectory = cfg.dataDir;
         User = "skyblock";
         Group = "skyblock";
-        LoadCredential = [ "pierdolauth-server-credential:${config.sops.secrets."mine-platform/game-auth-server-credentials".path}" ];
+        LoadCredential = [
+          "pierdolauth-server-credential:${config.sops.secrets."mine-platform/game-auth-server-credentials".path}"
+          "discord-bot-token:${config.sops.secrets."mine-platform/discord-bot-token".path}"
+        ];
         RuntimeDirectory = "skyblock-paper";
         RuntimeDirectoryMode = "0700";
         RuntimeDirectoryPreserve = false;

@@ -31,6 +31,8 @@ in {
       extraPackages = [ pkgs.fuse-overlayfs ];
       daemon.settings = {
         storage-driver = "fuse-overlayfs";
+        # oh yeah... RKN blocked docker!!... r u fckn serious?
+        registry-mirrors = [ "https://mirror.gcr.io" ];
         insecure-registries = [ "10.69.0.17:5000" ];
         log-driver = "json-file";
         log-opts = { max-size = "10m"; max-file = "3"; };

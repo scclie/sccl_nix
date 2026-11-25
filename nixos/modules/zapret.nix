@@ -31,6 +31,11 @@ let
   hostListExclude = pkgs.writeText "zapret-hosts-user-exclude.txt" (lib.concatMapStringsSep "\n" (h: h) cfg.excludes + "\n");
 in {
   options.sccl.zapret = {
+    extraTcpProfiles = lib.mkOption {
+      type = lib.types.listOf (lib.types.listOf lib.types.str);
+      default = [];
+      description = "Additional nfqws TCP profiles before the default profile. Include TCP/host filters; host exclusions are applied automatically.";
+    };
     tcpStrategy = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [
@@ -139,7 +144,7 @@ in {
       script = ''
         exec ${pkgs.zapret}/bin/nfqws \
           --qnum=200 --daemon --pidfile=/run/zapret-nfqws.pid \
-          --filter-tcp=80,443 \
+          ${lib.concatMapStrings (args: "${lib.escapeShellArgs args} --hostlist-exclude=/var/lib/zapret/ipset/zapret-hosts-user-exclude.txt --new \\\n") cfg.extraTcpProfiles}--filter-tcp=80,443 \
           --hostlist=/var/lib/zapret/ipset/zapret-hosts-user.txt \
           --hostlist-exclude=/var/lib/zapret/ipset/zapret-hosts-user-exclude.txt \
           ${lib.escapeShellArgs cfg.tcpStrategy} \

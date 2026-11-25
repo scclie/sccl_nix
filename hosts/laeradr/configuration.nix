@@ -39,6 +39,8 @@
         } // { name = "pierdol.ing"; })
       ];
     };
+
+    # opsec issue:
     wireguard = {
       enable = true;
       peers = [
@@ -58,15 +60,33 @@
     gifs = {
       enable = true;
     };
+
+    # writing full-blown workflows for my mods and pinning them here
+    # was probably the WORST fucking idea i've ever had, but hey... it works and looks cool?
     minecraft = {
       enable = true;
+      playersSleepingPercentage = 40;
+      gsit = {
+        version = "3.8.0";
+        url = "https://cdn.modrinth.com/data/GOHbQGyX/versions/ybfOKLzp/GSit-3.8.0.jar";
+        hash = "sha256-rGx1nPlgF2nkcVefn2UV5VjSWehdAGjyL5kWT03a4A8=";
+      };
+      inventoryRollbackPlus = {
+        version = "1.8.5";
+        url = "https://cdn.modrinth.com/data/XWKWAzd8/versions/eDsOfX6z/InventoryRollbackPlus-1.8.5.jar";
+        hash = "sha256-hkgl+jT8KusQGJ+Hr7dn9BimwKMnhvJXcwxXhcqc8gU=";
+      };
       pierdolAuth = {
-        version = "0.1.6";
-        hash = "sha256-7x0TBeHO/7Z3ntbI4IWWvb36iBJjBtMxNLK3F7ZFsVc=";
+        version = "0.1.7";
+        hash = "sha256-egORPnkrIS9Byl24dMDkwNNnxPkmNmY/jtmC2FfF6eA=";
       };
       pierdolChat = {
-        version = "0.1.0";
-        hash = "sha256-qse1y8KNuEbBs+9Ba+uygMNKtonCPz5R4zyWYHdD710=";
+        version = "0.1.5";
+        hash = "sha256-yz1f1b17xzIr8P6ASpEca3Uv+yjNu79N7RWKjG8yfno=";
+      };
+      pierdolPlaytime = {
+        version = "0.1.2";
+        hash = "sha256-5cImpOwXlmOtPoNYUYh+Yak6KScPWz+GMUftLW8c9q0=";
       };
       protocolLib = {
         version = "dev-build-2026-11-04";
@@ -87,6 +107,38 @@
       simpleAutoRestart = {
         version = "2.11.6";
         hash = "sha256-QJ5xiKfMxTflKpllC2Zs6RqTWxhPrps4/3InjF6m580=";
+      };
+      simpleVoiceChat = {
+        version = "2.6.25";
+        url = "https://cdn.modrinth.com/data/9eGKb6K1/versions/5OqsnSs7/voicechat-bukkit-2.6.25.jar";
+        hash = "sha256-858uhAhzqgjgzOxzP9yCTtTDuSguAn/W8Yp5AG7rrSA=";
+      };
+      discordSrv = {
+        channelId = "1574778983243845743";
+        version = "1.30.5";
+        url = "https://cdn.modrinth.com/data/UmLGoGij/versions/ATlquwiT/DiscordSRV-Build-1.30.5.jar";
+        hash = "sha256-7y+h8usUbHx3QStxkKfdM/H8kSgmg/5FQHc5VUyK7+8=";
+      };
+      worldEdit = {
+        version = "7.4.6";
+        url = "https://cdn.modrinth.com/data/1u6JkXh5/versions/YFnqiUlL/worldedit-bukkit-7.4.6.jar";
+        hash = "sha256-4M5n2HCtH++KQN2deSY2DK87tEciQ4VF1rILVfgqDJE=";
+      };
+      addHeads = {
+        version = "1.3.0";
+        url = "https://github.com/goshkow/addheads/releases/download/1.3.0/AddHeads-1.3.0.jar";
+        hash = "sha256-rd1PP4Knoi5R5pc6/8dYZ3ldn5O2fIQRsgCQrAoNkX4=";
+      };
+      craftableInvFrames = {
+        version = "2.4.2";
+        url = "https://cdn.modrinth.com/data/wtE6hwEA/versions/VQC1vutJ/craftableinvframes-2.4.2.jar";
+        hash = "sha256-4PLCROI1vby+7pPzj/nQy/vhBTLNIPVhWxIwlXqqoQc=";
+        recipeIngredient = "GLOW_INK_SAC";
+      };
+      skinsRestorer = {
+        version = "15.12.6";
+        url = "https://github.com/SkinsRestorer/SkinsRestorer/releases/download/15.12.6/SkinsRestorer.jar";
+        hash = "sha256-qFtKNw+Yh0HJo49NBJgmLtrL8yIDFHkKwcEnRhmWNZw=";
       };
       operators = [
         {
@@ -162,19 +214,34 @@
       discordInvite = "https://discord.gg/MNXnGGG3zt";
       matrixRoom = "https://matrix.to/#/#draumur:pierdol.ing";
     };
+
+    # i fucking love this thing,
+    # i also host a second node on cloudflare using nodewarden, just in case.
     vaultwarden = {
       enable = true;
     };
+
+    # asked my isp to unblock port 25, and they actually did.
+    # still too fucking lazy to finish setting up my mail server
+    # so i can actually send emails instead of just receiving them :D
     mail = {
       enable = true;
       extraDomains = [ "pierdol.ing" ];
       outboundRelay.enable = true;
     };
+
+    # the whole idea of matrix is cool as fuck, federation and all that shit.
+    # but first off, i've got nobody to talk to there,
+    # and secondly, the current implementation and all the inconsistencies
+    # in the specs are an absolute fucking mess.
     matrix = {
       enable = true;
       web = {
         enable = true;
       };
+      # couldn't get this shit to work...
+      # discord just keeps rate-limiting me and resetting my bots' tokens
+      # no matter what the fuck i do ;k
       discordBridge = {
         enable = true;
       };
@@ -182,6 +249,9 @@
     discordBridge = {
       enable = true;
     };
+
+    # why the fuck do i even need voice calls in matrix if i've never used them???
+    # they work like shit anyway.
     voice = {
       enable = true;
     };
@@ -191,6 +261,13 @@
     monitoring = {
       enable = true;
     };
+
+    # couldn't decide whether to use grafana or gatus, so fuck it, i'm using both.
+    # gatus is basically my public status page (tho if the whole server goes down, gatus goes down with it :D).
+    #
+    # i don't really like gatus, it's genuinely kinda shit.
+    # can't customize it the way i want, but... it works, i guess.
+    # too lazy to fuck around with alternatives rn??? don't even know many of them ;k
     status = {
       enable = true;
       endpoints = [
@@ -213,12 +290,17 @@
         { name = "searxng"; group = "services"; url = "https://sx.pierdol.ing/healthz"; interval = "5m"; }
         { name = "valheim"; group = "games"; url = "http://127.0.0.1:${toString config.sccl.valheim.webmap.port}/"; interval = "1m"; }
         { name = "mine.pierdol.ing core"; group = "games"; url = "https://mine.pierdol.ing/api/v1/healthz"; interval = "5m"; }
+        { name = "mine skyblock server"; group = "games"; url = "tcp://127.0.0.1:25565"; interval = "1m"; conditions = [ "[CONNECTED] == true" ]; }
       ];
     };
     backup = {
       enable = true;
       resticRepository = "s3:s3.amazonaws.com/backups-sccl";
     };
+
+    # this shit is actually more convenient than obsidian,
+    # just haven't gotten around to making it really fucking cool
+    # and tweaking it to fit my workflow yet.
     silverbullet.enable = true;
     proxy = {
       enable = true;
@@ -233,6 +315,23 @@
     };
     zapret = {
       enable = true;
+      # i love Flowseal :heart_eyes:
+      # general.bat tcp profile
+      extraTcpProfiles = let
+        clientHello = pkgs.fetchurl {
+          url = "https://raw.githubusercontent.com/Flowseal/zapret-discord-youtube/cf018db758623ed1813b9d93a6d7f3bdf01cc2b4/bin/tls_clienthello_4pda_to.bin";
+          hash = "sha256-7v6vCd3o1psfF2ISVB9jxosxSjOjNeztmaiinxclTag=";
+        };
+      in [
+        [
+          "--filter-tcp=443"
+          "--hostlist-domains=discord.com,discord.gg,discordapp.com,discordapp.net,discord.media,discordvoice.com"
+          "--dpi-desync=multisplit"
+          "--dpi-desync-split-seqovl=568"
+          "--dpi-desync-split-pos=1"
+          "--dpi-desync-split-seqovl-pattern=${clientHello}"
+        ]
+      ];
       tcpStrategy = [
         "--dpi-desync=fake"
         "--dpi-desync-fooling=badseq"
@@ -251,9 +350,6 @@
         "discordvoice.com"
         "api.cloudflare.com"
         "ziglang.org" # putin blocks ziglang :D
-        "docker.io"
-        "registry-1.docker.io"
-        "production.cloudflare.docker.com"
         "telegram.org"
         "t.me"
         "telegram.me"
@@ -261,25 +357,38 @@
         "web.telegram.org"
         "core.telegram.org"
       ];
-      excludes = [];
+      excludes = [
+        "docker.io"
+        "docker.com"
+      ];
     };
     sites = {
       enable = true;
+
+      # some random asshole's website
       sites."sccl.cc" = {
         domain = "sccl.cc";
         extraDomains = [ "www.sccl.cc" ];
       };
+
+      # some fucking blog... why the fuck do i even post there??
       sites."bred.sccl" = {
         domain = "bred.sccl.cc";
         extraDomains = [ "shiza.sccl.cc" ];
         assetCacheControl = "no-cache";
       };
+
+      # xkb config generator, literally used it ONCE.
       sites."xkb.sccl" = {
         domain = "xkb.sccl.cc";
       };
+
+      # otp keys generator, literally used it ONCE.
       sites."otp-migrate" = {
         domain = "otp-migrate.sccl.cc";
       };
+
+      # gifs or webms or whatever, kinda janky.
       sites."gif.sccl" = {
         domain = "gif.sccl.cc";
         facade = {

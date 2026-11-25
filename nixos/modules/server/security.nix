@@ -81,7 +81,7 @@ in {
       br-gifs.allowedTCPPorts = [ 5432 ];
       br-comments.allowedTCPPorts = [ 5432 ];
     } // lib.optionalAttrs config.sccl.minePlatform.enable {
-      br-mine.allowedTCPPorts = [ 5432 ];
+      br-mine.allowedTCPPorts = [ 5432 25565 ];
     };
     services.postgresql.authentication = lib.mkAfter ''
       host gif gif 172.30.10.2/32 scram-sha-256
