@@ -81,16 +81,31 @@
         hash = "sha256-egORPnkrIS9Byl24dMDkwNNnxPkmNmY/jtmC2FfF6eA=";
       };
       pierdolChat = {
-        version = "0.1.5";
-        hash = "sha256-yz1f1b17xzIr8P6ASpEca3Uv+yjNu79N7RWKjG8yfno=";
+        version = "0.1.6";
+        hash = "sha256-0aaNWpuei/k691nH5Qw9n9jMdiZclbM38bN5cJDBBp4=";
       };
       pierdolPlaytime = {
-        version = "0.1.2";
-        hash = "sha256-5cImpOwXlmOtPoNYUYh+Yak6KScPWz+GMUftLW8c9q0=";
+        version = "0.1.4";
+        hash = "sha256-IKtqYqkloAQdmXlo36EfcRveQyXOmEUqm+vIo9X+Ndc=";
       };
       protocolLib = {
         version = "dev-build-2026-11-04";
         hash = "sha256-Tu1/czegIbj51qsReQumfBVluVEy2SSnx27v3hre03k=";
+      };
+      placeholderApi = {
+        version = "2.12.3";
+        url = "https://cdn.modrinth.com/data/lKEzGugV/versions/pIvQcXW8/PlaceholderAPI-2.12.3.jar";
+        hash = "sha256-/eAyWfWvaTjzwz7rTYFAAKGtq/HSMEzhSXC+gfYJpDc=";
+      };
+      interactiveChat = {
+        version = "2026.1.3";
+        url = "https://cdn.modrinth.com/data/VOenPQ01/versions/XMxzktgX/InteractiveChat-2026.1.3.0.jar";
+        hash = "sha256-ihWaZUYBa4QV9PTVaTuPl9E1Wox+QhLct4zwu9Y17LA=";
+      };
+      vault = {
+        version = "1.7.3";
+        url = "https://github.com/MilkBowl/Vault/releases/download/1.7.3/Vault.jar";
+        hash = "sha256-prXtl/Q6XPW7rwCnyM0jxa/JvQA/hJh1r4s25s930B0=";
       };
       fastLogin = {
         version = "1.21.11-26.20";
@@ -123,11 +138,6 @@
         version = "7.4.6";
         url = "https://cdn.modrinth.com/data/1u6JkXh5/versions/YFnqiUlL/worldedit-bukkit-7.4.6.jar";
         hash = "sha256-4M5n2HCtH++KQN2deSY2DK87tEciQ4VF1rILVfgqDJE=";
-      };
-      addHeads = {
-        version = "1.3.0";
-        url = "https://github.com/goshkow/addheads/releases/download/1.3.0/AddHeads-1.3.0.jar";
-        hash = "sha256-rd1PP4Knoi5R5pc6/8dYZ3ldn5O2fIQRsgCQrAoNkX4=";
       };
       craftableInvFrames = {
         version = "2.4.2";

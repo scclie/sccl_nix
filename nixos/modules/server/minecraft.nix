@@ -34,6 +34,21 @@ let
     url = "https://github.com/dmulloy2/ProtocolLib/releases/download/dev-build/ProtocolLib.jar";
     hash = cfg.protocolLib.hash;
   };
+  placeholderApiReleaseJar = pkgs.fetchurl {
+    name = "PlaceholderAPI-${cfg.placeholderApi.version}.jar";
+    url = cfg.placeholderApi.url;
+    hash = cfg.placeholderApi.hash;
+  };
+  interactiveChatReleaseJar = pkgs.fetchurl {
+    name = "InteractiveChat-${cfg.interactiveChat.version}.jar";
+    url = cfg.interactiveChat.url;
+    hash = cfg.interactiveChat.hash;
+  };
+  vaultReleaseJar = pkgs.fetchurl {
+    name = "Vault-${cfg.vault.version}.jar";
+    url = cfg.vault.url;
+    hash = cfg.vault.hash;
+  };
   invSeeReleaseJar = pkgs.fetchurl {
     name = "InvSee++-${cfg.invSee.version}.jar";
     url = "https://cdn.modrinth.com/data/bYazc7fd/versions/LmdQx1rG/InvSee%2B%2B.jar";
@@ -54,15 +69,6 @@ let
     url = cfg.worldEdit.url;
     hash = cfg.worldEdit.hash;
   };
-  addHeadsReleaseJar = pkgs.fetchurl {
-    name = "AddHeads-${cfg.addHeads.version}.jar";
-    url = cfg.addHeads.url;
-    hash = cfg.addHeads.hash;
-  };
-  addHeadsConfig = pkgs.writeText "skyblock-addheads-config.yml" ''
-    tab:
-      enabled: false
-  '';
   skinsRestorerReleaseJar = pkgs.fetchurl {
     name = "SkinsRestorer-${cfg.skinsRestorer.version}.jar";
     url = cfg.skinsRestorer.url;
@@ -215,23 +221,21 @@ let
     restartTime:
       - "Daily;05:00"
     messages:
-      "300": "<yellow>Daily restart in 5 minutes."
-      "180": "<yellow>Daily restart in 3 minutes."
-      "120": "<yellow>Daily restart in 2 minutes."
-      "60": "<yellow>Daily restart in 1 minute."
-      "30": "<yellow>Daily restart in 30 seconds."
-      "10": "<red>Daily restart in 10 seconds."
-      "5": "<red>Daily restart in 5 seconds."
+      "300": "<yellow>daily restart in 5 min"
+      "180": "<yellow>daily restart in 3 min"
+      "120": "<yellow>daily restart in 2 min"
+      "60": "<yellow>daily restart in 1 min"
+      "30": "<yellow>daily restart in 30 sec"
+      "10": "<red>daily restart in 10 sec!"
+      "5": "<red>daily restart in 5 seconds!"
       "4": "<red>4"
       "3": "<red>3"
       "2": "<red>2"
       "1": "<red>1"
-      "0": "<red>Restarting now; please reconnect shortly."
+      "0": "<red>restarting now; pls reconnect shortly."
     titles:
-      "300": "<bold><dark_red>Scheduled restart"
-      "3": "<bold><dark_red>Restarting"
+      "3": "<bold><dark_red>restarting"
     subtitles:
-      "300": "<gold>In 5 minutes"
       "3": "<gold>Please reconnect shortly"
     commands:
       - "minecraft:stop"
@@ -351,7 +355,7 @@ let
   serverProperties = pkgs.writeText "skyblock-server.properties" ''
     server-port=${toString cfg.port}
     allow-flight=true
-    view-distance=16
+    view-distance=24
     spawn-protection=0
     online-mode=false
     white-list=true
@@ -462,6 +466,48 @@ in {
         description = "sri sha-256 hash of the pinned FastLogin release jar.";
       };
     };
+    placeholderApi = {
+      version = lib.mkOption {
+        type = lib.types.str;
+        description = "pinned PlaceholderAPI release version.";
+      };
+      url = lib.mkOption {
+        type = lib.types.str;
+        description = "artifact URL of the pinned PlaceholderAPI release jar.";
+      };
+      hash = lib.mkOption {
+        type = lib.types.strMatching "sha256-[A-Za-z0-9+/]{43}=";
+        description = "sri sha-256 hash of the pinned PlaceholderAPI release jar.";
+      };
+    };
+    interactiveChat = {
+      version = lib.mkOption {
+        type = lib.types.str;
+        description = "pinned InteractiveChat release version.";
+      };
+      url = lib.mkOption {
+        type = lib.types.str;
+        description = "artifact URL of the pinned InteractiveChat release jar.";
+      };
+      hash = lib.mkOption {
+        type = lib.types.strMatching "sha256-[A-Za-z0-9+/]{43}=";
+        description = "sri sha-256 hash of the pinned InteractiveChat release jar.";
+      };
+    };
+    vault = {
+      version = lib.mkOption {
+        type = lib.types.str;
+        description = "pinned Vault release version.";
+      };
+      url = lib.mkOption {
+        type = lib.types.str;
+        description = "artifact URL of the pinned Vault release jar.";
+      };
+      hash = lib.mkOption {
+        type = lib.types.strMatching "sha256-[A-Za-z0-9+/]{43}=";
+        description = "sri sha-256 hash of the pinned Vault release jar.";
+      };
+    };
     invSee = {
       version = lib.mkOption {
         type = lib.types.strMatching "[0-9]+\\.[0-9]+\\.[0-9]+";
@@ -537,20 +583,6 @@ in {
       hash = lib.mkOption {
         type = lib.types.strMatching "sha256-[A-Za-z0-9+/]{43}=";
         description = "sri sha-256 hash of the pinned WorldEdit release jar.";
-      };
-    };
-    addHeads = {
-      version = lib.mkOption {
-        type = lib.types.str;
-        description = "pinned AddHeads release version label.";
-      };
-      url = lib.mkOption {
-        type = lib.types.str;
-        description = "artifact URL of the pinned official AddHeads Paper release jar.";
-      };
-      hash = lib.mkOption {
-        type = lib.types.strMatching "sha256-[A-Za-z0-9+/]{43}=";
-        description = "sri sha-256 hash of the pinned AddHeads release jar.";
       };
     };
     craftableInvFrames = {
@@ -707,6 +739,21 @@ in {
         mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/ProtocolLib.jar"}
         temporary=""
 
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/.PlaceholderAPI.jar.XXXXXX"})"
+        install -m 0640 ${lib.escapeShellArg placeholderApiReleaseJar} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/PlaceholderAPI.jar"}
+        temporary=""
+
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/.Vault.jar.XXXXXX"})"
+        install -m 0640 ${lib.escapeShellArg vaultReleaseJar} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/Vault.jar"}
+        temporary=""
+
+        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/.InteractiveChat.jar.XXXXXX"})"
+        install -m 0640 ${lib.escapeShellArg interactiveChatReleaseJar} "$temporary"
+        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/InteractiveChat.jar"}
+        temporary=""
+
         temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/.FastLogin.jar.XXXXXX"})"
         install -m 0640 ${lib.escapeShellArg fastLoginReleaseJar} "$temporary"
         mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/FastLogin.jar"}
@@ -742,17 +789,6 @@ in {
         temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/.WorldEdit.jar.XXXXXX"})"
         install -m 0640 ${lib.escapeShellArg worldEditReleaseJar} "$temporary"
         mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/WorldEdit.jar"}
-        temporary=""
-
-        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/.AddHeads.jar.XXXXXX"})"
-        install -m 0640 ${lib.escapeShellArg addHeadsReleaseJar} "$temporary"
-        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/AddHeads.jar"}
-        temporary=""
-
-        install -d -m 0750 ${lib.escapeShellArg "${cfg.dataDir}/plugins/AddHeads"}
-        temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/AddHeads/config.yml.XXXXXX"})"
-        install -m 0640 ${addHeadsConfig} "$temporary"
-        mv -f -- "$temporary" ${lib.escapeShellArg "${cfg.dataDir}/plugins/AddHeads/config.yml"}
         temporary=""
 
         temporary="$(mktemp ${lib.escapeShellArg "${cfg.dataDir}/plugins/.CraftableInvFrames.jar.XXXXXX"})"
